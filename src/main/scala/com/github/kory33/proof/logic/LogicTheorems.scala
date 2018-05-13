@@ -102,4 +102,12 @@ object LogicTheorems {
     implies ∧ impliedBy
   }
 
+  /**
+    * introduction of double negation
+    */
+  def introduceDoubleNeg[A]: A => ￢[￢[A]] = { a: A =>
+    val contradictory: ￢[A] => Nothing = { notA: ￢[A] => a ∧ notA }
+    byContradiction(contradictory)
+  }
+
 }
