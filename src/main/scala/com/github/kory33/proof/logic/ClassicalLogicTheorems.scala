@@ -1,16 +1,15 @@
 package com.github.kory33.proof.logic
 
 import com.github.kory33.proof.logic.LogicDefinitions._
-import com.github.kory33.proof.logic.LogicTheorems._
 import com.github.kory33.proof.logic.LogicalImplications._
 import com.github.kory33.proof.logic.ClassicalLogicImplications._
 
-final class ClassicalLogicTheorems(implicit val axiom: ClassicalLogicAxiom) {
+class ClassicalLogicTheorems(implicit val axiom: ClassicalLogicAxiom) extends LogicTheorems {
 
   /**
     * law of exclusion of middle
     */
-  def middleExclusion[A]: A ∨ ￢[A] = {
+  final def middleExclusion[A]: A ∨ ￢[A] = {
     val contradictory1: ￢[A ∨ ￢[A]] => Nothing = { negProp =>
       val contradictory2: ￢[A] => Nothing = { notA =>
         val prop: A ∨ ￢[A] = notA
@@ -23,7 +22,7 @@ final class ClassicalLogicTheorems(implicit val axiom: ClassicalLogicAxiom) {
     byContradiction(contradictory1)
   }
 
-  def deMorgan3[A, B]: (￢[A] ∨ ￢[B]) ≣ ￢[A ∧ B] = {
+  final def deMorgan3[A, B]: (￢[A] ∨ ￢[B]) ≣ ￢[A ∧ B] = {
     val implies = deMorgan2[A, B]
     val impliedBy: (￢[A] ∨ ￢[B]) <= ￢[A ∧ B] = { notConj =>
       val contradictory: ￢[￢[A] ∨ ￢[B]] => Nothing = { prop =>
