@@ -1,6 +1,6 @@
-package com.github.kory33.proof.logic
+package com.github.kory33.proof.logic.propositional
 
-import com.github.kory33.proof.logic.LogicDefinitions._
+import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 
 /**
   * Axiom system that can be directly inferred from type system

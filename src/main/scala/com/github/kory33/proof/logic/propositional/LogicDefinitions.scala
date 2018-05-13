@@ -1,4 +1,4 @@
-package com.github.kory33.proof.logic
+package com.github.kory33.proof.logic.propositional
 
 object LogicDefinitions {
 

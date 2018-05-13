@@ -1,7 +1,7 @@
-package com.github.kory33.proof.logic
+package com.github.kory33.proof.logic.propositional
 
-import com.github.kory33.proof.logic.LogicDefinitions._
-import com.github.kory33.proof.logic.IntuitionisticLogicSystem._
+import com.github.kory33.proof.logic.propositional.LogicDefinitions._
+import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 
 import scala.annotation.implicitNotFound
 
