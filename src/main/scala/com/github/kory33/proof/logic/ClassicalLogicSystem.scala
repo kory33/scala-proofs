@@ -1,13 +1,16 @@
 package com.github.kory33.proof.logic
 
 import com.github.kory33.proof.logic.LogicDefinitions._
-import com.github.kory33.proof.logic.LogicalImplications._
-import com.github.kory33.proof.logic.ClassicalLogicImplications._
+import com.github.kory33.proof.logic.IntuitionisticLogicSystem._
+
+import scala.annotation.implicitNotFound
 
 /**
   * Axiom system that can be inferred from intuitionistic logic and classical logic axiom
   */
 class ClassicalLogicSystem(implicit val axiom: ClassicalLogicAxiom) extends IntuitionisticLogicSystem {
+
+  import ClassicalLogicSystem._
 
   /**
     * law of exclusion of middle
@@ -38,6 +41,15 @@ class ClassicalLogicSystem(implicit val axiom: ClassicalLogicAxiom) extends Intu
     }
 
     implies ∧ impliedBy
+  }
+
+}
+
+object ClassicalLogicSystem {
+
+  @implicitNotFound(msg = "Classical logic axiom missing")
+  implicit def eliminateDoubleNegation[A](doubleNeg: ￢[￢[A]])(implicit axiom: ClassicalLogicAxiom): A = {
+    axiom.eliminateDoubleNegation(doubleNeg)
   }
 
 }
