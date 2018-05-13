@@ -21,12 +21,7 @@ object Logic {
   /**
     * Proof by contradiction
     */
-  implicit def byContradiction[A]: (A => Nothing) => ￢[A] = identity
-
-  /**
-    * separation
-    */
-  implicit def sep[A, B]: A ∧ B => A = { conj => conj._1 }
+  def byContradiction[A]: (A => Nothing) => ￢[A] = identity
 
   /**
     * Disjunctions
