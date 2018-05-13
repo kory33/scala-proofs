@@ -1,15 +1,9 @@
 package com.github.kory33.proof.logic
 
-object Logic {
+import com.github.kory33.proof.logic.LogicDefinitions._
+import com.github.kory33.proof.logic.LogicalImplications._
 
-  type ￢[A] = A => Nothing
-  type ∧[A, B] = (A, B)
-  type ∨[A, B] = Either[A, B]
-  type <=[A, B] = B => A
-
-  implicit class Theorem[A](instance: A) {
-    def ∧[B](b: B): A ∧ B = (instance, b)
-  }
+object LogicTheorems {
 
   def identity[A]: A => A = { theorem: A => theorem }
 
@@ -24,12 +18,6 @@ object Logic {
   def byContradiction[A]: (A => Nothing) => ￢[A] = identity
 
   /**
-    * Disjunctions
-    */
-  implicit def leftDisj[A, B](a: A): A ∨ B = Left(a)
-  implicit def rightDisj[A, B](b: B): A ∨ B = Right(b)
-
-  /**
     * removal of disjunction
     */
   def removeDisj[A, B, C](): (A ∨ B, A => C, B => C) => C = { (disj, deduc1, deduc2) =>
@@ -39,12 +27,7 @@ object Logic {
     }
   }
 
-  implicit def contradiction[A]: A ∧ ￢[A] => Nothing = { case (a, notA) => notA(a) }
-
   def explosion[A]: Nothing => A = _ => ???
-
-  implicit def commuteDisj[A, B]: A ∨ B => B ∨ A = { conj => conj.swap }
-  implicit def commuteConj[A, B]: A ∧ B => B ∧ A = { case (a, b) => (b, a) }
 
   /**
     * law of noncontradiction
@@ -69,11 +52,6 @@ object Logic {
         case Left(a) => explosion(a ∧ notA)
         case Right(b) => b
       }
-  }
-
-  implicit class ≣[A, B](ev: (A => B) ∧ (B => A)) {
-    def implies: A => B = ev._1
-    def impliedBy: B => A = ev._2
   }
 
   def deMorgan[A, B]: ￢[A ∨ B] ≣ (￢[A] ∧ ￢[B]) = {
