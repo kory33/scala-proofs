@@ -4,10 +4,10 @@ import com.github.kory33.proof.logic.LogicDefinitions.{∧, _}
 import com.github.kory33.proof.logic.LogicalImplications._
 
 /**
-  * Theorems that can be directly inferred from type system
+  * Axiom system that can be directly inferred from type system
   * i.e. basic theorems in intuitionistic logic
   */
-class LogicTheorems {
+class IntuitionisticLogicSystem {
 
   final def identity[A]: A => A = { theorem: A => theorem }
 

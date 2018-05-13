@@ -4,7 +4,10 @@ import com.github.kory33.proof.logic.LogicDefinitions._
 import com.github.kory33.proof.logic.LogicalImplications._
 import com.github.kory33.proof.logic.ClassicalLogicImplications._
 
-class ClassicalLogicTheorems(implicit val axiom: ClassicalLogicAxiom) extends LogicTheorems {
+/**
+  * Axiom system that can be inferred from intuitionistic logic and classical logic axiom
+  */
+class ClassicalLogicSystem(implicit val axiom: ClassicalLogicAxiom) extends IntuitionisticLogicSystem {
 
   /**
     * law of exclusion of middle
