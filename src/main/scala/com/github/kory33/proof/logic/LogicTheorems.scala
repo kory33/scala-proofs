@@ -1,8 +1,12 @@
 package com.github.kory33.proof.logic
 
-import com.github.kory33.proof.logic.LogicDefinitions._
+import com.github.kory33.proof.logic.LogicDefinitions.{∧, _}
 import com.github.kory33.proof.logic.LogicalImplications._
 
+/**
+  * Theorems that can be directly inferred from type system
+  * i.e. basic theorems in intuitionistic logic
+  */
 object LogicTheorems {
 
   def identity[A]: A => A = { theorem: A => theorem }
@@ -54,7 +58,7 @@ object LogicTheorems {
       }
   }
 
-  def deMorgan[A, B]: ￢[A ∨ B] ≣ (￢[A] ∧ ￢[B]) = {
+  def deMorgan1[A, B]: ￢[A ∨ B] ≣ (￢[A] ∧ ￢[B]) = {
     val implies: ￢[A ∨ B] => (￢[A] ∧ ￢[B]) = { contradictory: (A ∨ B => Nothing) =>
       val notA = { a: A => contradictory(a) }
       val notB = { b: B => contradictory(b) }
@@ -69,6 +73,16 @@ object LogicTheorems {
     }
 
     implies ∧ impliedBy
+  }
+
+  def deMorgan2[A, B]: (￢[A] ∨ ￢[B]) => ￢[A ∧ B] = { disj =>
+    val contradictory: A ∧ B => Nothing = { case(a, b) =>
+      disj match {
+        case Left(notA) => a ∧ notA
+        case Right(notB) => b ∧ notB
+      }
+    }
+    byContradiction(contradictory)
   }
 
   def transitive[A, B, C]: ((A => B) ∧ (B => C)) => A => C = { case(f, g) => g compose f }

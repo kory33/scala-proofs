@@ -2,6 +2,9 @@ package com.github.kory33.proof.logic
 
 import com.github.kory33.proof.logic.LogicDefinitions.{∧, ∨, ￢}
 
+/**
+  * implications that can be inferred directly from type system
+  */
 object LogicalImplications {
 
   /**
