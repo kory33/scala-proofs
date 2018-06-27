@@ -8,14 +8,16 @@ import scala.annotation.implicitNotFound
 /**
   * Axiom system that can be inferred from intuitionistic logic and classical logic axiom
   */
-class ClassicalLogicSystem(implicit val axiom: ClassicalLogicAxiom) extends IntuitionisticLogicSystem {
+object ClassicalLogicSystem {
 
-  import ClassicalLogicSystem._
+  implicit def eliminateDoubleNegation[A](doubleNeg: ￢[￢[A]])(implicit axiom: ClassicalLogicAxiom): A = {
+    axiom.eliminateDoubleNegation(doubleNeg)
+  }
 
   /**
     * law of exclusion of middle
     */
-  final def middleExclusion[A]: A ∨ ￢[A] = {
+  def middleExclusion[A](implicit axiom: ClassicalLogicAxiom): A ∨ ￢[A] = {
     val contradictory1: ￢[A ∨ ￢[A]] => Nothing = { negProp =>
       val contradictory2: ￢[A] => Nothing = { notA =>
         val prop: A ∨ ￢[A] = notA
@@ -28,7 +30,7 @@ class ClassicalLogicSystem(implicit val axiom: ClassicalLogicAxiom) extends Intu
     byContradiction(contradictory1)
   }
 
-  final def deMorgan3[A, B]: (￢[A] ∨ ￢[B]) ≣ ￢[A ∧ B] = {
+  def deMorgan3[A, B](implicit axiom: ClassicalLogicAxiom): (￢[A] ∨ ￢[B]) ≣ ￢[A ∧ B] = {
     val implies = deMorgan2[A, B]
     val impliedBy: (￢[A] ∨ ￢[B]) <= ￢[A ∧ B] = { notConj =>
       val contradictory: ￢[￢[A] ∨ ￢[B]] => Nothing = { prop =>
@@ -41,15 +43,6 @@ class ClassicalLogicSystem(implicit val axiom: ClassicalLogicAxiom) extends Intu
     }
 
     implies ∧ impliedBy
-  }
-
-}
-
-object ClassicalLogicSystem {
-
-  @implicitNotFound(msg = "Classical logic axiom missing")
-  implicit def eliminateDoubleNegation[A](doubleNeg: ￢[￢[A]])(implicit axiom: ClassicalLogicAxiom): A = {
-    axiom.eliminateDoubleNegation(doubleNeg)
   }
 
 }

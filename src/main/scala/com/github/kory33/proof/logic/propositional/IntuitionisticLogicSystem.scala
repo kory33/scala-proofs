@@ -6,9 +6,7 @@ import com.github.kory33.proof.logic.propositional.LogicDefinitions._
   * Axiom system that can be directly inferred from type system
   * i.e. basic theorems in intuitionistic logic
   */
-class IntuitionisticLogicSystem {
-
-  import IntuitionisticLogicSystem._
+object IntuitionisticLogicSystem {
 
   final def identity[A]: A => A = { theorem: A => theorem }
 
@@ -17,10 +15,20 @@ class IntuitionisticLogicSystem {
     */
   final def MP[A, B]: (A, A => B) => B = { (a, deduction) => deduction(a) }
 
+  implicit def contradiction[A]: A ∧ ￢[A] => Nothing = { case (a, notA) => notA(a) }
+
   /**
     * Proof by contradiction
     */
   final def byContradiction[A]: (A => Nothing) => ￢[A] = identity
+
+  /**
+    * Disjunctions
+    */
+  implicit def leftDisj[A, B](a: A): A ∨ B = Left(a)
+  implicit def rightDisj[A, B](b: B): A ∨ B = Right(b)
+  implicit def commuteDisj[A, B]: A ∨ B => B ∨ A = { conj => conj.swap }
+  implicit def commuteConj[A, B]: A ∧ B => B ∧ A = { case (a, b) => (b, a) }
 
   /**
     * removal of disjunction
@@ -110,20 +118,5 @@ class IntuitionisticLogicSystem {
     val contradictory: ￢[A] => Nothing = { notA: ￢[A] => a ∧ notA }
     byContradiction(contradictory)
   }
-
-}
-
-object IntuitionisticLogicSystem {
-
-  /**
-    * Disjunctions
-    */
-  implicit def leftDisj[A, B](a: A): A ∨ B = Left(a)
-  implicit def rightDisj[A, B](b: B): A ∨ B = Right(b)
-
-  implicit def commuteDisj[A, B]: A ∨ B => B ∨ A = { conj => conj.swap }
-  implicit def commuteConj[A, B]: A ∧ B => B ∧ A = { case (a, b) => (b, a) }
-
-  implicit def contradiction[A]: A ∧ ￢[A] => Nothing = { case (a, notA) => notA(a) }
 
 }
