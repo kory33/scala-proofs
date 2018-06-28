@@ -13,7 +13,7 @@ object IntuitionisticLogicSystem {
   /**
     * Modus-Ponens
     */
-  final def MP[A, B]: (A, A => B) => B = { (a, deduction) => deduction(a) }
+  final def MP[A, B]: A => (A => B) => B = { a => deduction => deduction(a) }
 
   implicit def contradiction[A]: A ∧ ￢[A] => Nothing = { case (a, notA) => notA(a) }
 
@@ -25,15 +25,15 @@ object IntuitionisticLogicSystem {
   /**
     * Disjunctions
     */
-  implicit def leftDisj[A, B](a: A): A ∨ B = Left(a)
-  implicit def rightDisj[A, B](b: B): A ∨ B = Right(b)
+  implicit def leftDisj[A, B]: A => A ∨ B = Left.apply
+  implicit def rightDisj[A, B]: B => A ∨ B = Right.apply
   implicit def commuteDisj[A, B]: A ∨ B => B ∨ A = { conj => conj.swap }
   implicit def commuteConj[A, B]: A ∧ B => B ∧ A = { case (a, b) => (b, a) }
 
   /**
     * removal of disjunction
     */
-  final def removeDisj[A, B, C](): (A ∨ B, A => C, B => C) => C = { (disj, deduc1, deduc2) =>
+  final def removeDisj[A, B, C](): A ∨ B => (A => C) => (B => C) => C = { disj => deduc1 => deduc2 =>
     disj match {
       case Left(a) => deduc1(a)
       case Right(b) => deduc2(b)
@@ -50,17 +50,17 @@ object IntuitionisticLogicSystem {
   /**
     * Modus tollens
     */
-  final def MT[A, B]: (A => B) ∧ ￢[B] => ￢[A] = { case (ded, notB) =>
+  final def MT[A, B]: (A => B) => ￢[B] => ￢[A] = { ded => notB =>
     val contradictory: A => Nothing = { a: A => (ded(a), notB) }
     byContradiction(contradictory)
   }
 
-  final def contraposition[A, B]: (A => B) => (￢[B] => ￢[A]) = { ded => { notB => MT(ded ∧ notB) } }
+  final def contraposition[A, B]: (A => B) => (￢[B] => ￢[A]) = { ded => { notB => MT(ded)(notB) } }
 
   /**
     * Disjunctive syllogism / modus tollendo ponens
     */
-  final def MTP[A, B]: ((A ∨ B) ∧ ￢[A]) => B = { case(disj, notA) =>
+  final def MTP[A, B]: (A ∨ B) => ￢[A] => B = { disj => notA =>
       disj match {
         case Left(a) => explosion(a ∧ notA)
         case Right(b) => b
@@ -94,7 +94,7 @@ object IntuitionisticLogicSystem {
     byContradiction(contradictory)
   }
 
-  final def transitive[A, B, C]: ((A => B) ∧ (B => C)) => A => C = { case(f, g) => g compose f }
+  final def transitive[A, B, C]: (A => B) => (B => C) => A => C = { f => g => g compose f }
 
   final def distributive[A, B, C]: (A ∧ (B ∨ C)) ≣ ((A ∧ B) ∨ (A ∧ C)) = {
     val implies: (A ∧ (B ∨ C)) => ((A ∧ B) ∨ (A ∧ C)) = { case(a, bOrC) =>
