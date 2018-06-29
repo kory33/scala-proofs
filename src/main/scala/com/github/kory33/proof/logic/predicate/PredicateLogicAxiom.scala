@@ -9,7 +9,7 @@ trait PredicateLogicAxiom {
 
   def axiom2[φ[_]]: ∀[({ type λ[X] = ￢[φ[X]] })#λ] ≣ ￢[∃[φ]]
 
-  def generalize[φ]: φ => ∀[({ type λ[A] = φ })#λ]
+  def universal[φ]: φ ≣ ∀[({ type λ[A] = φ })#λ]
 
 
   /* With type lambdas:
