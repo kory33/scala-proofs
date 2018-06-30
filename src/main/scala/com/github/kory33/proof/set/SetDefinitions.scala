@@ -16,6 +16,6 @@ object SetDefinitions {
     def contained: A ⊂ B = ev._2
   }
 
-  type =/=[A, B] = ￢[=#=[A, B]]
+  type =/=[A, B] = ￢[A =#= B]
 
 }
