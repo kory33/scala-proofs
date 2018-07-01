@@ -12,13 +12,13 @@ trait PredicateLogicAxiom {
     *
     * This "constructs" a value of φ[X] given ∀[φ] and any type X.
     */
-  def instUniv[φ[_], X]: ∀[({ type λ[A] = φ[A] })#λ] => φ[X]
+  def instUniv[φ[_], X]: ∀[φ] => φ[X]
 
   /**
     * Universal generalization
     *
     * Given a constructor for any type, we can say that for all type there exists φ[A].
     */
-  def genUniv[φ[_], X]: (X => φ[X]) => ∀[({ type λ[A] = φ[A] })#λ]
+  def genUniv[φ[_], X]: (X => φ[X]) => ∀[φ]
 
 }
