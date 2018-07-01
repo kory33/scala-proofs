@@ -28,15 +28,15 @@ object IntuitionisticLogicSystem {
   implicit def leftDisj[A, B](a: A): A ∨ B = Left(a)
   implicit def rightDisj[A, B](b: B): A ∨ B = Right(b)
   implicit class RichDisjunction[A, B](disj: A ∨ B) {
-    def commuteDisj: B ∨ A = disj.swap
+    def commute: B ∨ A = disj.swap
     def mapRight[C]: (B => C) => A ∨ C = { ded => disj.map(ded) }
-    def mapLeft[C] : (A => C) => C ∨ B = { ded => disj.commuteDisj.mapRight(ded).commuteDisj }
+    def mapLeft[C] : (A => C) => C ∨ B = { ded => disj.commute.mapRight(ded).commute }
   }
 
   implicit class RichConjunction[A, B](conj: A ∧ B) {
-    def commuteConj: B ∧ A = conj match { case (a, b) => (b, a) }
+    def commute: B ∧ A = conj match { case (a, b) => (b, a) }
     def mapRight[C]: (B => C) => A ∧ C = { ded => conj match { case (a, b) => (a, ded(b)) } }
-    def mapLeft[C] : (A => C) => C ∧ B = { ded => conj match { case (a, b) => (ded(a), b) } }
+    def mapLeft[C] : (A => C) => C ∧ B = { ded => conj.commute.mapRight(ded).commute }
   }
 
   /**

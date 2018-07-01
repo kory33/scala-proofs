@@ -46,7 +46,7 @@ object ClassicalLogicSystem {
   }
 
   def implication[A, B](implicit axiom: ClassicalLogicAxiom): (A => B) ≣ (￢[A] ∨ B) = {
-    val implies = { ded: (A => B) => middleExclusion[A].commuteDisj.mapRight(ded) }
+    val implies = { ded: (A => B) => middleExclusion[A].commute.mapRight(ded) }
     val impliedBy: ￢[A] ∨ B => (A => B) = { 
       case notA: ￢[A] => { a: A => explosion[B](a ∧ notA) }
       case b: B => alwaysImplied(b)
