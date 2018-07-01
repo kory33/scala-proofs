@@ -7,15 +7,18 @@ trait PredicateLogicAxiom {
 
   def axiom1[φ[_], Ψ[_]]: ∀[({ type λ[X] = φ[X] => Ψ[X] })#λ] => ∀[φ] => ∀[Ψ]
 
-  def universal[φ]: φ ≣ ∀[({ type λ[A] = φ })#λ]
+  /**
+    * Universal instantiation
+    *
+    * This "constructs" a value of φ[X] given ∀[φ] and any type X.
+    */
+  def instUniv[φ[_], X]: ∀[({ type λ[A] = φ[A] })#λ] => φ[X]
 
-
-  /* With type lambdas:
-
-  def axiom1[φ[_], Ψ[_]]: ∀[X :-> φ[X] => Ψ[X]] => (∀[X :-> φ[X]] => ∀[X :-> Ψ[X]])
-
-  def generalize[φ]: φ => ∀[X :-> φ]
-
-   */
+  /**
+    * Universal generalization
+    *
+    * Given a constructor for any type, we can say that for all type there exists φ[A].
+    */
+  def genUniv[φ[_], X]: (X => φ[X]) => ∀[({ type λ[A] = φ[A] })#λ]
 
 }
