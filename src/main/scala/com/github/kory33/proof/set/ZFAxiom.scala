@@ -94,10 +94,17 @@ trait ZFAxiom {
     *
     * This is actually not in axiom set and is deduced from other axioms
     */
+  /*
   def empty:
     ∃[({ type λ1[x] =
       ∀[({ type λ2[y] =
         y ∈ x => y =/= y
       })#λ2]
-    })#λ1] // TODO prove.
+    })#λ1] = {
+    val separated = separation[({ type λ[u, _] = u =/= u })#λ]
+
+    // all x has prop F(x), there exists some y such that G(y). then there exists some y such that F(x) && G(y).
+
+  }
+  */
 }

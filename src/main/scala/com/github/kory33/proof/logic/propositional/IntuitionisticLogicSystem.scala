@@ -15,7 +15,7 @@ object IntuitionisticLogicSystem {
     */
   final def MP[A, B]: A => (A => B) => B = { a => deduction => deduction(a) }
 
-  implicit def contradiction[A]: A ∧ ￢[A] => Nothing = { case (a, notA) => notA(a) }
+  implicit def contradiction[A](contr: A ∧ ￢[A]): Nothing = contr match { case (a, notA) => notA(a) }
 
   /**
     * Proof by contradiction
@@ -25,10 +25,10 @@ object IntuitionisticLogicSystem {
   /**
     * Disjunctions
     */
-  implicit def leftDisj[A, B]: A => A ∨ B = Left.apply
-  implicit def rightDisj[A, B]: B => A ∨ B = Right.apply
-  implicit def commuteDisj[A, B]: A ∨ B => B ∨ A = { conj => conj.swap }
-  implicit def commuteConj[A, B]: A ∧ B => B ∧ A = { case (a, b) => (b, a) }
+  implicit def leftDisj[A, B](a: A): A ∨ B = Left(a)
+  implicit def rightDisj[A, B](b: B): A ∨ B = Right(b)
+  implicit def commuteDisj[A, B](disj: A ∨ B): B ∨ A = disj.swap
+  implicit def commuteConj[A, B](conj: A ∧ B): B ∧ A = conj match { case (a, b) => (b, a) }
 
   /**
     * removal of disjunction
@@ -51,8 +51,7 @@ object IntuitionisticLogicSystem {
     * Modus tollens
     */
   final def MT[A, B]: (A => B) => ￢[B] => ￢[A] = { ded => notB =>
-    val contradictory: A => Nothing = { a: A => (ded(a), notB) }
-    byContradiction(contradictory)
+    byContradiction { a: A => (ded(a), notB) }
   }
 
   final def contraposition[A, B]: (A => B) => (￢[B] => ￢[A]) = { ded => { notB => MT(ded)(notB) } }
