@@ -11,21 +11,14 @@ trait ZFAxiom {
     *
     * There exists a set.
     */
-  def existence: ∃[({ type λ[x] =
-    x =#= x
-  })#λ]
+  def existence: ∃[[x] => x =#= x]
 
   /**
     * Axiom of extensionality.
     *
     * For all set x and y, x contains and is contained in y when they have exactly same elements.
     */
-  def extensionality:
-    ∀[({ type λ1[x] =
-      ∀[({ type λ2[y] =
-        ∀[({ type λ3[z] = (z ∈ x) ≣ (z ∈ y) })#λ3] => x =#= y
-      })#λ2]
-    })#λ1]
+  def extensionality: ∀[[x] => ∀[[y] => ∀[[z] => (z ∈ x) ≣ (z ∈ y)] => x =#= y]]
 
   /**
     * Schema of separation.
@@ -35,57 +28,28 @@ trait ZFAxiom {
     *
     * @tparam F binary predicate
     */
-  def separation[F[_, _]]:
-    ∀[({ type λ1[x] =
-      ∀[({ type λ2[p] =
-        ∃[({ type λ3[y] =
-          ∀[({ type λ4[u] = (u ∈ y) ≣ ((u ∈ x) ∧ F[u, p])
-          })#λ4]
-        })#λ3]
-      })#λ2]
-    })#λ1]
+  def separation[F[_, _]]: ∀[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ F[u, p])]]]]
 
   /**
     * Axiom of pairing
     *
     * For any a and b there exists x that contains a and b.
     */
-  def pairing:
-    ∀[({ type λ1[a] =
-      ∀[({ type λ2[b] =
-        ∃[({ type λ3[x] =
-          (a ∈ x) ∧ (a ∈ x)
-        })#λ3]
-      })#λ2]
-    })#λ1]
+  def pairing: ∀[[a] => ∀[[b] => ∃[[x] => (a ∈ x) ∧ (a ∈ x)]]]
 
   /**
     * Axiom of union.
     *
     * For every family F there exists a set U containing all elements of F.
     */
-  def union[F <: Family]:
-    ∃[({ type λ1[U] =
-      ∀[({ type λ2[Y] =
-        ∀[({ type λ3[x] =
-          ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U
-        })#λ3]
-      })#λ2]
-    })#λ1]
+  def union[F <: Family]: ∃[[U] => ∀[[Y] => ∀[[x] => ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U]]]
 
   /**
     * Axiom of power set.
     *
     * For every set x there exists a set P containing all subsets of x.
     */
-  def power:
-    ∀[({ type λ1[X] =
-      ∃[({ type λ2[P] =
-        ∀[({ type λ3[z] =
-          (z ⊂ X) => (z ∈ P)
-        })#λ3]
-      })#λ2]
-    })#λ1]
+  def power: ∀[[X] => ∃[[P] => ∀[[z] => (z ⊂ X) => (z ∈ P)]]]
 
   /**
     * Axiom of empty set.
