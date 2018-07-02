@@ -5,7 +5,7 @@ import com.github.kory33.proof.logic.propositional.LogicDefinitions.{≣, ￢}
 
 trait PredicateLogicAxiom {
 
-  def axiom1[φ[_], Ψ[_]]: ∀[({ type λ[X] = φ[X] => Ψ[X] })#λ] => ∀[φ] => ∀[Ψ]
+  def axiom1[φ[_], Ψ[_]]: ∀[[X] => (φ[X] => Ψ[X])] => ∀[φ] => ∀[Ψ]
 
   /**
     * Universal instantiation
