@@ -49,7 +49,7 @@ object IntuitionisticLogicSystem {
     }
   }
 
-  final def explosion[A]: Nothing => A = _ => ???
+  final def explosion[A]: Nothing => A = identity
 
   /**
     * law of noncontradiction
