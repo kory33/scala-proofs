@@ -55,4 +55,19 @@ object ClassicalLogicSystem {
     implies ∧ impliedBy
   }
 
+  def nonImplication[A, B](implicit axiom: ClassicalLogicAxiom): ￢[A => B] ≣ (A ∧ ￢[B]) = {
+    val implies = { notDed: ￢[A => B] =>
+      val ev1 = contraposition(implication[A, B].impliedBy)(notDed)
+      deMorgan1.implies(ev1).mapLeft(eliminateDoubleNegation)
+    }
+
+    val impliedBy: (A ∧ ￢[B]) => ￢[A => B] = { case (a, notB) =>
+      byContradiction { map: (A => B) =>
+        map(a) ∧ notB
+      }
+    }
+
+    implies ∧ impliedBy
+  }
+
 }
