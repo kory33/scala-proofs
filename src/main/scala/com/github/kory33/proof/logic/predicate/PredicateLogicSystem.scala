@@ -4,6 +4,7 @@ import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.{∀, �
 import com.github.kory33.proof.logic.propositional.ClassicalLogicAxiom
 import com.github.kory33.proof.logic.propositional.LogicDefinitions.{￢, _}
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
+import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 
 object PredicateLogicSystem {
 
@@ -16,7 +17,11 @@ object PredicateLogicSystem {
     * Existential instantiation(elimination)
     */
   def instExist[F[_], φ](exists: ∃[F], forall: ∀[[X] => F[X] => φ])(implicit axiom: PredicateLogicAxiom): φ = {
-    axiom.instUniv[[X] => F[X] => φ, exists.S](forall)(exists.value)
+    axiom.instUniv[[x] => F[x] => φ, exists.S](forall)(exists.value)
+  }
+
+  def notForall[φ[_]](notForall: ￢[∀[[x] => φ[x]]])(implicit classicalLogicAxiom: ClassicalLogicAxiom): ∃[[x] => ￢[φ[x]]] = {
+    eliminateDoubleNegation(notForall)
   }
 
   /**
@@ -51,6 +56,46 @@ object PredicateLogicSystem {
   /**
     * ∀x.∀y.F(x, y) ⇔ ∀y.∀x.F(x, y)
     */
-  def forallCommute[F[_, _]]: ∀[[x] => ∀[[y] => F[x, y]]] ≣ ∀[[y] => ∀[[x] => F[x, y]]] = ???
+  def forallCommute[F[_, _]](implicit
+                             predicateLogicAxiom: PredicateLogicAxiom,
+                             classicalLogicAxiom: ClassicalLogicAxiom): ∀[[x] => ∀[[y] => F[x, y]]] ≣ ∀[[y] => ∀[[x] => F[x, y]]] = {
+    val implies = eliminateDoubleNegation(
+      byContradiction { negation: ￢[∀[[x] => ∀[[y] => F[x, y]]] => ∀[[y] => ∀[[x] => F[x, y]]]] =>
+        val ev1 = nonImplication.implies(negation)
+        val ev2: ∀[[x] => ∀[[y] => F[x, y]]] = ev1._1
+        val ev3: ￢[∀[[y] => ∀[[x] => F[x, y]]]] = ev1._2
+        val ev4: ∃[[y] => ￢[∀[[x] => F[x, y]]]] = notForall[[y] => ∀[[x] => F[x, y]]](ev3)
+        type Y = ev4.S
+        val ev5: ￢[∀[[x] => F[x, Y]]] = ev4.value
+        val ev6: ∃[[x] => ￢[F[x, Y]]] = notForall[[x] => F[x, Y]](ev5)
+        type X = ev6.S
+        val ev7: ￢[F[X, Y]] = ev6.value
+        val ev8: F[X, Y] = predicateLogicAxiom.instUniv[[y] => F[X, y], Y](
+          predicateLogicAxiom.instUniv[[x] => ∀[[y] => F[x, y]], X](ev2)
+        )
+        ev8 ∧ ev7
+      }
+    )
+
+    val impliedBy = eliminateDoubleNegation(
+      byContradiction { negation: ￢[∀[[y] => ∀[[x] => F[x, y]]] => ∀[[x] => ∀[[y] => F[x, y]]]] =>
+        val ev1 = nonImplication.implies(negation)
+        val ev2: ∀[[y] => ∀[[x] => F[x, y]]] = ev1._1
+        val ev3: ￢[∀[[x] => ∀[[y] => F[x, y]]]] = ev1._2
+        val ev4: ∃[[x] => ￢[∀[[y] => F[x, y]]]] = notForall[[x] => ∀[[y] => F[x, y]]](ev3)
+        type X = ev4.S
+        val ev5: ￢[∀[[y] => F[X, y]]] = ev4.value
+        val ev6: ∃[[y] => ￢[F[X, y]]] = notForall[[y] => F[X, y]](ev5)
+        type Y = ev6.S
+        val ev7: ￢[F[X, Y]] = ev6.value
+        val ev8: F[X, Y] = predicateLogicAxiom.instUniv[[x] => F[x, Y], X](
+          predicateLogicAxiom.instUniv[[y] => ∀[[x] => F[x, y]], Y](ev2)
+        )
+        ev8 ∧ ev7
+      }
+    )
+
+    implies ∧ impliedBy
+  }
 
 }
