@@ -66,7 +66,6 @@ trait ZFAxiom {
     val set = existence
 
     type Set = set.S
-    val setInstance = set.value
 
     val emptyExistence: ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]] =
       predAxiom.instUniv[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]], Nothing](
@@ -83,7 +82,6 @@ trait ZFAxiom {
       ev21(ev23)
     }
     val ev3: ∀[[u] => u ∉ EmptySet] = ev2
-    val ev4: ∃[[x] => ∀[[y] => y ∉ x]] = genExist[[x] => ∀[[y] => y ∉ x], EmptySet](ev3)
-    ev4
+    genExist[[x] => ∀[[y] => y ∉ x], EmptySet](ev3)
   }
 }
