@@ -1,12 +1,14 @@
 package com.github.kory33.proof.set
 
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
+import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions._
 
 object SetDefinitions {
 
   type Family
 
   type ∈[A, B]
+  type ∉[A, B] = ￢[A ∈ B]
   type ⊃[A, B]
   type ⊂[A, B] = B ⊃ A
 

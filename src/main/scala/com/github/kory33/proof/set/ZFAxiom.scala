@@ -1,8 +1,11 @@
 package com.github.kory33.proof.set
 
 import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.{∃, _}
+import com.github.kory33.proof.logic.predicate.PredicateLogicAxiom
+import com.github.kory33.proof.logic.predicate.PredicateLogicSystem._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
-import com.github.kory33.proof.set.SetDefinitions.{∈, _}
+import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
+import com.github.kory33.proof.set.SetDefinitions._
 
 trait ZFAxiom {
 
@@ -58,17 +61,29 @@ trait ZFAxiom {
     *
     * This is actually not in axiom set and is deduced from other axioms
     */
-  /*
-  def empty:
-    ∃[({ type λ1[x] =
-      ∀[({ type λ2[y] =
-        y ∈ x => y =/= y
-      })#λ2]
-    })#λ1] = {
-    val separated = separation[({ type λ[u, _] = u =/= u })#λ]
+  def existsEmpty(implicit predAxiom: PredicateLogicAxiom): ∃[[x] => ∀[[y] => y ∉ x]] = {
+    val separated = separation[[_, _] => Nothing]
+    val set = existence
 
-    // all x has prop F(x), there exists some y such that G(y). then there exists some y such that F(x) && G(y).
+    type Set = set.S
+    val setInstance = set.value
 
+    val emptyExistence: ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]] =
+      predAxiom.instUniv[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]], Nothing](
+        predAxiom.instUniv[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ Nothing)]]], Set](separated)
+      )
+    
+    type EmptySet = emptyExistence.S
+    val ev1: ∀[[u] => (u ∈ EmptySet) ≣ ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
+    val ev2: ∀[[u] => (u ∈ EmptySet) => Nothing] = byContradiction { assumption: ∃[[u] => ￢[u ∈ EmptySet] => Nothing] =>
+      type U = assumption.S
+      val ev21 = assumption.value
+      val ev22 = predAxiom.instUniv[[u] => (u ∈ EmptySet) ≣ ((u ∈ Set) ∧ Nothing), U](ev1)
+      val ev23 = ev22.implies.andThen { conclusion: (U ∈ Set) ∧ Nothing => conclusion._2 }
+      ev21(ev23)
+    }
+    val ev3: ∀[[u] => u ∉ EmptySet] = ev2
+    val ev4: ∃[[x] => ∀[[y] => y ∉ x]] = genExist[[x] => ∀[[y] => y ∉ x], EmptySet](ev3)
+    ev4
   }
-  */
 }

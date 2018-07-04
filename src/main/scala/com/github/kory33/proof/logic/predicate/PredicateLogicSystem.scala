@@ -20,6 +20,15 @@ object PredicateLogicSystem {
     axiom.instUniv[[x] => F[x] => φ, exists.S](forall)(exists.value)
   }
 
+  /**
+    * Universal generalization
+    */
+  def genUniv[φ](theorem: φ): ∀[[x] => φ] = {
+    byContradiction { existsNot: ∃[[x] => ￢[φ]] =>
+      theorem ∧ existsNot.value
+    }
+  }
+
   def notForall[φ[_]](notForall: ￢[∀[[x] => φ[x]]])(implicit classicalLogicAxiom: ClassicalLogicAxiom): ∃[[x] => ￢[φ[x]]] = {
     eliminateDoubleNegation(notForall)
   }
