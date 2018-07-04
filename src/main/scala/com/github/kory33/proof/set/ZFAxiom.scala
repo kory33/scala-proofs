@@ -68,20 +68,21 @@ trait ZFAxiom {
     type Set = set.S
 
     val emptyExistence: ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]] =
-      predAxiom.instUniv[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]], Nothing](
-        predAxiom.instUniv[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ Nothing)]]], Set](separated)
+      forType[Nothing].instantiate[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]]](
+        forType[Set].instantiate[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ Nothing)]]]](separated)
       )
-    
+
     type EmptySet = emptyExistence.S
     val ev1: ∀[[u] => (u ∈ EmptySet) ≣ ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
     val ev2: ∀[[u] => (u ∈ EmptySet) => Nothing] = byContradiction { assumption: ∃[[u] => ￢[u ∈ EmptySet] => Nothing] =>
       type U = assumption.S
       val ev21 = assumption.value
-      val ev22 = predAxiom.instUniv[[u] => (u ∈ EmptySet) ≣ ((u ∈ Set) ∧ Nothing), U](ev1)
+      val ev22 = forType[U].instantiate[[u] => (u ∈ EmptySet) ≣ ((u ∈ Set) ∧ Nothing)](ev1)
       val ev23 = ev22.implies.andThen { conclusion: (U ∈ Set) ∧ Nothing => conclusion._2 }
       ev21(ev23)
     }
     val ev3: ∀[[u] => u ∉ EmptySet] = ev2
-    genExist[[x] => ∀[[y] => y ∉ x], EmptySet](ev3)
+  
+    forType[EmptySet].generalize[[x] => ∀[[y] => y ∉ x]](ev3)
   }
 }

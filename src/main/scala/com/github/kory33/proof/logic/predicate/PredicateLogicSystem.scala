@@ -29,6 +29,13 @@ object PredicateLogicSystem {
     }
   }
 
+  class PartiallyTyped[T] {
+    def instantiate[F[_]](forall: ∀[F])(implicit axiom: PredicateLogicAxiom): F[T] = axiom.instUniv[F, T](forall)
+    def generalize[F[_]](instance: F[T]): ∃[F] = genExist[F, T](instance)
+  }
+
+  def forType[T] = new PartiallyTyped[T]
+
   def notForall[φ[_]](notForall: ￢[∀[[x] => φ[x]]])(implicit classicalLogicAxiom: ClassicalLogicAxiom): ∃[[x] => ￢[φ[x]]] = {
     eliminateDoubleNegation(notForall)
   }
@@ -44,8 +51,8 @@ object PredicateLogicSystem {
       type Y = ev1.S
       val ev2: G[X, Y] = ev1.value
 
-      val ev3: ∃[[x] => G[x, Y]] = genExist[[x] => G[x, Y], X](ev2)
-      genExist[[y] => ∃[[x] => G[x, y]], Y](ev3)
+      val ev3: ∃[[x] => G[x, Y]] = forType[X].generalize[[x] => G[x, Y]](ev2)
+      forType[Y].generalize[[y] => ∃[[x] => G[x, y]]](ev3)
     }
 
     implies[F] ∧ implies[[X, Y] => F[Y, X]]
@@ -68,8 +75,8 @@ object PredicateLogicSystem {
         val ev6: ∃[[x] => ￢[G[x, Y]]] = notForall[[x] => G[x, Y]](ev5)
         type X = ev6.S
         val ev7: ￢[G[X, Y]] = ev6.value
-        val ev8: G[X, Y] = predicateLogicAxiom.instUniv[[y] => G[X, y], Y](
-          predicateLogicAxiom.instUniv[[x] => ∀[[y] => G[x, y]], X](ev2)
+        val ev8: G[X, Y] = forType[Y].instantiate[[y] => G[X, y]](
+          forType[X].instantiate[[x] => ∀[[y] => G[x, y]]](ev2)
         )
         ev8 ∧ ev7
       }
