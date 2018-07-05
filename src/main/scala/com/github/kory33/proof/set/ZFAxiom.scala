@@ -1,7 +1,7 @@
 package com.github.kory33.proof.set
 
 import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.{∃, _}
-import com.github.kory33.proof.logic.predicate.PredicateLogicAxiom
+import com.github.kory33.proof.logic.propositional.ClassicalLogicAxiom
 import com.github.kory33.proof.logic.predicate.PredicateLogicSystem._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
@@ -61,7 +61,7 @@ trait ZFAxiom {
     *
     * This is actually not in axiom set and is deduced from other axioms
     */
-  def existsEmpty(implicit predAxiom: PredicateLogicAxiom): ∃[[x] => ∀[[y] => y ∉ x]] = {
+  def existsEmpty(implicit predAxiom: ClassicalLogicAxiom): ∃[[x] => ∀[[y] => y ∉ x]] = {
     val separated = separation[[_, _] => Nothing]
     val set = existence
 

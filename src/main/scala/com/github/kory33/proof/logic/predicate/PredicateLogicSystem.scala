@@ -13,11 +13,20 @@ object PredicateLogicSystem {
     */
   implicit def genExist[F[_], A](instance: F[A]): ∃[F] = new ∃ { type S = A; def value = instance }
 
+  def instUniv[φ[_], X](forall: ∀[φ])(implicit axiom: ClassicalLogicAxiom): φ[X] = {
+    byContradiction { notPX: ￢[φ[X]] =>
+      val ev11: ∃[[x] => ￢[φ[x]]] = notPX
+      val ev12: ￢[∃[[x] => ￢[φ[x]]]] = forall
+      ev11 ∧ ev12
+    }
+  }
+
   /**
     * Existential instantiation(elimination)
     */
-  def instExist[F[_], φ](exists: ∃[F], forall: ∀[[X] => F[X] => φ])(implicit axiom: PredicateLogicAxiom): φ = {
-    axiom.instUniv[[x] => F[x] => φ, exists.S](forall)(exists.value)
+  def instExist[F[_], φ](exists: ∃[F], forall: ∀[[X] => F[X] => φ])(implicit axiom: ClassicalLogicAxiom): φ = {
+    val ev1: F[exists.S] => φ = instUniv[[x] => F[x] => φ, exists.S](forall)
+    ev1(exists.value)
   }
 
   /**
@@ -30,7 +39,7 @@ object PredicateLogicSystem {
   }
 
   class PartiallyTyped[T] {
-    def instantiate[F[_]](forall: ∀[F])(implicit axiom: PredicateLogicAxiom): F[T] = axiom.instUniv[F, T](forall)
+    def instantiate[F[_]](forall: ∀[F])(implicit axiom: ClassicalLogicAxiom): F[T] = instUniv[F, T](forall)
     def generalize[F[_]](instance: F[T]): ∃[F] = genExist[F, T](instance)
   }
 
@@ -61,9 +70,7 @@ object PredicateLogicSystem {
   /**
     * ∀x.∀y.F(x, y) ⇔ ∀y.∀x.F(x, y)
     */
-  def forallCommute[F[_, _]](implicit
-                             predicateLogicAxiom: PredicateLogicAxiom,
-                             classicalLogicAxiom: ClassicalLogicAxiom): ∀[[x] => ∀[[y] => F[x, y]]] ≣ ∀[[y] => ∀[[x] => F[x, y]]] = {
+  def forallCommute[F[_, _]](implicit classicalLogicAxiom: ClassicalLogicAxiom): ∀[[x] => ∀[[y] => F[x, y]]] ≣ ∀[[y] => ∀[[x] => F[x, y]]] = {
     def implies[G[_, _]] = eliminateDoubleNegation(
       byContradiction { negation: ￢[∀[[x] => ∀[[y] => G[x, y]]] => ∀[[y] => ∀[[x] => G[x, y]]]] =>
         val ev1 = nonImplication.implies(negation)
