@@ -5,19 +5,14 @@ import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions._
 
 object SetDefinitions {
 
-  type Family
+  type ∈[x, y]
+  type =#=[x, y]
 
-  type ∈[A, B]
-  type ∉[A, B] = ￢[A ∈ B]
-  type ⊃[A, B]
-  type ⊂[A, B] = B ⊃ A
+  type ∉[x, y] = ￢[x ∈ y]
+  type =/=[x, y] = ￢[x =#= y]
+  type ⊂[x, y] = ∀[[z] => z ∈ x => z ∈ y]
+  type ⊃[x, y] = y ⊂ x
 
-  implicit class =#=[A, B](ev: (A ⊃ B) ∧ (A ⊂ B)) {
-    def contains: A ⊃ B = ev._1
-
-    def contained: A ⊂ B = ev._2
-  }
-
-  type =/=[A, B] = ￢[A =#= B]
+  type isEmpty[x] = ∀[[y] => y ∉ x]
 
 }

@@ -44,7 +44,7 @@ trait ZFAxiom {
     *
     * For every family F there exists a set U containing all elements of F.
     */
-  def union[F <: Family]: ∃[[U] => ∀[[Y] => ∀[[x] => ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U]]]
+  def union: ∀[[F] => ∃[[U] => ∀[[Y] => ∀[[x] => ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U]]]]
 
   /**
     * Axiom of power set.
@@ -60,7 +60,7 @@ trait ZFAxiom {
     *
     * This is actually not in axiom set and is deduced from other axioms
     */
-  def existsEmpty: ∃[[x] => ∀[[y] => y ∉ x]] = {
+  def existsEmpty: ∃[isEmpty] = {
     val separated = separation[[_, _] => Nothing]
     val set = existence
 
