@@ -44,14 +44,14 @@ trait ZFAxiom {
     *
     * For every family F there exists a set U containing all elements of F.
     */
-  def union: ∀[[F] => ∃[[U] => ∀[[Y] => ∀[[x] => ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U]]]]
+  def union: ∀[[F] => ∃[[u] => ∀[[y] => ∀[[x] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]]
 
   /**
     * Axiom of power set.
     *
     * For every set x there exists a set P containing all subsets of x.
     */
-  def power: ∀[[X] => ∃[[P] => ∀[[z] => (z ⊂ X) => (z ∈ P)]]]
+  def power: ∀[[x] => ∃[[p] => ∀[[z] => (z ⊂ x) => (z ∈ p)]]]
 
 }
 
@@ -60,6 +60,6 @@ object ZFAxiom {
   def extensionality(implicit axiom: ZFAxiom): ∀[[x] => ∀[[y] => ∀[[z] => (z ∈ x) ≣ (z ∈ y)] => x =#= y]] = axiom.extensionality
   def separation[F[_, _]](implicit axiom: ZFAxiom): ∀[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ F[u, p])]]]] = axiom.separation
   def pairing(implicit axiom: ZFAxiom): ∀[[a] => ∀[[b] => ∃[[x] => (a ∈ x) ∧ (a ∈ x)]]] = axiom.pairing
-  def union(implicit axiom: ZFAxiom): ∀[[F] => ∃[[U] => ∀[[Y] => ∀[[x] => ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U]]]] = axiom.union
-  def power(implicit axiom: ZFAxiom): ∀[[X] => ∃[[P] => ∀[[z] => (z ⊂ X) => (z ∈ P)]]] = axiom.power
+  def union(implicit axiom: ZFAxiom): ∀[[F] => ∃[[u] => ∀[[y] => ∀[[x] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]] = axiom.union
+  def power(implicit axiom: ZFAxiom): ∀[[x] => ∃[[p] => ∀[[z] => (z ⊂ x) => (z ∈ p)]]] = axiom.power
 }
