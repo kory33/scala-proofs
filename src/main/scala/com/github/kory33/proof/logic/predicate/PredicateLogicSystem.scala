@@ -1,7 +1,6 @@
 package com.github.kory33.proof.logic.predicate
 
 import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.{∀, ∃}
-import com.github.kory33.proof.logic.propositional.ClassicalLogicAxiom
 import com.github.kory33.proof.logic.propositional.LogicDefinitions.{￢, _}
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
@@ -13,7 +12,7 @@ object PredicateLogicSystem {
     */
   implicit def genExist[F[_], A](instance: F[A]): ∃[F] = new ∃ { type S = A; def value = instance }
 
-  def instUniv[φ[_], X](forall: ∀[φ])(implicit axiom: ClassicalLogicAxiom): φ[X] = {
+  def instUniv[φ[_], X](forall: ∀[φ]): φ[X] = {
     byContradiction { notPX: ￢[φ[X]] =>
       val ev11: ∃[[x] => ￢[φ[x]]] = notPX
       val ev12: ￢[∃[[x] => ￢[φ[x]]]] = forall
@@ -24,7 +23,7 @@ object PredicateLogicSystem {
   /**
     * Existential instantiation(elimination)
     */
-  def instExist[F[_], φ](exists: ∃[F], forall: ∀[[X] => F[X] => φ])(implicit axiom: ClassicalLogicAxiom): φ = {
+  def instExist[F[_], φ](exists: ∃[F], forall: ∀[[X] => F[X] => φ]): φ = {
     val ev1: F[exists.S] => φ = instUniv[[x] => F[x] => φ, exists.S](forall)
     ev1(exists.value)
   }
@@ -39,13 +38,13 @@ object PredicateLogicSystem {
   }
 
   class PartiallyTyped[T] {
-    def instantiate[F[_]](forall: ∀[F])(implicit axiom: ClassicalLogicAxiom): F[T] = instUniv[F, T](forall)
+    def instantiate[F[_]](forall: ∀[F]): F[T] = instUniv[F, T](forall)
     def generalize[F[_]](instance: F[T]): ∃[F] = genExist[F, T](instance)
   }
 
   def forType[T] = new PartiallyTyped[T]
 
-  def notForall[φ[_]](notForall: ￢[∀[[x] => φ[x]]])(implicit classicalLogicAxiom: ClassicalLogicAxiom): ∃[[x] => ￢[φ[x]]] = {
+  def notForall[φ[_]](notForall: ￢[∀[[x] => φ[x]]]): ∃[[x] => ￢[φ[x]]] = {
     eliminateDoubleNegation(notForall)
   }
 
@@ -70,7 +69,7 @@ object PredicateLogicSystem {
   /**
     * ∀x.∀y.F(x, y) ⇔ ∀y.∀x.F(x, y)
     */
-  def forallCommute[F[_, _]](implicit classicalLogicAxiom: ClassicalLogicAxiom): ∀[[x] => ∀[[y] => F[x, y]]] ≣ ∀[[y] => ∀[[x] => F[x, y]]] = {
+  def forallCommute[F[_, _]]: ∀[[x] => ∀[[y] => F[x, y]]] ≣ ∀[[y] => ∀[[x] => F[x, y]]] = {
     def implies[G[_, _]] = eliminateDoubleNegation(
       byContradiction { negation: ￢[∀[[x] => ∀[[y] => G[x, y]]] => ∀[[y] => ∀[[x] => G[x, y]]]] =>
         val ev1 = nonImplication.implies(negation)

@@ -10,14 +10,12 @@ import scala.annotation.implicitNotFound
   */
 object ClassicalLogicSystem {
 
-  implicit def eliminateDoubleNegation[A](doubleNeg: ￢[￢[A]])(implicit axiom: ClassicalLogicAxiom): A = {
-    axiom.eliminateDoubleNegation(doubleNeg)
-  }
+  implicit def eliminateDoubleNegation[A](doubleNeg: ￢[￢[A]]): A = doubleNeg(a => return a)
 
   /**
     * law of exclusion of middle
     */
-  def middleExclusion[A](implicit axiom: ClassicalLogicAxiom): A ∨ ￢[A] = {
+  def middleExclusion[A]: A ∨ ￢[A] = {
     val contradictory1: ￢[A ∨ ￢[A]] => Nothing = { negProp =>
       val contradictory2: ￢[A] => Nothing = { notA =>
         val prop: A ∨ ￢[A] = notA
@@ -30,7 +28,7 @@ object ClassicalLogicSystem {
     byContradiction(contradictory1)
   }
 
-  def deMorgan3[A, B](implicit axiom: ClassicalLogicAxiom): (￢[A] ∨ ￢[B]) ≣ ￢[A ∧ B] = {
+  def deMorgan3[A, B]: (￢[A] ∨ ￢[B]) ≣ ￢[A ∧ B] = {
     val implies = deMorgan2[A, B]
     val impliedBy: (￢[A] ∨ ￢[B]) <= ￢[A ∧ B] = { notConj =>
       val contradictory: ￢[￢[A] ∨ ￢[B]] => Nothing = { prop =>
@@ -45,7 +43,7 @@ object ClassicalLogicSystem {
     implies ∧ impliedBy
   }
 
-  def implication[A, B](implicit axiom: ClassicalLogicAxiom): (A => B) ≣ (￢[A] ∨ B) = {
+  def implication[A, B]: (A => B) ≣ (￢[A] ∨ B) = {
     val implies = { ded: (A => B) => middleExclusion[A].commute.mapRight(ded) }
     val impliedBy: ￢[A] ∨ B => (A => B) = { 
       case Left(notA) => { a: A => explosion[B](a ∧ notA) }
@@ -55,7 +53,7 @@ object ClassicalLogicSystem {
     implies ∧ impliedBy
   }
 
-  def nonImplication[A, B](implicit axiom: ClassicalLogicAxiom): ￢[A => B] ≣ (A ∧ ￢[B]) = {
+  def nonImplication[A, B]: ￢[A => B] ≣ (A ∧ ￢[B]) = {
     val implies = { notDed: ￢[A => B] =>
       val ev1 = contraposition(implication[A, B].impliedBy)(notDed)
       deMorgan1.implies(ev1).mapLeft(eliminateDoubleNegation)
