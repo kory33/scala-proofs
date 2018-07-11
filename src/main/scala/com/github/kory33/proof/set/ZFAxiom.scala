@@ -83,4 +83,7 @@ object ZFAxiom {
   def pairing(implicit axiom: ZFAxiom): ∀[[a] => ∀[[b] => ∃[[x] => (a ∈ x) ∧ (a ∈ x)]]] = axiom.pairing
   def union(implicit axiom: ZFAxiom): ∀[[F] => ∃[[u] => ∀[[y] => ∀[[x] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]] = axiom.union
   def power(implicit axiom: ZFAxiom): ∀[[x] => ∃[[p] => ∀[[z] => (z ⊂ x) => (z ∈ p)]]] = axiom.power
+  def infinity(implicit axiom: ZFAxiom): ∃[[x] => ∀[[z] => isEmpty[z] => (z ∈ x)] ∧ ∀∈[x, [y] => ∀[[z] => isSucc[z, y] => (z ∈ x)]]] = axiom.infinity
+  def replacement[φ[_, _, _, _]](implicit axiom: ZFAxiom): ∀[[A] => ∀[[p] => ∀∈[A, [x] => ∃![[y] => φ[x, y, A, p]]] => ∃[[Y] => ∀∈[A, [x] => ∃∈[Y, [y] => φ[x, y, A, p]]]]]] = axiom.replacement
+  def foundation(implicit axiom: ZFAxiom): ∀[[x] => ∃[[y] => y ∈ x] => ∃∈[x, [y] => ￢[∃[[z] => (z ∈ x) ∧ (z ∈ y)]]]] = axiom.foundation
 }
