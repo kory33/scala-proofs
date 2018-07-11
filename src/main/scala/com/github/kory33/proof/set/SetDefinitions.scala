@@ -14,5 +14,9 @@ object SetDefinitions {
   type ⊃[x, y] = y ⊂ x
 
   type isEmpty[x] = ∀[[y] => y ∉ x]
+  /**
+   * alias for y = Succ(x) where Succ(x) = x ∪ {x}
+   */
+  type isSucc[y, x] = ∀[[z] => (z ∈ y) ≣ (z ∈ x ∨ z =#= x)]
 
 }

@@ -53,6 +53,13 @@ trait ZFAxiom {
     */
   def power: ∀[[x] => ∃[[p] => ∀[[z] => (z ⊂ x) => (z ∈ p)]]]
 
+  /**
+   * Axiom of Infinity.
+   *
+   * There exists an infinite set of some special form.
+   */
+  def infinity: ∃[[x] => ∀[[z] => isEmpty[z] => (z ∈ x)] ∧ ∀[[y] => y ∈ x => ∀[[z] => isSucc[z, y] => (z ∈ x)]]]
+
 }
 
 object ZFAxiom {
