@@ -10,7 +10,7 @@ object SetDefinitions {
 
   type ∉[x, y] = ￢[x ∈ y]
   type =/=[x, y] = ￢[x =#= y]
-  type ⊂[x, y] = ∀[[z] => z ∈ x => z ∈ y]
+  type ⊂[x, y] = ∀[[z] => (z ∈ x) => (z ∈ y)]
   type ⊃[x, y] = y ⊂ x
 
   type isEmpty[x] = ∀[[y] => y ∉ x]
@@ -19,4 +19,7 @@ object SetDefinitions {
    */
   type isSucc[y, x] = ∀[[z] => (z ∈ y) ≣ (z ∈ x ∨ z =#= x)]
 
+  type ∀∈[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
+  type ∃∈[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
+  type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =#= y]]
 }

@@ -58,7 +58,21 @@ trait ZFAxiom {
    *
    * There exists an infinite set of some special form.
    */
-  def infinity: ∃[[x] => ∀[[z] => isEmpty[z] => (z ∈ x)] ∧ ∀[[y] => y ∈ x => ∀[[z] => isSucc[z, y] => (z ∈ x)]]]
+  def infinity: ∃[[x] => ∀[[z] => isEmpty[z] => (z ∈ x)] ∧ ∀∈[x, [y] => ∀[[z] => isSucc[z, y] => (z ∈ x)]]]
+
+  /**
+   * Axiom schema of replacement.
+   *
+   * For every formula φ, A and p, if φ(s, t, A, p) defines a function F on A by F(x) = y ⇔ φ(x, y, A, p)
+   * then there exists a set Y containing the range F[A] = {F(x): x ∈ A} of the function F.
+   */
+  def replacement[φ[_, _, _, _]]: ∀[[A] => ∀[[p] => ∀∈[A, [x] => ∃![[y] => φ[x, y, A, p]]] => ∃[[Y] => ∀∈[A, [x] => ∃∈[Y, [y] => φ[x, y, A, p]]]]]]
+
+  /**
+   * Axiom of foundation / regularity.
+   * Every nonempty set has an ∈-minimal element.
+   */
+  def foundation: ∀[[x] => ∃[[y] => y ∈ x] => ∃∈[x, [y] => ￢[∃[[z] => (z ∈ x) ∧ (z ∈ y)]]]]
 
 }
 
