@@ -53,35 +53,13 @@ trait ZFAxiom {
     */
   def power: ∀[[X] => ∃[[P] => ∀[[z] => (z ⊂ X) => (z ∈ P)]]]
 
-  /**
-    * Axiom of empty set.
-    *
-    * There exists an empty set.
-    *
-    * This is actually not in axiom set and is deduced from other axioms
-    */
-  def existsEmpty: ∃[isEmpty] = {
-    val separated = separation[[_, _] => Nothing]
-    val set = existence
+}
 
-    type Set = set.S
-
-    val emptyExistence: ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]] =
-      forType[Nothing].instantiate[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ Set) ∧ Nothing)]]](
-        forType[Set].instantiate[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ Nothing)]]]](separated)
-      )
-
-    type EmptySet = emptyExistence.S
-    val ev1: ∀[[u] => (u ∈ EmptySet) ≣ ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
-    val ev2: ∀[[u] => (u ∈ EmptySet) => Nothing] = byContradiction { assumption: ∃[[u] => ￢[u ∈ EmptySet] => Nothing] =>
-      type U = assumption.S
-      val ev21 = assumption.value
-      val ev22 = forType[U].instantiate[[u] => (u ∈ EmptySet) ≣ ((u ∈ Set) ∧ Nothing)](ev1)
-      val ev23 = ev22.implies.andThen { conclusion: (U ∈ Set) ∧ Nothing => conclusion._2 }
-      ev21(ev23)
-    }
-    val ev3: ∀[[u] => u ∉ EmptySet] = ev2
-  
-    forType[EmptySet].generalize[[x] => ∀[[y] => y ∉ x]](ev3)
-  }
+object ZFAxiom {
+  def existence(implicit axiom: ZFAxiom): ∃[[x] => x =#= x] = axiom.existence
+  def extensionality(implicit axiom: ZFAxiom): ∀[[x] => ∀[[y] => ∀[[z] => (z ∈ x) ≣ (z ∈ y)] => x =#= y]] = axiom.extensionality
+  def separation[F[_, _]](implicit axiom: ZFAxiom): ∀[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ F[u, p])]]]] = axiom.separation
+  def pairing(implicit axiom: ZFAxiom): ∀[[a] => ∀[[b] => ∃[[x] => (a ∈ x) ∧ (a ∈ x)]]] = axiom.pairing
+  def union(implicit axiom: ZFAxiom): ∀[[F] => ∃[[U] => ∀[[Y] => ∀[[x] => ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U]]]] = axiom.union
+  def power(implicit axiom: ZFAxiom): ∀[[X] => ∃[[P] => ∀[[z] => (z ⊂ X) => (z ∈ P)]]] = axiom.power
 }
