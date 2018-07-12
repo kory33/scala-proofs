@@ -51,7 +51,7 @@ object ZFSystem {
       }
       notAEqNotA(ev2 ∧ ev1)
     }
-
+  
     byContradiction { assumption: ∃[[x] => ∀[[y] => y ∈ x]] =>
       type S = assumption.S
       val setOfAllSets = assumption.value

@@ -14,17 +14,22 @@ object SetDefinitions {
   type ⊃[x, y] = y ⊂ x
 
   /**
-   * alias for x = ∅
+   * x = ∅
    */
   type isEmpty[x] = ∀[[y] => y ∉ x]
 
   /**
-   * alias for y = Succ(x) where Succ(x) = x ∪ {x}
+   * x ≠ ∅
+   */
+  type isNonEmpty[x] = ∃[[y] => y ∈ x]
+
+  /**
+   * y = Succ(x) where Succ(x) = x ∪ {x}
    */
   type isSucc[y, x] = ∀[[z] => (z ∈ y) ≣ (z ∈ x ∨ z =#= x)]
 
-  type ∀∈[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
-  type ∃∈[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
+  type hasAll[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
+  type hasSome[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
 
   /**
    * Unique existence
@@ -32,13 +37,23 @@ object SetDefinitions {
   type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =#= y]]
 
   /**
-   * x and y are disjoint.
+   * x and y are disjoint
    */
-  type Disjoint[x, y] = ￢[∃[[z] => (z ∈ x) ∧ (z ∈ y)]]
+  type isDisjointTo[x, y] = ￢[∃[[z] => (z ∈ x) ∧ (z ∈ y)]]
 
   /**
-   * alias for y = {x}
+   * F is a pairwise disjoint family
    */
-  type ContainsJust[y, x] = ∀[[z] => z ∈ y ≣ z =#= x]
+  type isPairwiseDisjoint[F] = F hasAll ([x] => F hasAll ([y] => (x =#= y) ∨ (x isDisjointTo y)))
+
+  /**
+   * S is a selector of F that intersects every x ∈ F in precisely one point
+   */
+  type isASelectorOn[S, F] = F hasAll ([x] => ∃![[z] => (z ∈ S) ∧ z ∈ x])
+
+  /**
+   * y = {x}
+   */
+  type containsJust[y, x] = ∀[[z] => z ∈ y ≣ z =#= x]
 
 }
