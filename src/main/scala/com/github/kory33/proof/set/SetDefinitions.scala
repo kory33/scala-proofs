@@ -22,4 +22,6 @@ object SetDefinitions {
   type ∀∈[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
   type ∃∈[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
   type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =#= y]]
+  type Disjoint[x, y] = ￢[∃[[z] => (z ∈ x) ∧ (z ∈ y)]]
+
 }
