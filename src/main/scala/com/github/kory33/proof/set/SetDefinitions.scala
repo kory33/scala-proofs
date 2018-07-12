@@ -13,7 +13,11 @@ object SetDefinitions {
   type ⊂[x, y] = ∀[[z] => (z ∈ x) => (z ∈ y)]
   type ⊃[x, y] = y ⊂ x
 
+  /**
+   * alias for x = ∅
+   */
   type isEmpty[x] = ∀[[y] => y ∉ x]
+
   /**
    * alias for y = Succ(x) where Succ(x) = x ∪ {x}
    */
@@ -21,7 +25,20 @@ object SetDefinitions {
 
   type ∀∈[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
   type ∃∈[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
+
+  /**
+   * Unique existence
+   */
   type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =#= y]]
+
+  /**
+   * x and y are disjoint.
+   */
   type Disjoint[x, y] = ￢[∃[[z] => (z ∈ x) ∧ (z ∈ y)]]
+
+  /**
+   * alias for y = {x}
+   */
+  type ContainsJust[y, x] = ∀[[z] => z ∈ y ≣ z =#= x]
 
 }
