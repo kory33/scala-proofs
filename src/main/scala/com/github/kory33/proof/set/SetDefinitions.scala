@@ -26,7 +26,7 @@ object SetDefinitions {
   /**
    * y = Succ(x) where Succ(x) = x ∪ {x}
    */
-  type isSucc[y, x] = ∀[[z] => (z ∈ y) ≣ (z ∈ x ∨ z =#= x)]
+  type isSucc[y, x] = ∀[[z] => (z ∈ y) <=> (z ∈ x ∨ z =#= x)]
 
   type hasAll[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
   type hasSome[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
@@ -54,6 +54,6 @@ object SetDefinitions {
   /**
    * y = {x}
    */
-  type containsJust[y, x] = ∀[[z] => z ∈ y ≣ z =#= x]
+  type containsJust[y, x] = ∀[[z] => z ∈ y <=> z =#= x]
 
 }

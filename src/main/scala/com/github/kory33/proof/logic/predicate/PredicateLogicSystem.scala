@@ -51,7 +51,7 @@ object PredicateLogicSystem {
   /**
     * ∃x.∃y.F(x, y) ⇔ ∃y.∃x.F(x, y)
     */
-  def existsCommute[F[_, _]]: ∃[[x] => ∃[[y] => F[x, y]]] ≣ ∃[[y] => ∃[[x] => F[x, y]]] = {
+  def existsCommute[F[_, _]]: ∃[[x] => ∃[[y] => F[x, y]]] <=> ∃[[y] => ∃[[x] => F[x, y]]] = {
     def implies[G[_, _]]: ∃[[x] => ∃[[y] => G[x, y]]] => ∃[[w] => ∃[[z] => G[z, w]]] = { exists =>
       type X = exists.S
       val ev1: ∃[[y] => G[X, y]] = exists.value
@@ -69,7 +69,7 @@ object PredicateLogicSystem {
   /**
     * ∀x.∀y.F(x, y) ⇔ ∀y.∀x.F(x, y)
     */
-  def forallCommute[F[_, _]]: ∀[[x] => ∀[[y] => F[x, y]]] ≣ ∀[[y] => ∀[[x] => F[x, y]]] = {
+  def forallCommute[F[_, _]]: ∀[[x] => ∀[[y] => F[x, y]]] <=> ∀[[y] => ∀[[x] => F[x, y]]] = {
     def implies[G[_, _]] = eliminateDoubleNegation(
       byContradiction { negation: ￢[∀[[x] => ∀[[y] => G[x, y]]] => ∀[[y] => ∀[[x] => G[x, y]]]] =>
         val ev1 = nonImplication.implies(negation)

@@ -20,7 +20,7 @@ trait ZFAxiom {
     *
     * For all set x and y, x contains and is contained in y when they have exactly same elements.
     */
-  def extensionality: ∀[[x] => ∀[[y] => ∀[[z] => (z ∈ x) ≣ (z ∈ y)] ≣ x =#= y]]
+  def extensionality: ∀[[x] => ∀[[y] => ∀[[z] => (z ∈ x) <=> (z ∈ y)] <=> x =#= y]]
 
   /**
     * Schema of separation.
@@ -30,7 +30,7 @@ trait ZFAxiom {
     *
     * @tparam F binary predicate
     */
-  def separation[F[_, _]]: ∀[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ F[u, p])]]]]
+  def separation[F[_, _]]: ∀[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
 
   /**
     * Axiom of pairing
@@ -78,8 +78,8 @@ trait ZFAxiom {
 
 object ZFAxiom {
   def existence(implicit axiom: ZFAxiom): ∃[[x] => x =#= x] = axiom.existence
-  def extensionality(implicit axiom: ZFAxiom): ∀[[x] => ∀[[y] => ∀[[z] => (z ∈ x) ≣ (z ∈ y)] ≣ x =#= y]] = axiom.extensionality
-  def separation[F[_, _]](implicit axiom: ZFAxiom): ∀[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) ≣ ((u ∈ x) ∧ F[u, p])]]]] = axiom.separation
+  def extensionality(implicit axiom: ZFAxiom): ∀[[x] => ∀[[y] => ∀[[z] => (z ∈ x) <=> (z ∈ y)] <=> x =#= y]] = axiom.extensionality
+  def separation[F[_, _]](implicit axiom: ZFAxiom): ∀[[x] => ∀[[p] => ∃[[y] => ∀[[u] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]] = axiom.separation
   def pairing(implicit axiom: ZFAxiom): ∀[[a] => ∀[[b] => ∃[[x] => (a ∈ x) ∧ (b ∈ x)]]] = axiom.pairing
   def union(implicit axiom: ZFAxiom): ∀[[F] => ∃[[u] => ∀[[y] => ∀[[x] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]] = axiom.union
   def power(implicit axiom: ZFAxiom): ∀[[x] => ∃[[p] => ∀[[z] => (z ⊂ x) => (z ∈ p)]]] = axiom.power

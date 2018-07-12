@@ -11,7 +11,7 @@ object LogicDefinitions {
     def ∧[B](b: B): A ∧ B = (instance, b)
   }
 
-  implicit class ≣[A, B](ev: (A => B) ∧ (B => A)) {
+  implicit class <=>[A, B](ev: (A => B) ∧ (B => A)) {
     def implies: A => B = ev._1
     def impliedBy: B => A = ev._2
   }

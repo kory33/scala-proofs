@@ -75,7 +75,7 @@ object IntuitionisticLogicSystem {
       }
   }
 
-  final def deMorgan1[A, B]: ￢[A ∨ B] ≣ (￢[A] ∧ ￢[B]) = {
+  final def deMorgan1[A, B]: ￢[A ∨ B] <=> (￢[A] ∧ ￢[B]) = {
     val implies: ￢[A ∨ B] => (￢[A] ∧ ￢[B]) = { contradictory: (A ∨ B => Nothing) =>
       val notA = { a: A => contradictory(a) }
       val notB = { b: B => contradictory(b) }
@@ -104,7 +104,7 @@ object IntuitionisticLogicSystem {
 
   final def transitive[A, B, C]: (A => B) => (B => C) => A => C = { f => g => g compose f }
 
-  final def distributive[A, B, C]: (A ∧ (B ∨ C)) ≣ ((A ∧ B) ∨ (A ∧ C)) = {
+  final def distributive[A, B, C]: (A ∧ (B ∨ C)) <=> ((A ∧ B) ∨ (A ∧ C)) = {
     val implies: (A ∧ (B ∨ C)) => ((A ∧ B) ∨ (A ∧ C)) = { case(a, bOrC) =>
       bOrC match {
         case Left(b) => a ∧ b
