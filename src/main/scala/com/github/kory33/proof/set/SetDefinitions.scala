@@ -52,8 +52,13 @@ object SetDefinitions {
   type isASelectorOn[S, F] = F hasAll ([x] => ∃![[z] => (z ∈ S) ∧ z ∈ x])
 
   /**
+   * z = {x, y}
+   */
+  type isPairOfJust[z, x, y] = ∀[[w] => (w ∈ z) <=> ((w =#= x) ∨ (w =#= y))]
+
+  /**
    * y = {x}
    */
-  type containsJust[y, x] = ∀[[z] => z ∈ y <=> z =#= x]
+  type containsJust[y, x] = ∀[[z] => (z ∈ y) <=> (z =#= x)]
 
 }
