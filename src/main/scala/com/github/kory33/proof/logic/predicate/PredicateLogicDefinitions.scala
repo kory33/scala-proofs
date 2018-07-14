@@ -4,11 +4,11 @@ import com.github.kory33.proof.logic.propositional.LogicDefinitions.￢
 
 object PredicateLogicDefinitions {
 
-  trait ∃[F[_]] {
-    type S
+  trait ∃[+D, F[_ <: D]] {
+    type S <: D
     def value: F[S]
   }
 
-  type ∀[F[_]] = ￢[∃[[x] => ￢[F[x]]]]
+  type ∀[-D, F[_ <: D]] = ￢[∃[D, [x <: D] => ￢[F[x]]]]
 
 }
