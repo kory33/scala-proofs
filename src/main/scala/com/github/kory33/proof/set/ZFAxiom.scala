@@ -72,7 +72,7 @@ trait ZFAxiom {
    * Axiom of foundation / regularity.
    * Every nonempty set has an ∈-minimal element.
    */
-  def foundation: ∀[[x] => isNonEmpty[x] => x hasSome ([y] => ￢[y hasSome ([z] => z ∈ x)])]
+  def foundation: ∀[[x] => isNonEmpty[x] => x hasSome ([y] => x isDisjointTo y)]
 
 }
 
@@ -85,5 +85,5 @@ object ZFAxiom {
   def power(implicit axiom: ZFAxiom): ∀[[x] => ∃[[p] => ∀[[z] => (z ⊂ x) => (z ∈ p)]]] = axiom.power
   def infinity(implicit axiom: ZFAxiom): ∃[[x] => ∀[[z] => isEmpty[z] => (z ∈ x)] ∧ (x hasAll ([y] => ∀[[z] => (z isSucc y) => (z ∈ x)]))] = axiom.infinity
   def replacement[φ[_, _, _, _]](implicit axiom: ZFAxiom): ∀[[A] => ∀[[p] => A hasAll ([x] => ∃![[y] => φ[x, y, A, p]]) => ∃[[Y] => A hasAll ([x] => Y hasSome ([y] => φ[x, y, A, p]))]]] = axiom.replacement
-  def foundation(implicit axiom: ZFAxiom): ∀[[x] => isNonEmpty[x] => x hasSome ([y] => ￢[y hasSome ([z] => z ∈ x)])] = axiom.foundation
+  def foundation(implicit axiom: ZFAxiom): ∀[[x] => isNonEmpty[x] => x hasSome ([y] => x isDisjointTo y)] = axiom.foundation
 }
