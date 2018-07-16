@@ -17,29 +17,29 @@ object ZFSystem {
 
     type Set = set.S
 
-    val emptyExistence: ∃[[y <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]] =
-      forType[Set].instantiate[[p <: AxiomaticSet] => ∃[[y <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]]](
-        forType[Set].instantiate[[x <: AxiomaticSet] => ∀[[p <: AxiomaticSet] => ∃[[y <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ y) <=> ((u ∈ x) ∧ Nothing)]]]](separated)
+    val emptyExistence: ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]] =
+      forType[Set].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]]](
+        forType[Set].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ Nothing)]]]](separated)
       )
 
     type EmptySet = emptyExistence.S
-    val ev1: ∀[[u <: AxiomaticSet] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
-    val ev2: ∀[[u <: AxiomaticSet] => (u ∈ EmptySet) => Nothing] = byContradiction { assumption: ∃[[u <: AxiomaticSet] => ￢[u ∈ EmptySet] => Nothing] =>
+    val ev1: ∀[[u <: Σ] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
+    val ev2: ∀[[u <: Σ] => (u ∈ EmptySet) => Nothing] = byContradiction { assumption: ∃[[u <: Σ] => ￢[u ∈ EmptySet] => Nothing] =>
       type U = assumption.S
       val ev21 = assumption.value
-      val ev22 = forType[U].instantiate[[u <: AxiomaticSet] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)](ev1)
+      val ev22 = forType[U].instantiate[[u <: Σ] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)](ev1)
       val ev23 = ev22.implies.andThen { conclusion: (U ∈ Set) ∧ Nothing => conclusion._2 }
       ev21(ev23)
     }
-    val ev3: ∀[[u <: AxiomaticSet] => u ∉ EmptySet] = ev2
+    val ev3: ∀[[u <: Σ] => u ∉ EmptySet] = ev2
   
-    forType[EmptySet].generalize[[x <: AxiomaticSet] => ∀[[y <: AxiomaticSet] => y ∉ x]](ev3)
+    forType[EmptySet].generalize[[x <: Σ] => ∀[[y <: Σ] => y ∉ x]](ev3)
   }
 
   /**
    * There is no set of all sets.
    */
-  def noSetOfAllSets(implicit axiom: ZFAxiom): ￢[∃[[x <: AxiomaticSet] => ∀[[y <: AxiomaticSet] => y ∈ x]]] = {
+  def noSetOfAllSets(implicit axiom: ZFAxiom): ￢[∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]]] = {
     def lemma1[A, B]: ￢[(A <=> (B ∧ ￢[A])) ∧ B] = byContradiction { assumption: (A <=> (B ∧ ￢[A])) ∧ B =>
       val (aEqBAndNotA, b) = assumption
       def ev1: ￢[A] => A = { notA: ￢[A] => aEqBAndNotA.impliedBy(b ∧ notA) }
@@ -52,20 +52,20 @@ object ZFSystem {
       notAEqNotA(ev2 ∧ ev1)
     }
   
-    byContradiction { assumption: ∃[[x <: AxiomaticSet] => ∀[[y <: AxiomaticSet] => y ∈ x]] =>
+    byContradiction { assumption: ∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]] =>
       type S = assumption.S
       val setOfAllSets = assumption.value
 
-      val paradoxicalExistence: ∃[[z <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ z) <=> ((u ∈ S) ∧ (u ∉ u))]] = 
-        forType[S].instantiate[[p <: AxiomaticSet] => ∃[[y <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ y) <=> ((u ∈ S) ∧ (u ∉ u))]]](
-          forType[S].instantiate[[x <: AxiomaticSet] => ∀[[p <: AxiomaticSet] => ∃[[y <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ y) <=> ((u ∈ x) ∧ (u ∉ u))]]]](
-            separation[[X <: AxiomaticSet, _] => X ∉ X]
+      val paradoxicalExistence: ∃[[z <: Σ] => ∀[[u <: Σ] => (u ∈ z) <=> ((u ∈ S) ∧ (u ∉ u))]] = 
+        forType[S].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ S) ∧ (u ∉ u))]]](
+          forType[S].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ (u ∉ u))]]]](
+            separation[[X <: Σ, _] => X ∉ X]
           )
         )
       type Z = paradoxicalExistence.S
-      val paradoxicalSet: ∀[[u <: AxiomaticSet] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))] = paradoxicalExistence.value
-      val ev1: (Z ∈ Z) <=> ((Z ∈ S) ∧ (Z ∉ Z)) = forType[Z].instantiate[[u <: AxiomaticSet] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))](paradoxicalSet)
-      val ev2: Z ∈ S = forType[Z].instantiate[[y <: AxiomaticSet] => y ∈ S](setOfAllSets)
+      val paradoxicalSet: ∀[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))] = paradoxicalExistence.value
+      val ev1: (Z ∈ Z) <=> ((Z ∈ S) ∧ (Z ∉ Z)) = forType[Z].instantiate[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))](paradoxicalSet)
+      val ev2: Z ∈ S = forType[Z].instantiate[[y <: Σ] => y ∈ S](setOfAllSets)
       lemma1(ev1 ∧ ev2)
     }
   }

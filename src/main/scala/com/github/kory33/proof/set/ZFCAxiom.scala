@@ -12,10 +12,10 @@ trait ZFCAxiom extends ZFAxiom {
   /**
    * For every family F of disjoint nonempty sets there exists a selector S that intersects every x ∈ F in precisely one point.
    */
-  def choice: ∀[[F <: AxiomaticSet] => ((F hasAll ([x <: AxiomaticSet] => ￢[isEmpty[x]])) ∧ isPairwiseDisjoint[F]) => ∃[[S <: AxiomaticSet] => S isASelectorOn F]]
+  def choice: ∀[[F <: Σ] => ((F hasAll ([x <: Σ] => ￢[isEmpty[x]])) ∧ isPairwiseDisjoint[F]) => ∃[[S <: Σ] => S isASelectorOn F]]
 
 }
 
 object ZFCAxiom {
-  def choice(implicit axiom: ZFCAxiom): ∀[[F <: AxiomaticSet] => ((F hasAll ([x <: AxiomaticSet] => ￢[isEmpty[x]])) ∧ isPairwiseDisjoint[F]) => ∃[[S <: AxiomaticSet] => S isASelectorOn F]] = axiom.choice
+  def choice(implicit axiom: ZFCAxiom): ∀[[F <: Σ] => ((F hasAll ([x <: Σ] => ￢[isEmpty[x]])) ∧ isPairwiseDisjoint[F]) => ∃[[S <: Σ] => S isASelectorOn F]] = axiom.choice
 }

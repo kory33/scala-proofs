@@ -13,14 +13,14 @@ trait ZFAxiom {
     *
     * There exists a set.
     */
-  def existence: ∃[[x <: AxiomaticSet] => x =#= x]
+  def existence: ∃[[x <: Σ] => x =#= x]
 
   /**
     * Axiom of extensionality.
     *
     * For all set x and y, x contains and is contained in y when they have exactly same elements.
     */
-  def extensionality: ∀[[x <: AxiomaticSet] => ∀[[y <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => (z ∈ x) <=> (z ∈ y)] <=> (x =#= y)]]
+  def extensionality: ∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] <=> (x =#= y)]]
 
   /**
     * Schema of separation.
@@ -30,35 +30,35 @@ trait ZFAxiom {
     *
     * @tparam F binary predicate
     */
-  def separation[F[_ <: AxiomaticSet, _ <: AxiomaticSet]]: ∀[[x <: AxiomaticSet] => ∀[[p <: AxiomaticSet] => ∃[[y <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
+  def separation[F[_ <: Σ, _ <: Σ]]: ∀[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
 
   /**
     * Axiom of pairing
     *
     * For any a and b there exists x that contains a and b.
     */
-  def pairing: ∀[[a <: AxiomaticSet] => ∀[[b <: AxiomaticSet] => ∃[[x <: AxiomaticSet] => (a ∈ x) ∧ (b ∈ x)]]]
+  def pairing: ∀[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => (a ∈ x) ∧ (b ∈ x)]]]
 
   /**
     * Axiom of union.
     *
     * For every family F there exists a set U containing all elements of F.
     */
-  def union: ∀[[F <: AxiomaticSet] => ∃[[u <: AxiomaticSet] => ∀[[y <: AxiomaticSet] => ∀[[x <: AxiomaticSet] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]]
+  def union: ∀[[F <: Σ] => ∃[[u <: Σ] => ∀[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]]
 
   /**
     * Axiom of power set.
     *
     * For every set x there exists a set P containing all subsets of x.
     */
-  def power: ∀[[x <: AxiomaticSet] => ∃[[p <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => (z ⊂ x) => (z ∈ p)]]]
+  def power: ∀[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]]
 
   /**
    * Axiom of Infinity.
    *
    * There exists an infinite set of some special form.
    */
-  def infinity: ∃[[x <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => isEmpty[z] => (z ∈ x)] ∧ (x hasAll ([y <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => (z isSucc y) => (z ∈ x)]))]
+  def infinity: ∃[[x <: Σ] => ∀[[z <: Σ] => isEmpty[z] => (z ∈ x)] ∧ (x hasAll ([y <: Σ] => ∀[[z <: Σ] => (z isSucc y) => (z ∈ x)]))]
 
   /**
    * Axiom schema of replacement.
@@ -66,33 +66,33 @@ trait ZFAxiom {
    * For every formula φ, A and p, if φ(s, t, A, p) defines a function F on A by F(x) = y ⇔ φ(x, y, A, p)
    * then there exists a set Y containing the range F[A] = {F(x): x ∈ A} of the function F.
    */
-  def replacement[φ[_ <: AxiomaticSet, _ <: AxiomaticSet, _ <: AxiomaticSet, _ <: AxiomaticSet]]: ∀[[A <: AxiomaticSet] => ∀[[p <: AxiomaticSet] => A hasAll ([x <: AxiomaticSet] => ∃![[y <: AxiomaticSet] => φ[x, y, A, p]]) => ∃[[Y <: AxiomaticSet] => A hasAll ([x <: AxiomaticSet] => Y hasSome ([y <: AxiomaticSet] => φ[x, y, A, p]))]]]
+  def replacement[φ[_ <: Σ, _ <: Σ, _ <: Σ, _ <: Σ]]: ∀[[A <: Σ] => ∀[[p <: Σ] => A hasAll ([x <: Σ] => ∃![[y <: Σ] => φ[x, y, A, p]]) => ∃[[Y <: Σ] => A hasAll ([x <: Σ] => Y hasSome ([y <: Σ] => φ[x, y, A, p]))]]]
 
   /**
    * Axiom of foundation / regularity.
    * Every nonempty set has an ∈-minimal element.
    */
-  def foundation: ∀[[x <: AxiomaticSet] => isNonEmpty[x] => x hasSome ([y <: AxiomaticSet] => x isDisjointTo y)]
+  def foundation: ∀[[x <: Σ] => isNonEmpty[x] => x hasSome ([y <: Σ] => x isDisjointTo y)]
 
 }
 
 object ZFAxiom {
-  def existence(implicit axiom: ZFAxiom): ∃[[x <: AxiomaticSet] => x =#= x]
+  def existence(implicit axiom: ZFAxiom): ∃[[x <: Σ] => x =#= x]
     = axiom.existence
-  def extensionality(implicit axiom: ZFAxiom): ∀[[x <: AxiomaticSet] => ∀[[y <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => (z ∈ x) <=> (z ∈ y)] <=> (x =#= y)]]
+  def extensionality(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] <=> (x =#= y)]]
     = axiom.extensionality
-  def separation[F[_ <: AxiomaticSet, _ <: AxiomaticSet]](implicit axiom: ZFAxiom): ∀[[x <: AxiomaticSet] => ∀[[p <: AxiomaticSet] => ∃[[y <: AxiomaticSet] => ∀[[u <: AxiomaticSet] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
+  def separation[F[_ <: Σ, _ <: Σ]](implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
     = axiom.separation
-  def pairing(implicit axiom: ZFAxiom): ∀[[a <: AxiomaticSet] => ∀[[b <: AxiomaticSet] => ∃[[x <: AxiomaticSet] => (a ∈ x) ∧ (b ∈ x)]]]
+  def pairing(implicit axiom: ZFAxiom): ∀[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => (a ∈ x) ∧ (b ∈ x)]]]
     = axiom.pairing
-  def union(implicit axiom: ZFAxiom): ∀[[F <: AxiomaticSet] => ∃[[u <: AxiomaticSet] => ∀[[y <: AxiomaticSet] => ∀[[x <: AxiomaticSet] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]]
+  def union(implicit axiom: ZFAxiom): ∀[[F <: Σ] => ∃[[u <: Σ] => ∀[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]]
     = axiom.union
-  def power(implicit axiom: ZFAxiom): ∀[[x <: AxiomaticSet] => ∃[[p <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => (z ⊂ x) => (z ∈ p)]]]
+  def power(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]]
     = axiom.power
-  def infinity(implicit axiom: ZFAxiom): ∃[[x <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => isEmpty[z] => (z ∈ x)] ∧ (x hasAll ([y <: AxiomaticSet] => ∀[[z <: AxiomaticSet] => (z isSucc y) => (z ∈ x)]))]
+  def infinity(implicit axiom: ZFAxiom): ∃[[x <: Σ] => ∀[[z <: Σ] => isEmpty[z] => (z ∈ x)] ∧ (x hasAll ([y <: Σ] => ∀[[z <: Σ] => (z isSucc y) => (z ∈ x)]))]
     = axiom.infinity
-  def replacement[φ[_ <: AxiomaticSet, _ <: AxiomaticSet, _ <: AxiomaticSet, _ <: AxiomaticSet]](implicit axiom: ZFAxiom): ∀[[A <: AxiomaticSet] => ∀[[p <: AxiomaticSet] => A hasAll ([x <: AxiomaticSet] => ∃![[y <: AxiomaticSet] => φ[x, y, A, p]]) => ∃[[Y <: AxiomaticSet] => A hasAll ([x <: AxiomaticSet] => Y hasSome ([y <: AxiomaticSet] => φ[x, y, A, p]))]]]
+  def replacement[φ[_ <: Σ, _ <: Σ, _ <: Σ, _ <: Σ]](implicit axiom: ZFAxiom): ∀[[A <: Σ] => ∀[[p <: Σ] => A hasAll ([x <: Σ] => ∃![[y <: Σ] => φ[x, y, A, p]]) => ∃[[Y <: Σ] => A hasAll ([x <: Σ] => Y hasSome ([y <: Σ] => φ[x, y, A, p]))]]]
     = axiom.replacement
-  def foundation(implicit axiom: ZFAxiom): ∀[[x <: AxiomaticSet] => isNonEmpty[x] => x hasSome ([y <: AxiomaticSet] => x isDisjointTo y)]
+  def foundation(implicit axiom: ZFAxiom): ∀[[x <: Σ] => isNonEmpty[x] => x hasSome ([y <: Σ] => x isDisjointTo y)]
     = axiom.foundation
 }
