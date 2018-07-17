@@ -69,4 +69,43 @@ object ZFSystem {
       lemma1(ev1 ∧ ev2)
     }
   }
+
+  /**
+   * There exists a set containing all subsets of x and nothing else.
+   */
+  def existsPower(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
+    byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
+      // X is a 'base' set
+      type X = assumption.S
+      val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
+      val ev2: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ⊂ X) => (z ∈ y)]] = forType[X].instantiate[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]](power)
+
+      // Y is a set containing power set of X
+      type Y = ev2.S
+      val ev3: ∀[[z <: Σ] => (z ⊂ X) => (z ∈ Y)] = ev2.value
+      val ev4: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ (u ⊂ X))]] =
+        forType[X].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Y) ∧ (u ⊂ p))]]](
+          forType[Y].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ (u ⊂ p))]]]](
+            separation[[u <: Σ, p <: Σ] => u ⊂ p]
+          )
+        )
+
+      // W is a power set of X
+      type W = ev4.S
+      val ev5: ∀[[z <: Σ] => (z ∈ W) <=> ((z ∈ Y) ∧ (z ⊂ X))] = ev4.value
+      val ev6: ∀[[z <: Σ] => (z ∈ W) <=> (z ⊂ X)] = byContradiction { assumption6: ∃[[z <: Σ] => ￢[(z ∈ W) <=> (z ⊂ X)]] =>
+        type Z = assumption6.S
+        val ev61: ￢[(Z ∈ W) <=> (Z ⊂ X)] = assumption6.value
+        val ev62: (Z ∈ W) <=> ((Z ∈ Y) ∧ (Z ⊂ X)) = forType[Z].instantiate[[z <: Σ] => (z ∈ W) <=> ((z ∈ Y) ∧ (z ⊂ X))](ev5)
+        val ev63: (Z ⊂ X) => (Z ∈ Y) = forType[Z].instantiate[[z <: Σ] => (z ⊂ X) => (z ∈ Y)](ev3)
+        val ev64: (Z ∈ W) => (Z ⊂ X) = ev62.implies.andThen(_._2)
+        val ev65: (Z ⊂ X) => (Z ∈ W) = { zInX => ev62.impliedBy(ev63(zInX) ∧ zInX) }
+        val ev66: (Z ∈ W) <=> (Z ⊂ X) = ev64 ∧ ev65
+        ev66 ∧ ev61
+      }
+      val ev7: W isPowerOf X = ev6
+      val ev8: ∃[[y <: Σ] => y isPowerOf X] = forType[W].generalize(ev7)
+      ev8 ∧ ev1
+    }
+  }
 }

@@ -63,4 +63,9 @@ object SetDefinitions {
    */
   type containsJust[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z =#= x)]
 
+  /**
+   * y is a power set of x.
+   */
+  type isPowerOf[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z ⊂ x)]
+
 }
