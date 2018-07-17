@@ -9,18 +9,24 @@ import com.github.kory33.proof.set.ZFAxiom._
 
 object ZFSystem {
   /**
+   * shorthand for axiom schema of separation.
+   */
+  def separate[X <: Σ, F[_ <: Σ, _ <: Σ], A <: Σ](implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, A])]] =
+    forType[A].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, p])]]](
+      forType[X].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]](
+        separation[F]
+      )
+    )
+
+  /**
     * There exists an empty set.
     */
   def existsEmpty(implicit axiom: ZFAxiom): ∃[isEmpty] = {
-    val separated = separation[[_, _] => Nothing]
     val set = existence
 
     type Set = set.S
 
-    val emptyExistence: ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]] =
-      forType[Set].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]]](
-        forType[Set].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ Nothing)]]]](separated)
-      )
+    val emptyExistence: ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]] = separate[Set, [_, _] => Nothing, Set]
 
     type EmptySet = emptyExistence.S
     val ev1: ∀[[u <: Σ] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
@@ -56,12 +62,7 @@ object ZFSystem {
       type S = assumption.S
       val setOfAllSets = assumption.value
 
-      val paradoxicalExistence: ∃[[z <: Σ] => ∀[[u <: Σ] => (u ∈ z) <=> ((u ∈ S) ∧ (u ∉ u))]] = 
-        forType[S].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ S) ∧ (u ∉ u))]]](
-          forType[S].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ (u ∉ u))]]]](
-            separation[[X <: Σ, _] => X ∉ X]
-          )
-        )
+      val paradoxicalExistence: ∃[[z <: Σ] => ∀[[u <: Σ] => (u ∈ z) <=> ((u ∈ S) ∧ (u ∉ u))]] = separate[S, [X <: Σ, _] => X ∉ X, S]
       type Z = paradoxicalExistence.S
       val paradoxicalSet: ∀[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))] = paradoxicalExistence.value
       val ev1: (Z ∈ Z) <=> ((Z ∈ S) ∧ (Z ∉ Z)) = forType[Z].instantiate[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))](paradoxicalSet)
@@ -83,12 +84,7 @@ object ZFSystem {
       // Y is a set containing power set of X
       type Y = ev2.S
       val ev3: ∀[[z <: Σ] => (z ⊂ X) => (z ∈ Y)] = ev2.value
-      val ev4: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ (u ⊂ X))]] =
-        forType[X].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Y) ∧ (u ⊂ p))]]](
-          forType[Y].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ (u ⊂ p))]]]](
-            separation[[u <: Σ, p <: Σ] => u ⊂ p]
-          )
-        )
+      val ev4: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ (u ⊂ X))]] = separate[Y, [u <: Σ, p <: Σ] => u ⊂ p, X]
 
       // W is a power set of X
       type W = ev4.S
