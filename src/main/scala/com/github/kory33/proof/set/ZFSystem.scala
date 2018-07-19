@@ -19,6 +19,28 @@ object ZFSystem {
     )
 
   /**
+   * If there exists a set containing all set u such that F[u], then there exists a subset containing all u such that F[u] and nothing else.
+   */
+  def comprehendsExactly[F[_ <: Σ]](existsSuperSet: ∃[[y <: Σ] => ∀[[z <: Σ] => F[z] => (z ∈ y)]])(implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]] = {
+    type Y = existsSuperSet.S
+    val ev1: ∀[[u <: Σ] => F[u] => (u ∈ Y)] = existsSuperSet.value
+    val ev2: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ F[u])]] = separate[Y, [u <: Σ, _ <: Σ] => F[u], Y]
+    type W = ev2.S
+    val ev3: ∀[[u <: Σ] => (u ∈ W) <=> ((u ∈ Y) ∧ F[u])] = ev2.value
+    val ev4: ∀[[u <: Σ] => (u ∈ W) <=> F[u]] = byContradiction { assumption: ∃[[u <: Σ] => ￢[(u ∈ W) <=> F[u]]] =>
+      type U = assumption.S
+      val ev41: ￢[(U ∈ W) <=> F[U]] = assumption.value
+      val ev42: (U ∈ W) <=> ((U ∈ Y) ∧ F[U]) = forType[U].instantiate[[u <: Σ] => (u ∈ W) <=> ((u ∈ Y) ∧ F[u])](ev3)
+      val ev43: (U ∈ W) => F[U] = ev42.implies.andThen(_._2)
+      val ev44: F[U] => (U ∈ Y) = forType[U].instantiate[[u <: Σ] => F[u] => (u ∈ Y)](ev1)
+      val ev45: F[U] => (U ∈ W) = { fu: F[U] => ev42.impliedBy(ev44(fu) ∧ fu) }
+      val ev46: (U ∈ W) <=> F[U] = ev43 ∧ ev45
+      ev46 ∧ ev41
+    }
+    forType[W].generalize[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]](ev4)
+  }
+
+  /**
     * There exists an empty set.
     */
   def existsEmpty(implicit axiom: ZFAxiom): ∃[isEmpty] = {
@@ -76,32 +98,12 @@ object ZFSystem {
    */
   def existsPower(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
-      // X is a 'base' set
       type X = assumption.S
       val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
       val ev2: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ⊂ X) => (z ∈ y)]] = forType[X].instantiate[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]](power)
-
-      // Y is a set containing power set of X
-      type Y = ev2.S
-      val ev3: ∀[[z <: Σ] => (z ⊂ X) => (z ∈ Y)] = ev2.value
-      val ev4: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ (u ⊂ X))]] = separate[Y, [u <: Σ, p <: Σ] => u ⊂ p, X]
-
-      // W is a power set of X
-      type W = ev4.S
-      val ev5: ∀[[z <: Σ] => (z ∈ W) <=> ((z ∈ Y) ∧ (z ⊂ X))] = ev4.value
-      val ev6: ∀[[z <: Σ] => (z ∈ W) <=> (z ⊂ X)] = byContradiction { assumption6: ∃[[z <: Σ] => ￢[(z ∈ W) <=> (z ⊂ X)]] =>
-        type Z = assumption6.S
-        val ev61: ￢[(Z ∈ W) <=> (Z ⊂ X)] = assumption6.value
-        val ev62: (Z ∈ W) <=> ((Z ∈ Y) ∧ (Z ⊂ X)) = forType[Z].instantiate[[z <: Σ] => (z ∈ W) <=> ((z ∈ Y) ∧ (z ⊂ X))](ev5)
-        val ev63: (Z ⊂ X) => (Z ∈ Y) = forType[Z].instantiate[[z <: Σ] => (z ⊂ X) => (z ∈ Y)](ev3)
-        val ev64: (Z ∈ W) => (Z ⊂ X) = ev62.implies.andThen(_._2)
-        val ev65: (Z ⊂ X) => (Z ∈ W) = { zInX => ev62.impliedBy(ev63(zInX) ∧ zInX) }
-        val ev66: (Z ∈ W) <=> (Z ⊂ X) = ev64 ∧ ev65
-        ev66 ∧ ev61
-      }
-      val ev7: W isPowerOf X = ev6
-      val ev8: ∃[[y <: Σ] => y isPowerOf X] = forType[W].generalize(ev7)
-      ev8 ∧ ev1
+      val ev3: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> (z ⊂ X)]] = comprehendsExactly[[z <: Σ] => z ⊂ X](ev2)
+      val ev4: ∃[[y <: Σ] => y isPowerOf X] = ev3
+      ev4 ∧ ev1
     }
   }
 }
