@@ -56,7 +56,7 @@ object SetDefinitions {
   /**
    * z = {x, y}
    */
-  type isPairOfJust[z <: Σ, x <: Σ, y <: Σ] = ∀[[w <: Σ] => (w ∈ z) <=> ((w =#= x) ∨ (w =#= y))]
+  type containsTwo[z <: Σ, x <: Σ, y <: Σ] = ∀[[w <: Σ] => (w ∈ z) <=> ((w =#= x) ∨ (w =#= y))]
 
   /**
    * y = {x}
