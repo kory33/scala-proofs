@@ -2,6 +2,7 @@ package com.github.kory33.proof.set
 
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.logic.predicate.PredicateLogicSystem._
+import com.github.kory33.proof.logic.predicate._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.set.SetDefinitions._
@@ -13,14 +14,14 @@ trait ZFAxiom {
     *
     * There exists a set.
     */
-  def existence: ∃[[x <: Σ] => x =#= x]
+  def existence: ∃[[x <: Σ] => x =::= x]
 
   /**
     * Axiom of extensionality.
     *
     * For all set x and y, x contains and is contained in y when they have exactly same elements.
     */
-  def extensionality: ∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] <=> (x =#= y)]]
+  def extensionality: ∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]]
 
   /**
     * Schema of separation.
@@ -77,9 +78,9 @@ trait ZFAxiom {
 }
 
 object ZFAxiom {
-  def existence(implicit axiom: ZFAxiom): ∃[[x <: Σ] => x =#= x]
+  def existence(implicit axiom: ZFAxiom): ∃[[x <: Σ] => x =::= x]
     = axiom.existence
-  def extensionality(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] <=> (x =#= y)]]
+  def extensionality(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]]
     = axiom.extensionality
   def separation[F[_ <: Σ, _ <: Σ]](implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
     = axiom.separation

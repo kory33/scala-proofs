@@ -1,5 +1,6 @@
 package com.github.kory33.proof.set
 
+import com.github.kory33.proof.logic.predicate._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 
@@ -8,10 +9,9 @@ trait Σ
 object SetDefinitions {
 
   type ∈[x <: Σ, y <: Σ]
-  type =#=[x <: Σ, y <: Σ]
 
   type ∉[x <: Σ, y <: Σ] = ￢[x ∈ y]
-  type =/=[x <: Σ, y <: Σ] = ￢[x =#= y]
+  type =/=[x <: Σ, y <: Σ] = ￢[x =::= y]
   type ⊂[x <: Σ, y <: Σ] = ∀[[z <: Σ] => (z ∈ x) => (z ∈ y)]
   type ⊃[x <: Σ, y <: Σ] = y ⊂ x
 
@@ -28,7 +28,7 @@ object SetDefinitions {
   /**
    * y = Succ(x) where Succ(x) = x ∪ {x}
    */
-  type isSucc[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> ((z ∈ x) ∨ (z =#= x))]
+  type isSucc[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> ((z ∈ x) ∨ (z =::= x))]
 
   type hasAll[A <: Σ, F[_ <: Σ]] = ∀[[x <: Σ] => (x ∈ A) => F[x]]
   type hasSome[A <: Σ, F[_ <: Σ]] = ∃[[x <: Σ] => (x ∈ A) ∧ F[x]]
@@ -36,7 +36,7 @@ object SetDefinitions {
   /**
    * Unique existence
    */
-  type ∃![F[_ <: Σ]] = ∃[F] ∧ ∀[[x <: Σ] => ∀[[y <: Σ] => (F[x] ∧ F[y]) => x =#= y]]
+  type ∃![F[_ <: Σ]] = ∃[F] ∧ ∀[[x <: Σ] => ∀[[y <: Σ] => (F[x] ∧ F[y]) => x =::= y]]
 
   /**
    * x and y are disjoint
@@ -46,7 +46,7 @@ object SetDefinitions {
   /**
    * F is a pairwise disjoint family
    */
-  type isPairwiseDisjoint[F <: Σ] = F hasAll ([x <: Σ] => F hasAll ([y <: Σ] => (x =#= y) ∨ (x isDisjointTo y)))
+  type isPairwiseDisjoint[F <: Σ] = F hasAll ([x <: Σ] => F hasAll ([y <: Σ] => (x =::= y) ∨ (x isDisjointTo y)))
 
   /**
    * S is a selector of F that intersects every x ∈ F in precisely one point
@@ -56,12 +56,12 @@ object SetDefinitions {
   /**
    * z = {x, y}
    */
-  type containsTwo[z <: Σ, x <: Σ, y <: Σ] = ∀[[w <: Σ] => (w ∈ z) <=> ((w =#= x) ∨ (w =#= y))]
+  type containsTwo[z <: Σ, x <: Σ, y <: Σ] = ∀[[w <: Σ] => (w ∈ z) <=> ((w =::= x) ∨ (w =::= y))]
 
   /**
    * y = {x}
    */
-  type containsJust[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z =#= x)]
+  type containsJust[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z =::= x)]
 
   /**
    * y is a power set of x.
