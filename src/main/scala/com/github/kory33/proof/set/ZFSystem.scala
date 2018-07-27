@@ -3,15 +3,16 @@ package com.github.kory33.proof.set
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
+import com.github.kory33.proof.logic.predicate._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.set.SetDefinitions._
 import com.github.kory33.proof.set.ZFAxiom._
 
-object ZFSystem {
+class ZFSystem(implicit axiom: ZFAxiom) {
   /**
    * shorthand for axiom schema of separation.
    */
-  def separate[X <: Σ, F[_ <: Σ, _ <: Σ], A <: Σ](implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, A])]] =
+  def separate[X <: Σ, F[_ <: Σ, _ <: Σ], A <: Σ]: ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, A])]] =
     forType[A].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, p])]]](
       forType[X].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]](
         separation[F]
@@ -21,7 +22,7 @@ object ZFSystem {
   /**
    * If there exists a set containing all set u such that F[u], then there exists a subset containing all u such that F[u] and nothing else.
    */
-  def comprehendsExactly[F[_ <: Σ]](existsSuperSet: ∃[[y <: Σ] => ∀[[z <: Σ] => F[z] => (z ∈ y)]])(implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]] = {
+  def comprehendsExactly[F[_ <: Σ]](existsSuperSet: ∃[[y <: Σ] => ∀[[z <: Σ] => F[z] => (z ∈ y)]]): ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]] = {
     type Y = existsSuperSet.S
     val ev1: ∀[[u <: Σ] => F[u] => (u ∈ Y)] = existsSuperSet.value
     val ev2: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ F[u])]] = separate[Y, [u <: Σ, _ <: Σ] => F[u], Y]
@@ -43,7 +44,7 @@ object ZFSystem {
   /**
     * There exists an empty set.
     */
-  def existsEmpty(implicit axiom: ZFAxiom): ∃[isEmpty] = {
+  val existsEmpty: ∃[isEmpty] = {
     val set = existence
 
     type Set = set.S
@@ -64,10 +65,39 @@ object ZFSystem {
     forType[EmptySet].generalize[[x <: Σ] => ∀[[y <: Σ] => y ∉ x]](ev3)
   }
 
+  type ∅ = existsEmpty.S
+
+  val emptyUnique: ∀[[x <: Σ] => isEmpty[x] => (x =::= ∅)] = {
+    byContradiction { assumption: ∃[[x <: Σ] => ￢[isEmpty[x] => (x =::= ∅)]] =>
+      type X = assumption.S
+      val ev1: ￢[isEmpty[X] => (X =::= ∅)] = assumption.value
+      val ev2: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] => (X =::= ∅) =
+        forType[∅].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
+          forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
+        )
+      val ev3: isEmpty[X] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] = { xIsEmpty: ∀[[y <: Σ] => y ∉ X] =>
+        byContradiction { assumption3: ∃[[z <: Σ] => ￢[(z ∈ X) <=> (z ∈ ∅)]] =>
+          type Z = assumption3.S
+          val ev31: ￢[(Z ∈ X) <=> (Z ∈ ∅)] = assumption3.value
+          val ev32: (Z ∈ X) => (Z ∈ ∅) = { assumption32: Z ∈ X =>
+            assumption32 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ X](xIsEmpty)
+          }
+          val ev33: (Z ∈ ∅) => (Z ∈ X) = { assumption33: Z ∈ ∅ =>
+            assumption33 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ ∅](existsEmpty.value)
+          }
+          val ev34: (Z ∈ X) <=> (Z ∈ ∅) = ev32 ∧ ev33
+          ev34 ∧ ev31
+        }
+      }
+      val ev4: isEmpty[X] => (X =::= ∅) = ev3.andThen(ev2)
+      ev4 ∧ ev1
+    }
+  }
+
   /**
    * There is no set of all sets.
    */
-  def noSetOfAllSets(implicit axiom: ZFAxiom): ￢[∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]]] = {
+  val noSetOfAllSets: ￢[∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]]] = {
     def lemma1[A, B]: ￢[(A <=> (B ∧ ￢[A])) ∧ B] = byContradiction { assumption: (A <=> (B ∧ ￢[A])) ∧ B =>
       val (aEqBAndNotA, b) = assumption
       def ev1: ￢[A] => A = { notA: ￢[A] => aEqBAndNotA.impliedBy(b ∧ notA) }
@@ -96,7 +126,7 @@ object ZFSystem {
   /**
    * There exists a set containing all subsets of x and nothing else.
    */
-  def existsPower(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
+  val existsPower: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
       type X = assumption.S
       val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
