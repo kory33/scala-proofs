@@ -44,7 +44,7 @@ class ZFSystem(implicit axiom: ZFAxiom) {
   /**
     * There exists an empty set.
     */
-  val existsEmpty: ∃[isEmpty] = {
+  val emptySet: ∃[isEmpty] = {
     val set = existence
 
     type Set = set.S
@@ -65,7 +65,7 @@ class ZFSystem(implicit axiom: ZFAxiom) {
     forType[EmptySet].generalize[[x <: Σ] => ∀[[y <: Σ] => y ∉ x]](ev3)
   }
 
-  type ∅ = existsEmpty.S
+  type ∅ = emptySet.S
 
   val emptyUnique: ∀[[x <: Σ] => isEmpty[x] => (x =::= ∅)] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[isEmpty[x] => (x =::= ∅)]] =>
@@ -83,7 +83,7 @@ class ZFSystem(implicit axiom: ZFAxiom) {
             assumption32 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ X](xIsEmpty)
           }
           val ev33: (Z ∈ ∅) => (Z ∈ X) = { assumption33: Z ∈ ∅ =>
-            assumption33 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ ∅](existsEmpty.value)
+            assumption33 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ ∅](emptySet.value)
           }
           val ev34: (Z ∈ X) <=> (Z ∈ ∅) = ev32 ∧ ev33
           ev34 ∧ ev31
