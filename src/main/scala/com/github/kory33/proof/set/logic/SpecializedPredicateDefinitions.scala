@@ -7,4 +7,5 @@ import com.github.kory33.proof.logic.propositional.LogicDefinitions.￢
 object SpecializedPredicateDefinitions {
   type ∃[F[_ <: Σ]] = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.∃[Σ, F]
   type ∀[F[_ <: Σ]] = ￢[∃[[x <: Σ] => ￢[F[x]]]]
+  type ∃~>[F[_[_ <: Σ] <: Σ]] = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.∃~>[Σ, F]
 }

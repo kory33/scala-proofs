@@ -11,4 +11,12 @@ object PredicateLogicDefinitions {
 
   type ∀[-D, F[_ <: D]] = ￢[∃[D, [x <: D] => ￢[F[x]]]]
 
+  /**
+   * There exists a type constructor such that F is fulfilled.
+   */
+  trait ∃~>[D, P[_[_ <: D] <: D]] {
+    type F[_ <: D] <: D
+    def value: P[F]
+  }
+
 }
