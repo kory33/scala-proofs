@@ -2,9 +2,10 @@ package com.github.kory33.proof.set
 
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
+import com.github.kory33.proof.set.logic._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
-import com.github.kory33.proof.logic.predicate._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
+import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 import com.github.kory33.proof.set.SetDefinitions._
 import com.github.kory33.proof.set.ZFAxiom._
 
@@ -40,6 +41,39 @@ class ZFSystem(implicit axiom: ZFAxiom) {
     }
     forType[W].generalize[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]](ev4)
   }
+  /**
+   * shorthand for axiom of extensionality.
+   */
+  def setEquals[X <: Σ, Y <: Σ]: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ Y)] => X =::= Y = {
+    forType[Y].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
+      forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
+    )
+  }
+
+  /**
+   * creates a type-level function given the that the relation is a bijection on types.
+   */
+  def createTypeFunction[R[_ <: Σ, _ <: Σ]]
+    (exists: ∀[[x <: Σ] => ∃[[y <: Σ] => y R x]],
+     unique: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x R z) ∧ (y R z) => x =::= y]]])
+    : ∃~>[[TypeFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => TypeFunction[x] R x]] = {
+      new ∃~>[[TypeFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => TypeFunction[x] R x]] {
+        type F[x <: Σ] = ∃[[y <: Σ] => y R x]#S
+        def value: ∀[[x <: Σ] => F[x] R x] = {
+          byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] R x]] =>
+            type X = assumption.S
+            val ev1: ￢[F[X] R X] = assumption.value
+            val ev2: ∃[[y <: Σ] => y R X] = forType[X].instantiate[[x <: Σ] => ∃[[y <: Σ] => y R x]](exists)
+            val ev3: ev2.S R X = ev2.value
+            // since the subtype of F[X] is unique to ev2.S, they are isomorphic.
+            // it is therefore safe to cast from G[ev2.S] to G[F[X]] for any G[_].
+            // let G[x] = x R X, then this cast is safe.
+            val ev4: F[X] R X = ev3.asInstanceOf[F[X] R X]
+            ev4 ∧ ev1
+          }
+        }
+      }
+    }
 
   /**
     * There exists an empty set.
@@ -126,7 +160,7 @@ class ZFSystem(implicit axiom: ZFAxiom) {
   /**
    * There exists a set containing all subsets of x and nothing else.
    */
-  val existsPower: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
+  val powerSetExists: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
       type X = assumption.S
       val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
@@ -136,4 +170,37 @@ class ZFSystem(implicit axiom: ZFAxiom) {
       ev4 ∧ ev1
     }
   }
+
+  /**
+   * Power set is unique.
+   */
+  val powerSetUnique: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]] = {
+    byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] =>
+      type Z = assumption.S
+      val ev1: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = assumption.value
+      val ev2: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = ev1
+      type X = ev2.S
+      val ev3: ∃[[y <: Σ] => ￢[(X isPowerOf Z) ∧ (y isPowerOf Z) => X =::= y]] = ev2.value
+      type Y = ev3.S
+      val ev4: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev3.value
+      val ev5: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = { case (xIsPowerOfZ, yIsPowerOfZ) =>
+        val ev51: ∀[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)] = xIsPowerOfZ
+        val ev52: ∀[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)] = yIsPowerOfZ
+        val ev53: ∀[[w <: Σ] => (w ∈ X) <=> (w ∈ Y)] = byContradiction { assumption53: ∃[[w <: Σ] => ￢[(w ∈ X) <=> (w ∈ Y)]] =>
+          type W = assumption53.S
+          val ev531: ￢[(W ∈ X) <=> (W ∈ Y)] = assumption53.value
+          val ev532: (W ∈ X) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)](ev51)
+          val ev533: (W ∈ Y) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)](ev52)
+          val ev534: (W ∈ X) <=> (W ∈ Y) = ev532.andThen(ev533.commute)
+          ev534 ∧ ev531
+        }
+        setEquals(ev53)
+      }
+      ev5 ∧ ev4
+    }
+  }
+
+  val powerFn: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createTypeFunction[isPowerOf](powerSetExists, powerSetUnique)
+
+  type Pow = powerFn.F
 }

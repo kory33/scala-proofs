@@ -39,6 +39,11 @@ object IntuitionisticLogicSystem {
     def mapLeft[C] : (A => C) => C ∧ B = { ded => conj.commute.mapRight(ded).commute }
   }
 
+  implicit class RichEquivalence[A, B](eq: A <=> B) {
+    def andThen[C]: (B <=> C) => (A <=> C) = { bEqC => eq.implies.andThen(bEqC.implies) ∧ bEqC.impliedBy.andThen(eq.impliedBy) }
+    def commute: B <=> A = eq.impliedBy ∧ eq.implies
+  }
+
   /**
     * removal of disjunction
     */

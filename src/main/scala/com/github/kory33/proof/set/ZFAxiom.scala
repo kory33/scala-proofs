@@ -6,6 +6,7 @@ import com.github.kory33.proof.logic.predicate._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.set.SetDefinitions._
+import com.github.kory33.proof.set.logic._
 
 trait ZFAxiom {
 
