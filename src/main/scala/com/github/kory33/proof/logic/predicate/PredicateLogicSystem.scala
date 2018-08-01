@@ -10,7 +10,7 @@ object PredicateLogicSystem {
   /**
     * Existential generalization
     */
-  implicit def genExist[D, F[_ <: D], A <: D](instance: F[A]): ∃[D, F] = new ∃ { type S = A; def value = instance }
+  implicit def genExist[D, F[_ <: D], A <: D](instance: F[A]): ∃[D, F] = new ∃ { type S = A; val value = instance }
 
   def instUniv[D, φ[_ <: D], X <: D](forall: ∀[D, φ]): φ[X] = {
     byContradiction { notPX: ￢[φ[X]] =>
