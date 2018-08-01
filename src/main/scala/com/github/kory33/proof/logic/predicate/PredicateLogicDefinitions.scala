@@ -16,7 +16,7 @@ object PredicateLogicDefinitions {
    */
   trait ∃~>[D, P[_[_ <: D] <: D]] {
     type F[_ <: D] <: D
-    def value: P[F]
+    val value: P[F]
   }
 
 }

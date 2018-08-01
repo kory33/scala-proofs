@@ -59,7 +59,7 @@ class ZFSystem(implicit axiom: ZFAxiom) {
     : ∃~>[[TypeFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => TypeFunction[x] R x]] = {
       new ∃~>[[TypeFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => TypeFunction[x] R x]] {
         type F[x <: Σ] = ∃[[y <: Σ] => y R x]#S
-        def value: ∀[[x <: Σ] => F[x] R x] = {
+        val value: ∀[[x <: Σ] => F[x] R x] = {
           byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] R x]] =>
             type X = assumption.S
             val ev1: ￢[F[X] R X] = assumption.value
@@ -202,5 +202,6 @@ class ZFSystem(implicit axiom: ZFAxiom) {
 
   val powerFn: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createTypeFunction[isPowerOf](powerSetExists, powerSetUnique)
 
-  type Pow = powerFn.F
+  type Pow[x <: Σ] = powerFn.F[x]
+  val powerSet: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFn.value
 }
