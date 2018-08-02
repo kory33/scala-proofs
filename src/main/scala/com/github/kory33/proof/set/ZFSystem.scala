@@ -162,6 +162,7 @@ class EmptySet(implicit axiom: ZFAxiom) {
   }
 
   type ∅ = existence.S
+  val constraint: isEmpty[∅] = existence.value
 
   val uniqueness: ∀[[x <: Σ] => isEmpty[x] => (x =::= ∅)] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[isEmpty[x] => (x =::= ∅)]] =>
@@ -344,4 +345,8 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
 
   val powerSet = new PowerSet
   type Pow[x <: Σ] = powerSet.Pow
+  
+  val pairSet = new PairSet
+  type ++:[x <: Σ] = pairSet.++:
+  type Just[x <: Σ] = pairSet.Just
 }
