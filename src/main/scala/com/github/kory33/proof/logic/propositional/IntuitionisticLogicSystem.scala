@@ -47,7 +47,7 @@ object IntuitionisticLogicSystem {
   /**
     * removal of disjunction
     */
-  final def removeDisj[A, B, C](): A ∨ B => (A => C) => (B => C) => C = { disj => deduc1 => deduc2 =>
+  final def removeDisj[A, B, C]: A ∨ B => (A => C) => (B => C) => C = { disj => deduc1 => deduc2 =>
     disj match {
       case Left(a) => deduc1(a)
       case Right(b) => deduc2(b)
