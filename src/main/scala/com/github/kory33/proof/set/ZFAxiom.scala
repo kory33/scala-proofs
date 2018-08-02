@@ -39,7 +39,7 @@ trait ZFAxiom {
     *
     * For any a and b there exists x that contains a and b.
     */
-  def pairing: ∀[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => (a ∈ x) ∧ (b ∈ x)]]]
+  def pairing: ∀[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]]]
 
   /**
     * Axiom of union.
@@ -85,7 +85,7 @@ object ZFAxiom {
     = axiom.extensionality
   def separation[F[_ <: Σ, _ <: Σ]](implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
     = axiom.separation
-  def pairing(implicit axiom: ZFAxiom): ∀[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => (a ∈ x) ∧ (b ∈ x)]]]
+  def pairing(implicit axiom: ZFAxiom): ∀[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]]]
     = axiom.pairing
   def union(implicit axiom: ZFAxiom): ∀[[F <: Σ] => ∃[[u <: Σ] => ∀[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]]
     = axiom.union

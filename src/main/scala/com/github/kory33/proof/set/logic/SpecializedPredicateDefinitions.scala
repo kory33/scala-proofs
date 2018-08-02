@@ -11,4 +11,8 @@ object SpecializedPredicateDefinitions {
     type F[_ <: Σ] <: Σ
     val value: P[F]
   }
+  trait ∃~~>[P[_[_ <: Σ, _ <: Σ] <: Σ]] {
+    type F[_ <: Σ, _ <: Σ] <: Σ
+    val value: P[F]
+  }  
 }
