@@ -9,11 +9,11 @@ import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 import com.github.kory33.proof.set.SetDefinitions._
 import com.github.kory33.proof.set.ZFAxiom._
 
-class ZFSystem(implicit axiom: ZFAxiom) {
+object Shortcuts {
   /**
    * shorthand for axiom schema of separation.
    */
-  def separate[X <: Σ, F[_ <: Σ, _ <: Σ], A <: Σ]: ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, A])]] =
+  def separate[X <: Σ, F[_ <: Σ, _ <: Σ], A <: Σ](implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, A])]] =
     forType[A].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, p])]]](
       forType[X].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]](
         separation[F]
@@ -23,7 +23,7 @@ class ZFSystem(implicit axiom: ZFAxiom) {
   /**
    * If there exists a set containing all set u such that F[u], then there exists a subset containing all u such that F[u] and nothing else.
    */
-  def comprehendsExactly[F[_ <: Σ]](existsSuperSet: ∃[[y <: Σ] => ∀[[z <: Σ] => F[z] => (z ∈ y)]]): ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]] = {
+  def comprehendsExactly[F[_ <: Σ]](existsSuperSet: ∃[[y <: Σ] => ∀[[z <: Σ] => F[z] => (z ∈ y)]])(implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]] = {
     type Y = existsSuperSet.S
     val ev1: ∀[[u <: Σ] => F[u] => (u ∈ Y)] = existsSuperSet.value
     val ev2: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ F[u])]] = separate[Y, [u <: Σ, _ <: Σ] => F[u], Y]
@@ -44,10 +44,10 @@ class ZFSystem(implicit axiom: ZFAxiom) {
   /**
    * shorthand for axiom of extensionality.
    */
-  def setEquals[X <: Σ, Y <: Σ]: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ Y)] => X =::= Y = {
+  def setEquals[X <: Σ, Y <: Σ](containsSameElement: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ Y)])(implicit axiom: ZFAxiom): X =::= Y = {
     forType[Y].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
       forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
-    )
+    )(containsSameElement)
   }
 
   /**
@@ -74,6 +74,62 @@ class ZFSystem(implicit axiom: ZFAxiom) {
         }
       }
     }
+}
+
+class PowerSet(implicit axiom: ZFAxiom) {
+  import Shortcuts._
+
+  /**
+   * There exists a set containing all subsets of x and nothing else.
+   */
+  val powerSetExists: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
+    byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
+      type X = assumption.S
+      val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
+      val ev2: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ⊂ X) => (z ∈ y)]] = forType[X].instantiate[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]](power)
+      val ev3: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> (z ⊂ X)]] = comprehendsExactly[[z <: Σ] => z ⊂ X](ev2)
+      val ev4: ∃[[y <: Σ] => y isPowerOf X] = ev3
+      ev4 ∧ ev1
+    }
+  }
+
+  /**
+   * Power set is unique.
+   */
+  val powerSetUnique: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]] = {
+    byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] =>
+      type Z = assumption.S
+      val ev1: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = assumption.value
+      val ev2: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = ev1
+      type X = ev2.S
+      val ev3: ∃[[y <: Σ] => ￢[(X isPowerOf Z) ∧ (y isPowerOf Z) => X =::= y]] = ev2.value
+      type Y = ev3.S
+      val ev4: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev3.value
+      val ev5: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = { case (xIsPowerOfZ, yIsPowerOfZ) =>
+        val ev51: ∀[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)] = xIsPowerOfZ
+        val ev52: ∀[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)] = yIsPowerOfZ
+        val ev53: ∀[[w <: Σ] => (w ∈ X) <=> (w ∈ Y)] = byContradiction { assumption53: ∃[[w <: Σ] => ￢[(w ∈ X) <=> (w ∈ Y)]] =>
+          type W = assumption53.S
+          val ev531: ￢[(W ∈ X) <=> (W ∈ Y)] = assumption53.value
+          val ev532: (W ∈ X) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)](ev51)
+          val ev533: (W ∈ Y) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)](ev52)
+          val ev534: (W ∈ X) <=> (W ∈ Y) = ev532.andThen(ev533.commute)
+          ev534 ∧ ev531
+        }
+        setEquals(ev53)
+      }
+      ev5 ∧ ev4
+    }
+  }
+
+  val powerFunctionExists: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createTypeFunction[isPowerOf](powerSetExists, powerSetUnique)
+
+  type Pow[x <: Σ] = powerFunctionExists.F[x]
+  val powerSetConstraints: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExists.value
+}
+
+class EmptySet(implicit axiom: ZFAxiom) {
+  import Shortcuts._
 
   /**
     * There exists an empty set.
@@ -127,6 +183,10 @@ class ZFSystem(implicit axiom: ZFAxiom) {
       ev4 ∧ ev1
     }
   }
+}
+
+class BasicConstructs(implicit axiom: ZFAxiom) {
+  import Shortcuts._
 
   /**
    * There is no set of all sets.
@@ -157,51 +217,9 @@ class ZFSystem(implicit axiom: ZFAxiom) {
     }
   }
 
-  /**
-   * There exists a set containing all subsets of x and nothing else.
-   */
-  val powerSetExists: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
-    byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
-      type X = assumption.S
-      val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
-      val ev2: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ⊂ X) => (z ∈ y)]] = forType[X].instantiate[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]](power)
-      val ev3: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> (z ⊂ X)]] = comprehendsExactly[[z <: Σ] => z ⊂ X](ev2)
-      val ev4: ∃[[y <: Σ] => y isPowerOf X] = ev3
-      ev4 ∧ ev1
-    }
-  }
+  val emptySet = new EmptySet
+  type ∅ = emptySet.∅
 
-  /**
-   * Power set is unique.
-   */
-  val powerSetUnique: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]] = {
-    byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] =>
-      type Z = assumption.S
-      val ev1: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = assumption.value
-      val ev2: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = ev1
-      type X = ev2.S
-      val ev3: ∃[[y <: Σ] => ￢[(X isPowerOf Z) ∧ (y isPowerOf Z) => X =::= y]] = ev2.value
-      type Y = ev3.S
-      val ev4: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev3.value
-      val ev5: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = { case (xIsPowerOfZ, yIsPowerOfZ) =>
-        val ev51: ∀[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)] = xIsPowerOfZ
-        val ev52: ∀[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)] = yIsPowerOfZ
-        val ev53: ∀[[w <: Σ] => (w ∈ X) <=> (w ∈ Y)] = byContradiction { assumption53: ∃[[w <: Σ] => ￢[(w ∈ X) <=> (w ∈ Y)]] =>
-          type W = assumption53.S
-          val ev531: ￢[(W ∈ X) <=> (W ∈ Y)] = assumption53.value
-          val ev532: (W ∈ X) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)](ev51)
-          val ev533: (W ∈ Y) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)](ev52)
-          val ev534: (W ∈ X) <=> (W ∈ Y) = ev532.andThen(ev533.commute)
-          ev534 ∧ ev531
-        }
-        setEquals(ev53)
-      }
-      ev5 ∧ ev4
-    }
-  }
-
-  val powerFn: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createTypeFunction[isPowerOf](powerSetExists, powerSetUnique)
-
-  type Pow[x <: Σ] = powerFn.F[x]
-  val powerSet: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFn.value
+  val powerSet = new PowerSet
+  type Pow[x <: Σ] = powerSet.Pow
 }
