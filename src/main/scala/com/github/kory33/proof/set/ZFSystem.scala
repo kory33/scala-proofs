@@ -268,16 +268,10 @@ class PowerSet(implicit axiom: ZFAxiom) {
       type Y = ev3.S
       val ev4: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev3.value
       val ev5: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = { case (xIsPowerOfZ, yIsPowerOfZ) =>
+        import PredicateLogicLemma._
         val ev51: ∀[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)] = xIsPowerOfZ
         val ev52: ∀[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)] = yIsPowerOfZ
-        val ev53: ∀[[w <: Σ] => (w ∈ X) <=> (w ∈ Y)] = byContradiction { assumption53: ∃[[w <: Σ] => ￢[(w ∈ X) <=> (w ∈ Y)]] =>
-          type W = assumption53.S
-          val ev531: ￢[(W ∈ X) <=> (W ∈ Y)] = assumption53.value
-          val ev532: (W ∈ X) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)](ev51)
-          val ev533: (W ∈ Y) <=> (W ⊂ Z) = forType[W].instantiate[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)](ev52)
-          val ev534: (W ∈ X) <=> (W ∈ Y) = ev532.andThen(ev533.commute)
-          ev534 ∧ ev531
-        }
+        val ev53: ∀[[w <: Σ] => (w ∈ X) <=> (w ∈ Y)] = forallEquivConditions[[w <: Σ] => w ∈ X, [w <: Σ] => w ⊂ Z, [w <: Σ] => w ∈ Y](ev51, ev52)
         setEquals(ev53)
       }
       ev5 ∧ ev4
