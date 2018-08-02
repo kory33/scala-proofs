@@ -13,12 +13,13 @@ object Shortcuts {
   /**
    * shorthand for axiom schema of separation.
    */
-  def separate[X <: Σ, F[_ <: Σ, _ <: Σ], A <: Σ](implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, A])]] =
+  def separate[X <: Σ, F[_ <: Σ, _ <: Σ], A <: Σ](implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, A])]] = {
     forType[A].instantiate[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u, p])]]](
       forType[X].instantiate[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]](
         separation[F]
       )
     )
+  }
 
   /**
    * If there exists a set containing all set u such that F[u], then there exists a subset containing all u such that F[u] and nothing else.
@@ -41,6 +42,7 @@ object Shortcuts {
     }
     forType[W].generalize[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]](ev4)
   }
+
   /**
    * shorthand for axiom of extensionality.
    */
@@ -76,13 +78,71 @@ object Shortcuts {
     }
 }
 
+
+class EmptySet(implicit axiom: ZFAxiom) {
+  import Shortcuts._
+
+  /**
+    * There exists an empty set.
+    */
+  val existence: ∃[isEmpty] = {
+    val set = existence
+
+    type Set = set.S
+
+    val emptyExistence: ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]] = separate[Set, [_, _] => Nothing, Set]
+
+    type EmptySet = emptyExistence.S
+    val ev1: ∀[[u <: Σ] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
+    val ev2: ∀[[u <: Σ] => (u ∈ EmptySet) => Nothing] = byContradiction { assumption: ∃[[u <: Σ] => ￢[u ∈ EmptySet] => Nothing] =>
+      type U = assumption.S
+      val ev21 = assumption.value
+      val ev22 = forType[U].instantiate[[u <: Σ] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)](ev1)
+      val ev23 = ev22.implies.andThen { conclusion: (U ∈ Set) ∧ Nothing => conclusion._2 }
+      ev21(ev23)
+    }
+    val ev3: ∀[[u <: Σ] => u ∉ EmptySet] = ev2
+  
+    forType[EmptySet].generalize[[x <: Σ] => ∀[[y <: Σ] => y ∉ x]](ev3)
+  }
+
+  type ∅ = existence.S
+
+  val uniqueness: ∀[[x <: Σ] => isEmpty[x] => (x =::= ∅)] = {
+    byContradiction { assumption: ∃[[x <: Σ] => ￢[isEmpty[x] => (x =::= ∅)]] =>
+      type X = assumption.S
+      val ev1: ￢[isEmpty[X] => (X =::= ∅)] = assumption.value
+      val ev2: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] => (X =::= ∅) =
+        forType[∅].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
+          forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
+        )
+      val ev3: isEmpty[X] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] = { xIsEmpty: ∀[[y <: Σ] => y ∉ X] =>
+        byContradiction { assumption3: ∃[[z <: Σ] => ￢[(z ∈ X) <=> (z ∈ ∅)]] =>
+          type Z = assumption3.S
+          val ev31: ￢[(Z ∈ X) <=> (Z ∈ ∅)] = assumption3.value
+          val ev32: (Z ∈ X) => (Z ∈ ∅) = { assumption32: Z ∈ X =>
+            assumption32 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ X](xIsEmpty)
+          }
+          val ev33: (Z ∈ ∅) => (Z ∈ X) = { assumption33: Z ∈ ∅ =>
+            assumption33 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ ∅](existence.value)
+          }
+          val ev34: (Z ∈ X) <=> (Z ∈ ∅) = ev32 ∧ ev33
+          ev34 ∧ ev31
+        }
+      }
+      val ev4: isEmpty[X] => (X =::= ∅) = ev3.andThen(ev2)
+      ev4 ∧ ev1
+    }
+  }
+}
+
 class PowerSet(implicit axiom: ZFAxiom) {
   import Shortcuts._
 
   /**
    * There exists a set containing all subsets of x and nothing else.
    */
-  val powerSetExists: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
+  val existence: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
       type X = assumption.S
       val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
@@ -96,7 +156,7 @@ class PowerSet(implicit axiom: ZFAxiom) {
   /**
    * Power set is unique.
    */
-  val powerSetUnique: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]] = {
+  val uniqueness: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]] = {
     byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] =>
       type Z = assumption.S
       val ev1: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = assumption.value
@@ -122,67 +182,10 @@ class PowerSet(implicit axiom: ZFAxiom) {
     }
   }
 
-  val powerFunctionExists: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createTypeFunction[isPowerOf](powerSetExists, powerSetUnique)
+  val powerFunctionExistence: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createTypeFunction[isPowerOf](existence, uniqueness)
 
-  type Pow[x <: Σ] = powerFunctionExists.F[x]
-  val powerSetConstraints: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExists.value
-}
-
-class EmptySet(implicit axiom: ZFAxiom) {
-  import Shortcuts._
-
-  /**
-    * There exists an empty set.
-    */
-  val emptySet: ∃[isEmpty] = {
-    val set = existence
-
-    type Set = set.S
-
-    val emptyExistence: ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ Set) ∧ Nothing)]] = separate[Set, [_, _] => Nothing, Set]
-
-    type EmptySet = emptyExistence.S
-    val ev1: ∀[[u <: Σ] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)] = emptyExistence.value
-    val ev2: ∀[[u <: Σ] => (u ∈ EmptySet) => Nothing] = byContradiction { assumption: ∃[[u <: Σ] => ￢[u ∈ EmptySet] => Nothing] =>
-      type U = assumption.S
-      val ev21 = assumption.value
-      val ev22 = forType[U].instantiate[[u <: Σ] => (u ∈ EmptySet) <=> ((u ∈ Set) ∧ Nothing)](ev1)
-      val ev23 = ev22.implies.andThen { conclusion: (U ∈ Set) ∧ Nothing => conclusion._2 }
-      ev21(ev23)
-    }
-    val ev3: ∀[[u <: Σ] => u ∉ EmptySet] = ev2
-  
-    forType[EmptySet].generalize[[x <: Σ] => ∀[[y <: Σ] => y ∉ x]](ev3)
-  }
-
-  type ∅ = emptySet.S
-
-  val emptyUnique: ∀[[x <: Σ] => isEmpty[x] => (x =::= ∅)] = {
-    byContradiction { assumption: ∃[[x <: Σ] => ￢[isEmpty[x] => (x =::= ∅)]] =>
-      type X = assumption.S
-      val ev1: ￢[isEmpty[X] => (X =::= ∅)] = assumption.value
-      val ev2: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] => (X =::= ∅) =
-        forType[∅].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
-          forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
-        )
-      val ev3: isEmpty[X] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] = { xIsEmpty: ∀[[y <: Σ] => y ∉ X] =>
-        byContradiction { assumption3: ∃[[z <: Σ] => ￢[(z ∈ X) <=> (z ∈ ∅)]] =>
-          type Z = assumption3.S
-          val ev31: ￢[(Z ∈ X) <=> (Z ∈ ∅)] = assumption3.value
-          val ev32: (Z ∈ X) => (Z ∈ ∅) = { assumption32: Z ∈ X =>
-            assumption32 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ X](xIsEmpty)
-          }
-          val ev33: (Z ∈ ∅) => (Z ∈ X) = { assumption33: Z ∈ ∅ =>
-            assumption33 ∧ forType[Z].instantiate[[y <: Σ] => y ∉ ∅](emptySet.value)
-          }
-          val ev34: (Z ∈ X) <=> (Z ∈ ∅) = ev32 ∧ ev33
-          ev34 ∧ ev31
-        }
-      }
-      val ev4: isEmpty[X] => (X =::= ∅) = ev3.andThen(ev2)
-      ev4 ∧ ev1
-    }
-  }
+  type Pow[x <: Σ] = powerFunctionExistence.F[x]
+  val constraint: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExistence.value
 }
 
 class BasicConstructs(implicit axiom: ZFAxiom) {
