@@ -61,7 +61,7 @@ object SetDefinitions {
   /**
    * y = {x}
    */
-  type containsJust[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z =::= x)]
+  type isSingletonOf[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z =::= x)]
 
   /**
    * y is a power set of x.
