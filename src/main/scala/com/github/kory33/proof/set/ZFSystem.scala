@@ -10,6 +10,33 @@ import com.github.kory33.proof.set.SetDefinitions._
 import com.github.kory33.proof.set.ZFAxiom._
 
 object Lemma {
+
+  object Predicate {
+    def forallEquivCommute[F[_ <: Σ], G[_ <: Σ]]: ∀[[x <: Σ] => F[x] <=> G[x]] => ∀[[x <: Σ] => G[x] <=> F[x]] = { equiv =>
+      byContradiction { assumption: ∃[[x <: Σ] => ￢[G[x] <=> F[x]]] =>
+        type X = assumption.S
+        val ev1: ￢[G[X] <=> F[X]] = assumption.value
+        val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](equiv)
+        ev2.commute ∧ ev1
+      }
+    }
+
+    def forallEquivTransitive[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]]
+      : (∀[[x <: Σ] => F[x] <=> G[x]], ∀[[x <: Σ] => G[x] <=> H[x]]) => ∀[[x <: Σ] => F[x] <=> H[x]] = { case (fg, gh) =>
+      byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] <=> H[x]]] =>
+        type X = assumption.S
+        val ev1: ￢[F[X] <=> H[X]] = assumption.value
+        val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](fg)
+        val ev3: G[X] <=> H[X] = forType[X].instantiate[[x <: Σ] => G[x] <=> H[x]](gh)
+        ev2.andThen(ev3) ∧ ev1
+      }
+    }
+
+    def forallEquivConditions[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]](fg: ∀[[x <: Σ] => F[x] <=> G[x]], hg: ∀[[x <: Σ] => H[x] <=> G[x]]): ∀[[x <: Σ] => F[x] <=> H[x]] = {
+      forallEquivTransitive[F, G, H](fg, forallEquivCommute[H, G](hg))
+    }
+  }
+
   /**
    * shorthand for axiom schema of separation.
    */
@@ -46,6 +73,14 @@ object Lemma {
     forType[Y].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
       forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
     )(containsSameElement)
+  }
+
+  /**
+   * Two sets having the same equivalence condition on their elements are equal.
+   */
+  def equivalence[X <: Σ, Y <: Σ, F[_ <: Σ]](implicit axiom: ZFAxiom): (∀[[w <: Σ] => (w ∈ X) <=> F[w]] ∧ ∀[[w <: Σ] => (w ∈ Y) <=> F[w]]) => (X =::= Y) = { case (x, y) =>
+    val ev1: ∀[[x <: Σ] => x ∈ X <=> x ∈ Y] = Predicate.forallEquivConditions[[w <: Σ] => w ∈ X, F, [w <: Σ] => w ∈ Y](x, y)
+    setEquals[X, Y](ev1)
   }
 
   /**
@@ -103,31 +138,6 @@ object Lemma {
       }
   }
   
-  object Predicate {
-    def forallEquivCommute[F[_ <: Σ], G[_ <: Σ]]: ∀[[x <: Σ] => F[x] <=> G[x]] => ∀[[x <: Σ] => G[x] <=> F[x]] = { equiv =>
-      byContradiction { assumption: ∃[[x <: Σ] => ￢[G[x] <=> F[x]]] =>
-        type X = assumption.S
-        val ev1: ￢[G[X] <=> F[X]] = assumption.value
-        val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](equiv)
-        ev2.commute ∧ ev1
-      }
-    }
-
-    def forallEquivTransitive[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]]
-      : (∀[[x <: Σ] => F[x] <=> G[x]], ∀[[x <: Σ] => G[x] <=> H[x]]) => ∀[[x <: Σ] => F[x] <=> H[x]] = { case (fg, gh) =>
-      byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] <=> H[x]]] =>
-        type X = assumption.S
-        val ev1: ￢[F[X] <=> H[X]] = assumption.value
-        val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](fg)
-        val ev3: G[X] <=> H[X] = forType[X].instantiate[[x <: Σ] => G[x] <=> H[x]](gh)
-        ev2.andThen(ev3) ∧ ev1
-      }
-    }
-
-    def forallEquivConditions[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]](fg: ∀[[x <: Σ] => F[x] <=> G[x]], hg: ∀[[x <: Σ] => H[x] <=> G[x]]): ∀[[x <: Σ] => F[x] <=> H[x]] = {
-      forallEquivTransitive[F, G, H](fg, forallEquivCommute[H, G](hg))
-    }
-  }
 }
 
 class EmptySet(implicit axiom: ZFAxiom) {
@@ -305,7 +315,18 @@ class UnionSet(implicit axiom: ZFAxiom) {
     }
   }
 
-  val uniqueness: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isUnionOf z) ∧ (y isUnionOf z) => x =::= y]]] = ???
+  val uniqueness: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isUnionOf z) ∧ (y isUnionOf z) => x =::= y]]] = {
+    byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isUnionOf z) ∧ (y isUnionOf z) => x =::= y]]]] =>
+      type Z = assumption.S
+      val ev1: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isUnionOf Z) ∧ (y isUnionOf Z) => x =::= y]]] = assumption.value
+      type X = ev1.S
+      val ev2: ∃[[y <: Σ] => ￢[(X isUnionOf Z) ∧ (y isUnionOf Z) => X =::= y]] = ev1.value
+      type Y = ev2.S
+      val ev3: ￢[(X isUnionOf Z) ∧ (Y isUnionOf Z) => X =::= Y] = ev2.value
+      val ev4: (X isUnionOf Z) ∧ (Y isUnionOf Z) => X =::= Y = equivalence[X, Y, [x <: Σ] => ∃[[Y <: Σ] => ((x ∈ Y) ∧ (Y ∈ Z))]]
+      ev4 ∧ ev3
+    }
+  }
 
   val unionFunctionExistence: ∃~>[[Union[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Union[x] isUnionOf x]] = createUnaryTypeFunction[isUnionOf](existence, uniqueness)
 
