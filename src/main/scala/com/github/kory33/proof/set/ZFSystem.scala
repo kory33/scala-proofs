@@ -9,7 +9,7 @@ import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 import com.github.kory33.proof.set.SetDefinitions._
 import com.github.kory33.proof.set.ZFAxiom._
 
-object Shortcuts {
+object Lemma {
   /**
    * shorthand for axiom schema of separation.
    */
@@ -102,36 +102,36 @@ object Shortcuts {
         }
       }
   }
-}
-
-object PredicateLogicLemma {
-  def forallEquivCommute[F[_ <: Σ], G[_ <: Σ]]: ∀[[x <: Σ] => F[x] <=> G[x]] => ∀[[x <: Σ] => G[x] <=> F[x]] = { equiv =>
-    byContradiction { assumption: ∃[[x <: Σ] => ￢[G[x] <=> F[x]]] =>
-      type X = assumption.S
-      val ev1: ￢[G[X] <=> F[X]] = assumption.value
-      val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](equiv)
-      ev2.commute ∧ ev1
+  
+  object Predicate {
+    def forallEquivCommute[F[_ <: Σ], G[_ <: Σ]]: ∀[[x <: Σ] => F[x] <=> G[x]] => ∀[[x <: Σ] => G[x] <=> F[x]] = { equiv =>
+      byContradiction { assumption: ∃[[x <: Σ] => ￢[G[x] <=> F[x]]] =>
+        type X = assumption.S
+        val ev1: ￢[G[X] <=> F[X]] = assumption.value
+        val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](equiv)
+        ev2.commute ∧ ev1
+      }
     }
-  }
 
-  def forallEquivTransitive[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]]
-    : (∀[[x <: Σ] => F[x] <=> G[x]], ∀[[x <: Σ] => G[x] <=> H[x]]) => ∀[[x <: Σ] => F[x] <=> H[x]] = { case (fg, gh) =>
-    byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] <=> H[x]]] =>
-      type X = assumption.S
-      val ev1: ￢[F[X] <=> H[X]] = assumption.value
-      val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](fg)
-      val ev3: G[X] <=> H[X] = forType[X].instantiate[[x <: Σ] => G[x] <=> H[x]](gh)
-      ev2.andThen(ev3) ∧ ev1
+    def forallEquivTransitive[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]]
+      : (∀[[x <: Σ] => F[x] <=> G[x]], ∀[[x <: Σ] => G[x] <=> H[x]]) => ∀[[x <: Σ] => F[x] <=> H[x]] = { case (fg, gh) =>
+      byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] <=> H[x]]] =>
+        type X = assumption.S
+        val ev1: ￢[F[X] <=> H[X]] = assumption.value
+        val ev2: F[X] <=> G[X] = forType[X].instantiate[[x <: Σ] => F[x] <=> G[x]](fg)
+        val ev3: G[X] <=> H[X] = forType[X].instantiate[[x <: Σ] => G[x] <=> H[x]](gh)
+        ev2.andThen(ev3) ∧ ev1
+      }
     }
-  }
 
-  def forallEquivConditions[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]](fg: ∀[[x <: Σ] => F[x] <=> G[x]], hg: ∀[[x <: Σ] => H[x] <=> G[x]]): ∀[[x <: Σ] => F[x] <=> H[x]] = {
-    forallEquivTransitive[F, G, H](fg, forallEquivCommute[H, G](hg))
+    def forallEquivConditions[F[_ <: Σ], G[_ <: Σ], H[_ <: Σ]](fg: ∀[[x <: Σ] => F[x] <=> G[x]], hg: ∀[[x <: Σ] => H[x] <=> G[x]]): ∀[[x <: Σ] => F[x] <=> H[x]] = {
+      forallEquivTransitive[F, G, H](fg, forallEquivCommute[H, G](hg))
+    }
   }
 }
 
 class EmptySet(implicit axiom: ZFAxiom) {
-  import Shortcuts._
+  import Lemma._
 
   /**
     * There exists an empty set.
@@ -189,7 +189,8 @@ class EmptySet(implicit axiom: ZFAxiom) {
 }
 
 class PairSet(implicit axiom: ZFAxiom) {
-  import Shortcuts._
+  import Lemma._
+  import Lemma.Predicate._
 
   val existence: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => containsTwo[z, x, y]]]] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => ∃[[z <: Σ] => containsTwo[z, x, y]]]]] =>
@@ -217,7 +218,6 @@ class PairSet(implicit axiom: ZFAxiom) {
       type Y = ev3.S
       val ev4: ￢[(containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W] = ev3.value
       val ev5: (containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W = { case (zContainsXY, wContainsXY) =>
-        import PredicateLogicLemma._
         val ev51: ∀[[w <: Σ] => (w ∈ Z) <=> ((w =::= X) ∨ (w =::= Y))] = zContainsXY
         val ev52: ∀[[w <: Σ] => (w ∈ W) <=> ((w =::= X) ∨ (w =::= Y))] = wContainsXY
         val ev53: ∀[[w <: Σ] => (w ∈ Z) <=> (w ∈ W)] = forallEquivConditions[[w <: Σ] => w ∈ Z, [w <: Σ] => (w =::= X) ∨ (w =::= Y), [w <: Σ] => w ∈ W](ev51, ev52)
@@ -259,8 +259,8 @@ class PairSet(implicit axiom: ZFAxiom) {
 }
 
 class UnionSet(implicit axiom: ZFAxiom) {
-        import PredicateLogicLemma._
-  import Shortcuts._
+  import Lemma._
+  import Lemma.Predicate._
 
   val existence: ∀[[x <: Σ] => ∃[[y <: Σ] => y isUnionOf x]] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isUnionOf x]]] =>
@@ -315,7 +315,8 @@ class UnionSet(implicit axiom: ZFAxiom) {
 }
 
 class PowerSet(implicit axiom: ZFAxiom) {
-  import Shortcuts._
+  import Lemma._
+  import Lemma.Predicate._
 
   val existence: ∀[[x <: Σ] => ∃[[y <: Σ] => y isPowerOf x]] = {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
@@ -338,7 +339,6 @@ class PowerSet(implicit axiom: ZFAxiom) {
       type Y = ev3.S
       val ev4: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev3.value
       val ev5: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = { case (xIsPowerOfZ, yIsPowerOfZ) =>
-        import PredicateLogicLemma._
         val ev51: ∀[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)] = xIsPowerOfZ
         val ev52: ∀[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)] = yIsPowerOfZ
         val ev53: ∀[[w <: Σ] => (w ∈ X) <=> (w ∈ Y)] = forallEquivConditions[[w <: Σ] => w ∈ X, [w <: Σ] => w ⊂ Z, [w <: Σ] => w ∈ Y](ev51, ev52)
@@ -355,7 +355,7 @@ class PowerSet(implicit axiom: ZFAxiom) {
 }
 
 class BasicConstructs(implicit axiom: ZFAxiom) {
-  import Shortcuts._
+  import Lemma._
 
   /**
    * There is no set of all sets.
