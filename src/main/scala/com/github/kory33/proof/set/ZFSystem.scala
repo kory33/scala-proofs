@@ -227,12 +227,7 @@ class PairSet(implicit axiom: ZFAxiom) {
       val ev3: ∃[[y <: Σ] => ￢[(containsTwo[Z, X, y] ∧ containsTwo[W, X, y]) => Z =::= W]] = ev2.value
       type Y = ev3.S
       val ev4: ￢[(containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W] = ev3.value
-      val ev5: (containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W = { case (zContainsXY, wContainsXY) =>
-        val ev51: ∀[[w <: Σ] => (w ∈ Z) <=> ((w =::= X) ∨ (w =::= Y))] = zContainsXY
-        val ev52: ∀[[w <: Σ] => (w ∈ W) <=> ((w =::= X) ∨ (w =::= Y))] = wContainsXY
-        val ev53: ∀[[w <: Σ] => (w ∈ Z) <=> (w ∈ W)] = forallEquivConditions[[w <: Σ] => w ∈ Z, [w <: Σ] => (w =::= X) ∨ (w =::= Y), [w <: Σ] => w ∈ W](ev51, ev52)
-        setEquals(ev53)
-      }
+      val ev5: (containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W = equivalence[Z, W, [z <: Σ] => (z =::= X) ∨ (z =::= Y)]
       ev5 ∧ ev4
     }
   }
@@ -359,12 +354,7 @@ class PowerSet(implicit axiom: ZFAxiom) {
       val ev3: ∃[[y <: Σ] => ￢[(X isPowerOf Z) ∧ (y isPowerOf Z) => X =::= y]] = ev2.value
       type Y = ev3.S
       val ev4: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev3.value
-      val ev5: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = { case (xIsPowerOfZ, yIsPowerOfZ) =>
-        val ev51: ∀[[w <: Σ] => (w ∈ X) <=> (w ⊂ Z)] = xIsPowerOfZ
-        val ev52: ∀[[w <: Σ] => (w ∈ Y) <=> (w ⊂ Z)] = yIsPowerOfZ
-        val ev53: ∀[[w <: Σ] => (w ∈ X) <=> (w ∈ Y)] = forallEquivConditions[[w <: Σ] => w ∈ X, [w <: Σ] => w ⊂ Z, [w <: Σ] => w ∈ Y](ev51, ev52)
-        setEquals(ev53)
-      }
+      val ev5: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = equivalence[X, Y, [z <: Σ] => z ⊂ Z]
       ev5 ∧ ev4
     }
   }
