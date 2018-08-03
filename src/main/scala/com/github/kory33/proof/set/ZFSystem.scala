@@ -237,30 +237,8 @@ class PairSet(implicit axiom: ZFAxiom) {
   }
 
   type ++:[x <: Σ, y <: Σ] = pairFunctionExistence.F[x, y]
-  val pairConstraint: ∀[[x <: Σ] => ∀[[y <: Σ] => containsTwo[x ++: y, x, y]]] = pairFunctionExistence.value
+  val constraint: ∀[[x <: Σ] => ∀[[y <: Σ] => containsTwo[x ++: y, x, y]]] = pairFunctionExistence.value
 
-  type Just[x <: Σ] = x ++: x
-  val singletonConstraint: ∀[[x <: Σ] => Just[x] isSingletonOf x] = byContradiction { assumption: ∃[[x <: Σ] => ￢[Just[x] isSingletonOf x]] =>
-    type X = assumption.S
-    val ev1: ￢[Just[X] isSingletonOf X] = assumption.value
-    val ev2: containsTwo[Just[X], X, X] = forType[X].instantiate[[y <: Σ] => containsTwo[X ++: y, X, y]](
-      forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => containsTwo[x ++: y, x, y]]](pairConstraint)
-    )
-    val ev3: ∀[[w <: Σ] => (w ∈ Just[X]) <=> ((w =::= X) ∨ (w =::= X))] = ev2
-    val ev4: ∀[[w <: Σ] => (w ∈ Just[X]) <=> (w =::= X)] = byContradiction { assumption4: ∃[[w <: Σ] => ￢[(w ∈ Just[X]) <=> (w =::= X)]] =>
-      type W = assumption4.S
-      val ev41: ￢[(W ∈ Just[X]) <=> (W =::= X)] = assumption4.value
-      val ev42: (W ∈ Just[X]) <=> ((W =::= X) ∨ (W =::= X)) = forType[W].instantiate[[w <: Σ] => (w ∈ Just[X]) <=> ((w =::= X) ∨ (w =::= X))](ev3)
-      val ev43: ((W =::= X) ∨ (W =::= X)) <=> (W =::= X) = {
-        val implies = { from: (W =::= X) ∨ (W =::= X) => removeDisj(from)(identity)(identity) }
-        val impliedBy: ((W =::= X) ∨ (W =::= X)) <= (W =::= X) = Left.apply
-        implies ∧ impliedBy
-      }
-      val ev44: (W ∈ Just[X]) <=> (W =::= X) = ev42.andThen(ev43)
-      ev44 ∧ ev41
-    }
-    ev4 ∧ ev1
-  }
 }
 
 class UnionSet(implicit axiom: ZFAxiom) {
@@ -401,12 +379,34 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
   type ∅ = emptySet.∅
 
   val pairSet = new PairSet
-  type ++:[x <: Σ] = pairSet.++:
-  type Just[x <: Σ] = pairSet.Just
+  type ++:[x <: Σ, y <: Σ] = pairSet.++:[x, y]
+
+  type Just[x <: Σ] = x ++: x
+  val singletonConstraint: ∀[[x <: Σ] => Just[x] isSingletonOf x] = byContradiction { assumption: ∃[[x <: Σ] => ￢[Just[x] isSingletonOf x]] =>
+    type X = assumption.S
+    val ev1: ￢[Just[X] isSingletonOf X] = assumption.value
+    val ev2: containsTwo[Just[X], X, X] = forType[X].instantiate[[y <: Σ] => containsTwo[X ++: y, X, y]](
+      forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => containsTwo[x ++: y, x, y]]](pairSet.constraint)
+    )
+    val ev3: ∀[[w <: Σ] => (w ∈ Just[X]) <=> ((w =::= X) ∨ (w =::= X))] = ev2
+    val ev4: ∀[[w <: Σ] => (w ∈ Just[X]) <=> (w =::= X)] = byContradiction { assumption4: ∃[[w <: Σ] => ￢[(w ∈ Just[X]) <=> (w =::= X)]] =>
+      type W = assumption4.S
+      val ev41: ￢[(W ∈ Just[X]) <=> (W =::= X)] = assumption4.value
+      val ev42: (W ∈ Just[X]) <=> ((W =::= X) ∨ (W =::= X)) = forType[W].instantiate[[w <: Σ] => (w ∈ Just[X]) <=> ((w =::= X) ∨ (w =::= X))](ev3)
+      val ev43: ((W =::= X) ∨ (W =::= X)) <=> (W =::= X) = {
+        val implies = { from: (W =::= X) ∨ (W =::= X) => removeDisj(from)(identity)(identity) }
+        val impliedBy: ((W =::= X) ∨ (W =::= X)) <= (W =::= X) = Left.apply
+        implies ∧ impliedBy
+      }
+      val ev44: (W ∈ Just[X]) <=> (W =::= X) = ev42.andThen(ev43)
+      ev44 ∧ ev41
+    }
+    ev4 ∧ ev1
+  }
 
   val unionSet = new UnionSet
-  type Union[F <: Σ] = unionSet.Union
+  type Union[F <: Σ] = unionSet.Union[F]
 
   val powerSet = new PowerSet
-  type Pow[x <: Σ] = powerSet.Pow
+  type Pow[x <: Σ] = powerSet.Pow[x]
 }
