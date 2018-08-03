@@ -27,12 +27,12 @@ trait ZFAxiom {
   /**
     * Schema of separation.
     *
-    * For every binary predicate F of free variables,
-    * every set x and parameter p, there exists set y = { u ∈ x | F(u, p) }.
+    * For every binary predicate F of one free variable and every set x,
+    * there exists set y = { u ∈ x | F(u) }.
     *
-    * @tparam F binary predicate
+    * @tparam F unary predicate
     */
-  def separation[F[_ <: Σ, _ <: Σ]]: ∀[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
+  def separation[F[_ <: Σ]]: ∀[[x <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u])]]]
 
   /**
     * Axiom of pairing
@@ -83,7 +83,7 @@ object ZFAxiom {
     = axiom.existence
   def extensionality(implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]]
     = axiom.extensionality
-  def separation[F[_ <: Σ, _ <: Σ]](implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∀[[p <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u, p])]]]]
+  def separation[F[_ <: Σ]](implicit axiom: ZFAxiom): ∀[[x <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u])]]]
     = axiom.separation
   def pairing(implicit axiom: ZFAxiom): ∀[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]]]
     = axiom.pairing
