@@ -409,4 +409,8 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
 
   val powerSet = new PowerSet
   type Pow[x <: Σ] = powerSet.Pow[x]
+
+  type ∪[x <: Σ, y <: Σ] = Union[x ++: y]
+  val sumConstraint: ∀[[x <: Σ] => ∀[[y <: Σ] => isSumOf[x ∪ y, x, y]]] = ???
+
 }

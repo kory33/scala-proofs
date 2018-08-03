@@ -73,4 +73,9 @@ object SetDefinitions {
    */
   type isPowerOf[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z ⊂ x)]
 
+  /**
+   * z is a sum of x and y.
+   */
+  type isSumOf[z <: Σ, x <: Σ, y <: Σ] = ∀[[x <: Σ] => (x ∈ z) <=> (x ∈ x) ∨ (x ∈ y)]
+
 }
