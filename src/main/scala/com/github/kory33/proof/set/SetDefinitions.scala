@@ -64,6 +64,11 @@ object SetDefinitions {
   type isSingletonOf[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z =::= x)]
 
   /**
+   * U = Union of family F
+   */
+  type isUnionOf[U <: Σ, F <: Σ] = ∀[[x <: Σ] => (x ∈ U) <=> ∃[[Y <: Σ] => ((x ∈ Y) ∧ (Y ∈ F))]]
+
+  /**
    * y is a power set of x.
    */
   type isPowerOf[y <: Σ, x <: Σ] = ∀[[z <: Σ] => (z ∈ y) <=> (z ⊂ x)]
