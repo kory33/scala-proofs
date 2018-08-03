@@ -400,10 +400,13 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
   val emptySet = new EmptySet
   type ∅ = emptySet.∅
 
-  val powerSet = new PowerSet
-  type Pow[x <: Σ] = powerSet.Pow
-  
   val pairSet = new PairSet
   type ++:[x <: Σ] = pairSet.++:
   type Just[x <: Σ] = pairSet.Just
+
+  val unionSet = new UnionSet
+  type Union[F <: Σ] = unionSet.Union
+
+  val powerSet = new PowerSet
+  type Pow[x <: Σ] = powerSet.Pow
 }
