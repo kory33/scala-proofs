@@ -401,6 +401,16 @@ class BinaryIntersectionConstruct(val pairSet: PairSetConstruct,
 
 }
 
+class OrderedPairConstruct(val pairSet: PairSetConstruct, val singleton: SingletonConstruct) {
+
+  type ++: = pairSet.++:
+  type Just = singleton.Just
+
+  type :::[a <: Σ, b <: Σ] = Just[a] ++: Just[a ++: b]
+  def constraint[a <: Σ, b <: Σ, c <: Σ, d <: Σ]: (a ::: b) =::= (c ::: d) <=> (a =::= c) ∧ (b =::= d) = ???
+
+}
+
 class BasicConstructs(implicit axiom: ZFAxiom) {
   import Lemma._
 
@@ -427,6 +437,9 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
 
   val binaryIntersection = new BinaryIntersectionConstruct(pairSet, intersection)
   type ∩[x <: Σ, y <: Σ] = binaryIntersection.∩[x, y]
+
+  val orderedPair = new OrderedPairConstruct(pairSet, singleton)
+  type :::[a <: Σ, b <: Σ] = orderedPair.:::[a, b]
 
 }
 
