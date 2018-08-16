@@ -383,6 +383,24 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct,
 
 }
 
+class IntersectionConstruct(val union: UnionSetConstruct) {
+  
+  type Intersection[F <: Σ] <: Σ
+  val constraint: ∀[[F <: Σ] => ∀[[z <: Σ] => z ∈ Intersection[F] <=> F hasAll ([x <: Σ] => z ∈ x)]] = ???
+
+}
+
+class BinaryIntersectionConstruct(val pairSet: PairSetConstruct,
+                                  val intersection: IntersectionConstruct) {
+
+  type Intersection = intersection.Intersection
+  type ++: = pairSet.++:
+
+  type ∩[x <: Σ, y <: Σ] = Intersection[x ++: y]
+  val constraint: ∀[[x <: Σ] => ∀[[y <: Σ] => isIntersectionOf[x ∩ y, x, y]]] = ???
+
+}
+
 class BasicConstructs(implicit axiom: ZFAxiom) {
   import Lemma._
 
@@ -398,11 +416,17 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
   val powerSet = new PowerSetConstruct
   type Pow[x <: Σ] = powerSet.Pow[x]
 
-  val singletonSet = new SingletonConstruct(pairSet)
-  type Just[x <: Σ] = singletonSet.Just[x]
+  val singleton = new SingletonConstruct(pairSet)
+  type Just[x <: Σ] = singleton.Just[x]
 
   val binaryUnion = new BinaryUnionConstruct(pairSet, unionSet)
   type ∪[x <: Σ, y <: Σ] = binaryUnion.∪[x, y]
+
+  val intersection = new IntersectionConstruct(unionSet)
+  type Intersection[F <: Σ] = intersection.Intersection[F]
+
+  val binaryIntersection = new BinaryIntersectionConstruct(pairSet, intersection)
+  type ∩[x <: Σ, y <: Σ] = binaryIntersection.∩[x, y]
 
 }
 

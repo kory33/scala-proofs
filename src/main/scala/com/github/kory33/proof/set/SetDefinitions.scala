@@ -76,7 +76,9 @@ object SetDefinitions {
   /**
    * z is a sum of x and y.
    */
-  type isSumOf[z <: Σ, x <: Σ, y <: Σ] = ∀[[x <: Σ] => (x ∈ z) <=> (x ∈ x) ∨ (x ∈ y)]
+  type isSumOf[z <: Σ, x <: Σ, y <: Σ] = ∀[[w <: Σ] => (w ∈ z) <=> (w ∈ x) ∨ (w ∈ y)]
+
+  type isIntersectionOf[z <: Σ, x <: Σ, y <: Σ] = ∀[[w <: Σ] => (w ∈ z) <=> (w ∈ x) ∧ (w ∈ y)]
 
   /**
    * given class function is injective.
