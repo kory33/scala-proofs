@@ -127,8 +127,8 @@ object Lemma {
             )
             type Z = ev3.S
             val ev4: R[Z, X, Y] = ev3.value
-            // since the subtype of F[X] is unique to Z, they are isomorphic.
-            // it is therefore safe to cast from G[Z] to G[F[X]] for any G[_].
+            // since the subtype of F[X, Y] is unique to Z, they are isomorphic.
+            // it is therefore safe to cast from G[Z] to G[F[X, Y]] for any G[_].
             // let G[x] = R[x, X, Y], then this cast is safe.
             val ev5: R[F[X, Y], X, Y] = ev4.asInstanceOf[R[F[X, Y], X, Y]]
 
