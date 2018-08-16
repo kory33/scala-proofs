@@ -140,6 +140,15 @@ object Lemma {
   
 }
 
+class ComprehensionConstruct(implicit axiom: ZFAxiom) {
+
+/*
+  type Comprehension[X, F[_ <: Σ]] <: Σ
+  def constraint[X <: Σ, F[_ <: Σ], x <: Σ]: (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x]) = ???
+*/
+
+}
+
 class EmptySetConstruct(implicit axiom: ZFAxiom) {
   import Lemma._
 
