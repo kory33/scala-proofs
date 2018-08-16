@@ -78,4 +78,9 @@ object SetDefinitions {
    */
   type isSumOf[z <: Σ, x <: Σ, y <: Σ] = ∀[[x <: Σ] => (x ∈ z) <=> (x ∈ x) ∨ (x ∈ y)]
 
+  /**
+   * given class function is injective.
+   */
+  type isInjective[f[_ <: Σ] <: Σ] = ∀[[x <: Σ] => ∀[[y <: Σ] => (f[x] =::= f[y]) => (x =::= y)]]
+
 }
