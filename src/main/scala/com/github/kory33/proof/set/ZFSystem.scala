@@ -89,8 +89,8 @@ object Lemma {
   def createUnaryClassFunction[R[_ <: Σ, _ <: Σ]]
     (exists: ∀[[x <: Σ] => ∃[[y <: Σ] => y R x]],
      unique: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x R z) ∧ (y R z) => x =::= y]]])
-    : ∃~>[[TypeFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => TypeFunction[x] R x]] = {
-      new ∃~>[[TypeFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => TypeFunction[x] R x]] {
+    : ∃~>[[ClassFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => ClassFunction[x] R x]] = {
+      new ∃~>[[ClassFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => ClassFunction[x] R x]] {
         type F[x <: Σ] = ∃[[y <: Σ] => y R x]#S
         val value: ∀[[x <: Σ] => F[x] R x] = {
           byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] R x]] =>
@@ -112,8 +112,8 @@ object Lemma {
   def createBinaryClassFunction[R[_ <: Σ, _ <: Σ, _ <: Σ]]
     (exists: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => R[z, x, y]]]],
      unique: ∀[[z <: Σ] => ∀[[w <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (R[z, x, y] ∧ R[w, x, y]) => z =::= w]]]])
-    : ∃~~>[[TypeFunction[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => R[TypeFunction[x, y], x, y]]]] = {
-      new ∃~~>[[TypeFunction[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => R[TypeFunction[x, y], x, y]]]] {
+    : ∃~~>[[ClassFunction[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => R[ClassFunction[x, y], x, y]]]] = {
+      new ∃~~>[[ClassFunction[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => R[ClassFunction[x, y], x, y]]]] {
         type F[x <: Σ, y <: Σ] = ∃[[z <: Σ] => R[z, x, y]]#S
         val value: ∀[[x <: Σ] => ∀[[y <: Σ] => R[F[x, y], x, y]]] = {
           byContradiction { assumption: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => R[F[x, y], x, y]]]] =>
