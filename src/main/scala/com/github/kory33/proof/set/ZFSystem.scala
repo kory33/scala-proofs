@@ -140,7 +140,7 @@ object Lemma {
   
 }
 
-class EmptySet(implicit axiom: ZFAxiom) {
+class EmptySetConstruct(implicit axiom: ZFAxiom) {
   import Lemma._
 
   /**
@@ -198,7 +198,7 @@ class EmptySet(implicit axiom: ZFAxiom) {
   }
 }
 
-class PairSet(implicit axiom: ZFAxiom) {
+class PairSetConstruct(implicit axiom: ZFAxiom) {
   import Lemma._
   import Lemma.Predicate._
 
@@ -241,7 +241,7 @@ class PairSet(implicit axiom: ZFAxiom) {
 
 }
 
-class UnionSet(implicit axiom: ZFAxiom) {
+class UnionSetConstruct(implicit axiom: ZFAxiom) {
   import Lemma._
   import Lemma.Predicate._
 
@@ -308,7 +308,7 @@ class UnionSet(implicit axiom: ZFAxiom) {
 
 }
 
-class PowerSet(implicit axiom: ZFAxiom) {
+class PowerSetConstruct(implicit axiom: ZFAxiom) {
   import Lemma._
   import Lemma.Predicate._
 
@@ -343,46 +343,12 @@ class PowerSet(implicit axiom: ZFAxiom) {
   val constraint: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExistence.value
 }
 
-class BasicConstructs(implicit axiom: ZFAxiom) {
-  import Lemma._
+class SingletonConstruct(val pairSet: PairSetConstruct) {
 
-  /**
-   * There is no set of all sets.
-   */
-  val noSetOfAllSets: ￢[∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]]] = {
-    def lemma1[A, B]: ￢[(A <=> (B ∧ ￢[A])) ∧ B] = byContradiction { assumption: (A <=> (B ∧ ￢[A])) ∧ B =>
-      val (aEqBAndNotA, b) = assumption
-      def ev1: ￢[A] => A = { notA: ￢[A] => aEqBAndNotA.impliedBy(b ∧ notA) }
-      def ev2: A => ￢[A] = { a: A => aEqBAndNotA.implies(a)._2 }
-      val notAEqNotA = byContradiction { aEqNotA: A <=> ￢[A] =>
-        val notA = byContradiction { a: A => a ∧ aEqNotA.implies(a) }
-        val a: A = aEqNotA.impliedBy(notA)
-        a ∧ notA
-      }
-      notAEqNotA(ev2 ∧ ev1)
-    }
-  
-    byContradiction { assumption: ∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]] =>
-      type S = assumption.S
-      val setOfAllSets = assumption.value
-
-      val paradoxicalExistence: ∃[[z <: Σ] => ∀[[u <: Σ] => (u ∈ z) <=> ((u ∈ S) ∧ (u ∉ u))]] = separate[S, [X <: Σ] => X ∉ X]
-      type Z = paradoxicalExistence.S
-      val paradoxicalSet: ∀[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))] = paradoxicalExistence.value
-      val ev1: (Z ∈ Z) <=> ((Z ∈ S) ∧ (Z ∉ Z)) = forType[Z].instantiate[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))](paradoxicalSet)
-      val ev2: Z ∈ S = forType[Z].instantiate[[y <: Σ] => y ∈ S](setOfAllSets)
-      lemma1(ev1 ∧ ev2)
-    }
-  }
-
-  val emptySet = new EmptySet
-  type ∅ = emptySet.∅
-
-  val pairSet = new PairSet
-  type ++:[x <: Σ, y <: Σ] = pairSet.++:[x, y]
+  type ++: = pairSet.++:
 
   type Just[x <: Σ] = x ++: x
-  val singletonConstraint: ∀[[x <: Σ] => Just[x] isSingletonOf x] = byContradiction { assumption: ∃[[x <: Σ] => ￢[Just[x] isSingletonOf x]] =>
+  val constraint: ∀[[x <: Σ] => Just[x] isSingletonOf x] = byContradiction { assumption: ∃[[x <: Σ] => ￢[Just[x] isSingletonOf x]] =>
     type X = assumption.S
     val ev1: ￢[Just[X] isSingletonOf X] = assumption.value
     val ev2: containsTwo[Just[X], X, X] = forType[X].instantiate[[y <: Σ] => containsTwo[X ++: y, X, y]](
@@ -404,13 +370,73 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
     ev4 ∧ ev1
   }
 
-  val unionSet = new UnionSet
-  type Union[F <: Σ] = unionSet.Union[F]
+}
 
-  val powerSet = new PowerSet
-  type Pow[x <: Σ] = powerSet.Pow[x]
+class BinaryUnionConstruct(val pairSet: PairSetConstruct,
+                           val unionSet: UnionSetConstruct) {
+
+  type Union = unionSet.Union
+  type ++: = pairSet.++:
 
   type ∪[x <: Σ, y <: Σ] = Union[x ++: y]
-  val sumConstraint: ∀[[x <: Σ] => ∀[[y <: Σ] => isSumOf[x ∪ y, x, y]]] = ???
+  val constraint: ∀[[x <: Σ] => ∀[[y <: Σ] => isSumOf[x ∪ y, x, y]]] = ???
+
+}
+
+class BasicConstructs(implicit axiom: ZFAxiom) {
+  import Lemma._
+
+  val emptySet = new EmptySetConstruct
+  type ∅ = emptySet.∅
+
+  val pairSet = new PairSetConstruct
+  type ++:[x <: Σ, y <: Σ] = pairSet.++:[x, y]
+
+  val unionSet = new UnionSetConstruct
+  type Union[F <: Σ] = unionSet.Union[F]
+
+  val powerSet = new PowerSetConstruct
+  type Pow[x <: Σ] = powerSet.Pow[x]
+
+  val singletonSet = new SingletonConstruct(pairSet)
+  type Just[x <: Σ] = singletonSet.Just[x]
+
+  val binaryUnion = new BinaryUnionConstruct(pairSet, unionSet)
+  type ∪[x <: Σ, y <: Σ] = binaryUnion.∪[x, y]
+
+}
+
+class ElementaryTheorems(implicit axiom: ZFAxiom) {
+
+  /**
+   * There is no set of all sets.
+   */
+  val noSetOfAllSets: ￢[∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]]] = {
+    def lemma1[A, B]: ￢[(A <=> (B ∧ ￢[A])) ∧ B] = byContradiction { assumption: (A <=> (B ∧ ￢[A])) ∧ B =>
+      val (aEqBAndNotA, b) = assumption
+      def ev1: ￢[A] => A = { notA: ￢[A] => aEqBAndNotA.impliedBy(b ∧ notA) }
+      def ev2: A => ￢[A] = { a: A => aEqBAndNotA.implies(a)._2 }
+      val notAEqNotA = byContradiction { aEqNotA: A <=> ￢[A] =>
+        val notA = byContradiction { a: A => a ∧ aEqNotA.implies(a) }
+        val a: A = aEqNotA.impliedBy(notA)
+        a ∧ notA
+      }
+      notAEqNotA(ev2 ∧ ev1)
+    }
+  
+    byContradiction { assumption: ∃[[x <: Σ] => ∀[[y <: Σ] => y ∈ x]] =>
+      import Lemma._
+
+      type S = assumption.S
+      val setOfAllSets = assumption.value
+
+      val paradoxicalExistence: ∃[[z <: Σ] => ∀[[u <: Σ] => (u ∈ z) <=> ((u ∈ S) ∧ (u ∉ u))]] = separate[S, [X <: Σ] => X ∉ X]
+      type Z = paradoxicalExistence.S
+      val paradoxicalSet: ∀[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))] = paradoxicalExistence.value
+      val ev1: (Z ∈ Z) <=> ((Z ∈ S) ∧ (Z ∉ Z)) = forType[Z].instantiate[[u <: Σ] => (u ∈ Z) <=> ((u ∈ S) ∧ (u ∉ u))](paradoxicalSet)
+      val ev2: Z ∈ S = forType[Z].instantiate[[y <: Σ] => y ∈ S](setOfAllSets)
+      lemma1(ev1 ∧ ev2)
+    }
+  }
 
 }
