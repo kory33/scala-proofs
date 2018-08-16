@@ -379,14 +379,30 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct,
   type ++: = pairSet.++:
 
   type ∪[x <: Σ, y <: Σ] = Union[x ++: y]
-  val constraint: ∀[[x <: Σ] => ∀[[y <: Σ] => isSumOf[x ∪ y, x, y]]] = ???
+  val constraintValue: ∀[[x <: Σ] => ∀[[y <: Σ] => isSumOf[x ∪ y, x, y]]]
+
+  def constraint[x <: Σ, y <: Σ]: isSumOf[x ∪ y, x, y] = {
+    forType[y].instantiate[[y1 <: Σ] => isSumOf[x ∪ y1, x, y1]](
+      forType[x].instantiate[[x1 <: Σ] => ∀[[y1 <: Σ] => isSumOf[x1 ∪ y1, x1, y1]]](
+        constraintValue
+      )
+    )
+  }
 
 }
 
 class IntersectionConstruct(val union: UnionSetConstruct) {
   
   type Intersection[F <: Σ] <: Σ
-  val constraint: ∀[[F <: Σ] => ∀[[z <: Σ] => z ∈ Intersection[F] <=> F hasAll ([x <: Σ] => z ∈ x)]] = ???
+  val constraintVal: ∀[[F <: Σ] => ∀[[z <: Σ] => (z ∈ Intersection[F]) <=> F hasAll ([x <: Σ] => z ∈ x)]]
+
+  def constraint[F <: Σ, z <: Σ]: (z ∈ Intersection[F]) <=> F hasAll ([x <: Σ] => z ∈ x) = {
+    forType[z].instantiate[[z1 <: Σ] => (z1 ∈ Intersection[F]) <=> F hasAll ([x <: Σ] => z1 ∈ x)](
+      forType[F].instantiate[[F1 <: Σ] => ∀[[z1 <: Σ] => (z1 ∈ Intersection[F1]) <=> F1 hasAll ([x <: Σ] => z1 ∈ x)]](
+        constraintVal
+      )
+    )
+  }
 
 }
 
@@ -397,7 +413,13 @@ class BinaryIntersectionConstruct(val pairSet: PairSetConstruct,
   type ++: = pairSet.++:
 
   type ∩[x <: Σ, y <: Σ] = Intersection[x ++: y]
-  val constraint: ∀[[x <: Σ] => ∀[[y <: Σ] => isIntersectionOf[x ∩ y, x, y]]] = ???
+  val constraintValue: ∀[[x <: Σ] => ∀[[y <: Σ] => isIntersectionOf[x ∩ y, x, y]]]
+
+  def constraint[x <: Σ, y <: Σ]: isIntersectionOf[x ∩ y, x, y] = {
+    forType[y].instantiate[[y1 <: Σ] => isIntersectionOf[x ∩ y1, x, y1]](
+      forType[x].instantiate[[x1 <: Σ] => ∀[[y1 <: Σ] => isIntersectionOf[x1 ∩ y1, x1, y1]]](constraintValue)
+    )
+  }
 
 }
 
@@ -407,7 +429,19 @@ class OrderedPairConstruct(val pairSet: PairSetConstruct, val singleton: Singlet
   type Just = singleton.Just
 
   type :::[a <: Σ, b <: Σ] = Just[a] ++: Just[a ++: b]
-  def constraint[a <: Σ, b <: Σ, c <: Σ, d <: Σ]: (a ::: b) =::= (c ::: d) <=> (a =::= c) ∧ (b =::= d) = ???
+  val constraintValue: ∀[[a <: Σ] => ∀[[b <: Σ] => ∀[[c <: Σ] => ∀[[d <: Σ] => (a ::: b) =::= (c ::: d) <=> (a =::= c) ∧ (b =::= d)]]]] = ???
+
+  def constraint[a <: Σ, b <: Σ, c <: Σ, d <: Σ]: (a ::: b) =::= (c ::: d) <=> (a =::= c) ∧ (b =::= d) = {
+    forType[d].instantiate[[d1 <: Σ] => (a ::: b) =::= (c ::: d1) <=> (a =::= c) ∧ (b =::= d1)](
+      forType[c].instantiate[[c1 <: Σ] => ∀[[d1 <: Σ] => (a ::: b) =::= (c1 ::: d1) <=> (a =::= c1) ∧ (b =::= d1)]](
+        forType[b].instantiate[[b1 <: Σ] => ∀[[c1 <: Σ] => ∀[[d1 <: Σ] => (a ::: b1) =::= (c1 ::: d1) <=> (a =::= c1) ∧ (b1 =::= d1)]]](
+          forType[a].instantiate[[a1 <: Σ] => ∀[[b1 <: Σ] => ∀[[c1 <: Σ] => ∀[[d1 <: Σ] => (a1 ::: b1) =::= (c1 ::: d1) <=> (a1 =::= c1) ∧ (b1 =::= d1)]]]](
+            constraintValue
+          )
+        )
+      )
+    )
+  }
 
 }
 
