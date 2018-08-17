@@ -32,6 +32,7 @@ object SpecializedPredicateSystem {
   }
 
   def forType[T <: Σ] = PredicateLogicSystem.forType[T, Σ]
+  def forType2[T1 <: Σ, T2 <: Σ] = PredicateLogicSystem.forType2[T1, T2, Σ]
 
   def notForall[φ[_ <: Σ]](notForall: ￢[∀[[x <: Σ] => φ[x]]]): ∃[[x <: Σ] => ￢[φ[x]]] = PredicateLogicSystem.notForall[Σ, φ](notForall)
 

@@ -46,6 +46,21 @@ object PredicateLogicSystem {
 
   def forType[T <: D, D] = new PartiallyTyped[T, D]
 
+  class PartiallyTyped2[T1 <: D, T2 <: D, D] {
+    def instantiate[F[_ <: D, _ <: D]](forall: ∀[D, [x <: D] => ∀[D, [y <: D] => F[x, y]]]): F[T1, T2] = {
+      forType[T2, D].instantiate[[y <: D] => F[T1, y]](
+        forType[T1, D].instantiate[[x <: D] => ∀[D, [y <: D] => F[x, y]]](forall)
+      )
+    }
+    def generalize[F[_ <: D, _ <: D]](instance: F[T1, T2]): ∃[D, [x <: D] => ∃[D, [y <: D] => F[x, y]]] = {
+      forType[T1, D].generalize[[x <: D] => ∃[D, [y <: D] => F[x, y]]](
+        forType[T2, D].generalize[[y <: D] => F[T1, y]](instance)
+      )
+    }
+  }
+
+  def forType2[T1 <: D, T2 <: D, D] = new PartiallyTyped2[T1, T2, D]
+
   def notForall[D, φ[_ <: D]](notForall: ￢[∀[D, [x <: D] => φ[x]]]): ∃[D, [x <: D] => ￢[φ[x]]] = {
     eliminateDoubleNegation(notForall)
   }

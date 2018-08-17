@@ -75,9 +75,7 @@ object Lemma {
    * shorthand for axiom of extensionality.
    */
   def setEquals[X <: Σ, Y <: Σ](containsSameElement: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ Y)])(implicit axiom: ZFAxiom): X =::= Y = {
-    forType[Y].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
-      forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
-    )(containsSameElement)
+    forType2[X, Y].instantiate[[x <: Σ, y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)](extensionality)(containsSameElement)
   }
 
   /**
@@ -93,22 +91,22 @@ object Lemma {
    */
   def createUnaryClassFunction[R[_ <: Σ, _ <: Σ]](uniqueExists: ∀[[x <: Σ] => ∃![[y <: Σ] => y R x]])
     : ∃~>[[ClassFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => ClassFunction[x] R x]] = {
-      new ∃~>[[ClassFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => ClassFunction[x] R x]] {
-        type F[x <: Σ] = ∃[[y <: Σ] => y R x]#S
-        val value: ∀[[x <: Σ] => F[x] R x] = {
-          byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] R x]] =>
-            type X = assumption.S
-            type RX[y <: Σ] = y R X
-            val ev1: ￢[RX[F[X]]] = assumption.value
-            val ev2: ∃![RX] = forType[X].instantiate[[x <: Σ] => ∃![[y <: Σ] => y R x]](uniqueExists)
-            type Y = ev2._1.S
-            val ev3: RX[Y] = ev2._1.value
-            val ev4: RX[F[X]] = Isomorphisms.uniqueness(ev2, ev3).sub[RX](ev3)
-            ev4 ∧ ev1
-          }
+    new ∃~>[[ClassFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => ClassFunction[x] R x]] {
+      type F[x <: Σ] = ∃[[y <: Σ] => y R x]#S
+      val value: ∀[[x <: Σ] => F[x] R x] = {
+        byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] R x]] =>
+          type X = assumption.S
+          type RX[y <: Σ] = y R X
+          val ev1: ￢[RX[F[X]]] = assumption.value
+          val ev2: ∃![RX] = forType[X].instantiate[[x <: Σ] => ∃![[y <: Σ] => y R x]](uniqueExists)
+          type Y = ev2._1.S
+          val ev3: RX[Y] = ev2._1.value
+          val ev4: RX[F[X]] = Isomorphisms.uniqueness(ev2, ev3).sub[RX](ev3)
+          ev4 ∧ ev1
         }
       }
     }
+  }
 
   /**
    * creates a class function(_ <: Σ, _ <: Σ => Σ) given the that the relation forms a function on types.
@@ -124,9 +122,7 @@ object Lemma {
             type Y = ev1.S
             type RXY[z <: Σ] = R[z, X, Y]
             val ev2: ￢[RXY[F[X, Y]]] = ev1.value
-            val ev3: ∃![RXY] = forType[Y].instantiate[[y <: Σ] => ∃![[z <: Σ] => R[z, X, y]]](
-              forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∃![[z <: Σ] => R[z, x, y]]]](uniqueExists)
-            )
+            val ev3: ∃![RXY] = forType2[X, Y].instantiate[[x <: Σ, y <: Σ] => ∃![[z <: Σ] => R[z, x, y]]](uniqueExists)
             type Z = ev3._1.S
             val ev4: RXY[Z] = ev3._1.value
             val ev5: RXY[F[X, Y]] = Isomorphisms.uniqueness(ev3, ev4).sub[RXY](ev4)
@@ -182,10 +178,9 @@ class EmptySetConstruct(implicit axiom: ZFAxiom) {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[isEmpty[x] => (x =::= ∅)]] =>
       type X = assumption.S
       val ev1: ￢[isEmpty[X] => (X =::= ∅)] = assumption.value
-      val ev2: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] => (X =::= ∅) =
-        forType[∅].instantiate[[y <: Σ] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ y)] => (X =::= y)](
-          forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)]](extensionality)
-        )
+      val ev2: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] => (X =::= ∅) = {
+        forType2[X, ∅].instantiate[[x <: Σ, y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)](extensionality)
+      }
       val ev3: isEmpty[X] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] = { xIsEmpty: ∀[[y <: Σ] => y ∉ X] =>
         byContradiction { assumption3: ∃[[z <: Σ] => ￢[(z ∈ X) <=> (z ∈ ∅)]] =>
           type Z = assumption3.S
@@ -216,10 +211,9 @@ class PairSetConstruct(implicit axiom: ZFAxiom) {
       val ev1: ∃[[y <: Σ] => ￢[∃[[z <: Σ] => containsTwo[z, X, y]]]] = assumption.value
       type Y = ev1.S
       val ev2: ￢[∃[[z <: Σ] => containsTwo[z, X, Y]]] = ev1.value
-      val ev3: ∃[[z <: Σ] => ∀[[w <: Σ] => ((w =::= X) ∨ (w =::= Y)) => (w ∈ z)]] =
-        forType[Y].instantiate[[b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= X) ∨ (w =::= b)) => (w ∈ x)]]](
-          forType[X].instantiate[[a <: Σ] => ∀[[b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]]](pairing)
-        )
+      val ev3: ∃[[z <: Σ] => ∀[[w <: Σ] => ((w =::= X) ∨ (w =::= Y)) => (w ∈ z)]] = {
+        forType2[X, Y].instantiate[[a <: Σ, b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]](pairing)
+      }
       val ev4: ∃[[z <: Σ] => containsTwo[z, X, Y]] = comprehendsExactly[[w <: Σ] => ((w =::= X) ∨ (w =::= Y))](ev3)
       ev4 ∧ ev2
     }
@@ -278,11 +272,7 @@ class UnionSetConstruct(implicit axiom: ZFAxiom) {
             val impliedBy: ∃[[Y <: Σ] => ((X ∈ Y) ∧ (Y ∈ F))] => ((X ∈ U) ∧ ∃[[y <: Σ] => ((X ∈ y) ∧ (y ∈ F))]) = { ex =>
               type Y = ex.S
               val ev4321: (X ∈ Y) ∧ (Y ∈ F) = ex.value
-              val ev4322: ((X ∈ Y) ∧ (Y ∈ F)) => X ∈ U = {
-                forType[X].instantiate[[x <: Σ] => ((x ∈ Y) ∧ (Y ∈ F)) => x ∈ U](
-                  forType[Y].instantiate[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ U]](ev3)
-                )
-              }
+              val ev4322: ((X ∈ Y) ∧ (Y ∈ F)) => X ∈ U = forType2[Y, X].instantiate[[y <: Σ, x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ U](ev3)
               val ev4323: X ∈ U = ev4322(ev4321)
               ev4323 ∧ ex
             }
@@ -394,14 +384,7 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct,
 
   type ∪[x <: Σ, y <: Σ] = Union[x ++: y]
   val constraintValue: ∀[[x <: Σ] => ∀[[y <: Σ] => isSumOf[x ∪ y, x, y]]] = ???
-
-  def constraint[x <: Σ, y <: Σ]: isSumOf[x ∪ y, x, y] = {
-    forType[y].instantiate[[y1 <: Σ] => isSumOf[x ∪ y1, x, y1]](
-      forType[x].instantiate[[x1 <: Σ] => ∀[[y1 <: Σ] => isSumOf[x1 ∪ y1, x1, y1]]](
-        constraintValue
-      )
-    )
-  }
+  def constraint[x <: Σ, y <: Σ]: isSumOf[x ∪ y, x, y] = forType2[x, y].instantiate[[x1 <: Σ, y1 <: Σ] => isSumOf[x1 ∪ y1, x1, y1]](constraintValue)
 
 }
 
@@ -412,11 +395,7 @@ class IntersectionConstruct(val union: UnionSetConstruct) {
   val constraintVal: ∀[[F <: Σ] => ∀[[z <: Σ] => (z ∈ Intersection[F]) <=> (F hasAll ([x <: Σ] => z ∈ x))]] = ???
 
   def constraint[F <: Σ, z <: Σ]: (z ∈ Intersection[F]) <=> (F hasAll ([x <: Σ] => z ∈ x)) = {
-    forType[z].instantiate[[z1 <: Σ] => (z1 ∈ Intersection[F]) <=> (F hasAll ([x <: Σ] => z1 ∈ x))](
-      forType[F].instantiate[[F1 <: Σ] => ∀[[z1 <: Σ] => (z1 ∈ Intersection[F1]) <=> (F1 hasAll ([x <: Σ] => z1 ∈ x))]](
-        constraintVal
-      )
-    )
+    forType2[F, z].instantiate[[F1 <: Σ, z1 <: Σ] => (z1 ∈ Intersection[F1]) <=> (F1 hasAll ([x <: Σ] => z1 ∈ x))](constraintVal)
   }
 
 }
@@ -431,9 +410,7 @@ class BinaryIntersectionConstruct(val pairSet: PairSetConstruct,
   val constraintValue: ∀[[x <: Σ] => ∀[[y <: Σ] => isIntersectionOf[x ∩ y, x, y]]] = ???
 
   def constraint[x <: Σ, y <: Σ]: isIntersectionOf[x ∩ y, x, y] = {
-    forType[y].instantiate[[y1 <: Σ] => isIntersectionOf[x ∩ y1, x, y1]](
-      forType[x].instantiate[[x1 <: Σ] => ∀[[y1 <: Σ] => isIntersectionOf[x1 ∩ y1, x1, y1]]](constraintValue)
-    )
+    forType2[x, y].instantiate[[x1 <: Σ, y1 <: Σ] => isIntersectionOf[x1 ∩ y1, x1, y1]](constraintValue)
   }
 
 }
@@ -447,13 +424,9 @@ class OrderedPairConstruct(val pairSet: PairSetConstruct, val singleton: Singlet
   val constraintValue: ∀[[a <: Σ] => ∀[[b <: Σ] => ∀[[c <: Σ] => ∀[[d <: Σ] => ((a ::: b) =::= (c ::: d)) <=> ((a =::= c) ∧ (b =::= d))]]]] = ???
 
   def constraint[a <: Σ, b <: Σ, c <: Σ, d <: Σ]: ((a ::: b) =::= (c ::: d)) <=> ((a =::= c) ∧ (b =::= d)) = {
-    forType[d].instantiate[[d1 <: Σ] => ((a ::: b) =::= (c ::: d1)) <=> ((a =::= c) ∧ (b =::= d1))](
-      forType[c].instantiate[[c1 <: Σ] => ∀[[d1 <: Σ] => ((a ::: b) =::= (c1 ::: d1)) <=> ((a =::= c1) ∧ (b =::= d1))]](
-        forType[b].instantiate[[b1 <: Σ] => ∀[[c1 <: Σ] => ∀[[d1 <: Σ] => ((a ::: b1) =::= (c1 ::: d1)) <=> ((a =::= c1) ∧ (b1 =::= d1))]]](
-          forType[a].instantiate[[a1 <: Σ] => ∀[[b1 <: Σ] => ∀[[c1 <: Σ] => ∀[[d1 <: Σ] => ((a1 ::: b1) =::= (c1 ::: d1)) <=> ((a1 =::= c1) ∧ (b1 =::= d1))]]]](
-            constraintValue
-          )
-        )
+    forType2[c, d].instantiate[[c1 <: Σ, d1 <: Σ] => ((a ::: b) =::= (c1 ::: d1)) <=> ((a =::= c1) ∧ (b =::= d1))](
+      forType2[a, b].instantiate[[a1 <: Σ, b1 <: Σ] => ∀[[c1 <: Σ] => ∀[[d1 <: Σ] => ((a1 ::: b1) =::= (c1 ::: d1)) <=> ((a1 =::= c1) ∧ (b1 =::= d1))]]](
+        constraintValue
       )
     )
   }
