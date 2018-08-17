@@ -3,6 +3,7 @@ package com.github.kory33.proof.set
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic._
+import com.github.kory33.proof.set.logic.Equality._
 
 trait Σ
 

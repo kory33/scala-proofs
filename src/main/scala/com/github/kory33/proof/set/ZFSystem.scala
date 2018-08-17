@@ -5,6 +5,7 @@ import scala.language.implicitConversions
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
 import com.github.kory33.proof.set.logic._
+import com.github.kory33.proof.set.logic.Equality._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
