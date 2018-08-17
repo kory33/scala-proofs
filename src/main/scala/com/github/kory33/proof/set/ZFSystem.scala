@@ -110,9 +110,10 @@ object Lemma {
       }
     }
 
-  def createBinaryClassFunction[R[_ <: Σ, _ <: Σ, _ <: Σ]]
-    (exists: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => R[z, x, y]]]],
-     unique: ∀[[z <: Σ] => ∀[[w <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (R[z, x, y] ∧ R[w, x, y]) => z =::= w]]]])
+  /**
+   * creates a class function(_ <: Σ, _ <: Σ => Σ) given the that the relation forms a function on types.
+   */
+  def createBinaryClassFunction[R[_ <: Σ, _ <: Σ, _ <: Σ]](uniqueExists: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃![[z <: Σ] => R[z, x, y]]]])
     : ∃~~>[[ClassFunction[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => R[ClassFunction[x, y], x, y]]]] = {
       new ∃~~>[[ClassFunction[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => R[ClassFunction[x, y], x, y]]]] {
         type F[x <: Σ, y <: Σ] = ∃[[z <: Σ] => R[z, x, y]]#S
@@ -121,17 +122,14 @@ object Lemma {
             type X = assumption.S
             val ev1: ∃[[y <: Σ] => ￢[R[F[X, y], X, y]]] = assumption.value
             type Y = ev1.S
-            val ev2: ￢[R[F[X, Y], X, Y]] = ev1.value
-
-            val ev3: ∃[[z <: Σ] => R[z, X, Y]] = forType[Y].instantiate[[y <: Σ] => ∃[[z <: Σ] => R[z, X, y]]](
-              forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => R[z, x, y]]]](exists)
+            type RXY[z <: Σ] = R[z, X, Y]
+            val ev2: ￢[RXY[F[X, Y]]] = ev1.value
+            val ev3: ∃![RXY] = forType[Y].instantiate[[y <: Σ] => ∃![[z <: Σ] => R[z, X, y]]](
+              forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∃![[z <: Σ] => R[z, x, y]]]](uniqueExists)
             )
-            type Z = ev3.S
-            val ev4: R[Z, X, Y] = ev3.value
-            // since the subtype of F[X, Y] is unique to Z, they are isomorphic.
-            // it is therefore safe to cast from G[Z] to G[F[X, Y]] for any G[_].
-            // let G[x] = R[x, X, Y], then this cast is safe.
-            val ev5: R[F[X, Y], X, Y] = ev4.asInstanceOf[R[F[X, Y], X, Y]]
+            type Z = ev3._1.S
+            val ev4: RXY[Z] = ev3._1.value
+            val ev5: RXY[F[X, Y]] = Isomorphisms.uniqueness(ev3, ev4).sub[RXY](ev4)
 
             ev5 ∧ ev2
           }
@@ -242,8 +240,10 @@ class PairSetConstruct(implicit axiom: ZFAxiom) {
     }
   }
 
+  val uniqueExistence: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃![[z <: Σ] => containsTwo[z, x, y]]]] = ???
+
   val pairFunctionExistence: ∃~~>[[++:[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => containsTwo[x ++: y, x, y]]]] = {
-    createBinaryClassFunction[containsTwo](existence, uniqueness)
+    createBinaryClassFunction[containsTwo](uniqueExistence)
   }
 
   type ++:[x <: Σ, y <: Σ] = pairFunctionExistence.F[x, y]
