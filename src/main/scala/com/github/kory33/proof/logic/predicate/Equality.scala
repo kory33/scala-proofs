@@ -9,16 +9,13 @@ object Equality {
   */
   @implicitNotFound(msg = "Cannot prove that ${A} =::= ${B}.")
   trait =::=[D, A <: D, B <: D] {
-    def lift[F[_ <: D] <: D]: =::=[D, F[A], F[B]]
     def sub[F[_ <: D]]: F[A] => F[B]
-    def commute: =::=[D, B, A]
+    def commute: =::=[D, B, A] = this.sub[[b <: D] => =::=[D, b, A]](implicitly[=::=[D, A, A]])
   }
 
   object =::= {
     implicit def constructEquality[D, A <: D]: =::=[D, A, A] = new =::=[D, A, A] {
-      def lift[F[_ <: D] <: D]: =::=[D, F[A], F[A]] = constructEquality[D, F[A]]
       def sub[F[_ <: D]]: F[A] => F[A] = identity
-      def commute: =::=[D, A, A] = this
     }
   }
 

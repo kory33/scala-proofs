@@ -2,6 +2,8 @@ package com.github.kory33.proof.set
 
 import scala.language.implicitConversions
 
+import com.github.kory33.proof.meta.set.Isomorphisms
+
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
 import com.github.kory33.proof.set.logic._
@@ -87,25 +89,21 @@ object Lemma {
   }
 
   /**
-   * creates a type-level function given the that the relation is a bijection on types.
+   * creates a class function(_ <: Σ => Σ) given the that the relation forms a function on types.
    */
-  def createUnaryClassFunction[R[_ <: Σ, _ <: Σ]]
-    (exists: ∀[[x <: Σ] => ∃[[y <: Σ] => y R x]],
-     unique: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x R z) ∧ (y R z) => x =::= y]]])
+  def createUnaryClassFunction[R[_ <: Σ, _ <: Σ]](uniqueExists: ∀[[x <: Σ] => ∃![[y <: Σ] => y R x]])
     : ∃~>[[ClassFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => ClassFunction[x] R x]] = {
       new ∃~>[[ClassFunction[_ <: Σ] <: Σ] => ∀[[x <: Σ] => ClassFunction[x] R x]] {
         type F[x <: Σ] = ∃[[y <: Σ] => y R x]#S
         val value: ∀[[x <: Σ] => F[x] R x] = {
           byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] R x]] =>
             type X = assumption.S
-            val ev1: ￢[F[X] R X] = assumption.value
-            val ev2: ∃[[y <: Σ] => y R X] = forType[X].instantiate[[x <: Σ] => ∃[[y <: Σ] => y R x]](exists)
-            type Y = ev2.S
-            val ev3: Y R X = ev2.value
-            // since the subtype of F[X] is unique to Y, they are isomorphic.
-            // it is therefore safe to cast from G[Y] to G[F[X]] for any G[_].
-            // let G[x] = x R X, then this cast is safe.
-            val ev4: F[X] R X = ev3.asInstanceOf[F[X] R X]
+            type RX[y <: Σ] = y R X
+            val ev1: ￢[RX[F[X]]] = assumption.value
+            val ev2: ∃![RX] = forType[X].instantiate[[x <: Σ] => ∃![[y <: Σ] => y R x]](uniqueExists)
+            type Y = ev2._1.S
+            val ev3: RX[Y] = ev2._1.value
+            val ev4: RX[F[X]] = Isomorphisms.uniqueness(ev2, ev3).sub[RX](ev3)
             ev4 ∧ ev1
           }
         }
@@ -313,7 +311,9 @@ class UnionSetConstruct(implicit axiom: ZFAxiom) {
     }
   }
 
-  val unionFunctionExistence: ∃~>[[Union[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Union[x] isUnionOf x]] = createUnaryClassFunction[isUnionOf](existence, uniqueness)
+  val uniqueExistence: ∀[[x <: Σ] => ∃![[y <: Σ] => y isUnionOf x]] = ???
+
+  val unionFunctionExistence: ∃~>[[Union[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Union[x] isUnionOf x]] = createUnaryClassFunction[isUnionOf](uniqueExistence)
 
   type Union[x <: Σ] = unionFunctionExistence.F[x]
   val constraint: ∀[[x <: Σ] => Union[x] isUnionOf x] = unionFunctionExistence.value
@@ -349,7 +349,9 @@ class PowerSetConstruct(implicit axiom: ZFAxiom) {
     }
   }
 
-  val powerFunctionExistence: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createUnaryClassFunction[isPowerOf](existence, uniqueness)
+  val uniqueExistence: ∀[[x <: Σ] => ∃![[y <: Σ] => y isPowerOf x]] = ???
+
+  val powerFunctionExistence: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createUnaryClassFunction[isPowerOf](uniqueExistence)
 
   type Pow[x <: Σ] = powerFunctionExistence.F[x]
   val constraint: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExistence.value
