@@ -1,5 +1,7 @@
 package com.github.kory33.proof.set
 
+import scala.language.implicitConversions
+
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
 import com.github.kory33.proof.set.logic._

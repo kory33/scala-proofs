@@ -1,5 +1,7 @@
 package com.github.kory33.proof.set.logic
 
+import scala.language.implicitConversions
+
 import com.github.kory33.proof.logic.predicate.PredicateLogicSystem
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
