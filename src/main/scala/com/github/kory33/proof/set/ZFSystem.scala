@@ -17,6 +17,8 @@ import com.github.kory33.proof.set.ZFAxiom._
 object Lemma {
 
   object Predicate {
+    def forallConj[F[_ <: Σ], G[_ <: Σ]]: (∀[F] ∧ ∀[G]) <=> ∀[[x <: Σ] => F[x] ∧ G[x]] = ???
+
     def forallEquivCommute[F[_ <: Σ], G[_ <: Σ]]: ∀[[x <: Σ] => F[x] <=> G[x]] => ∀[[x <: Σ] => G[x] <=> F[x]] = { equiv =>
       byContradiction { assumption: ∃[[x <: Σ] => ￢[G[x] <=> F[x]]] =>
         type X = assumption.S
@@ -84,6 +86,24 @@ object Lemma {
   def equivalence[X <: Σ, Y <: Σ, F[_ <: Σ]](implicit axiom: ZFAxiom): (∀[[w <: Σ] => (w ∈ X) <=> F[w]] ∧ ∀[[w <: Σ] => (w ∈ Y) <=> F[w]]) => (X =::= Y) = { case (x, y) =>
     val ev1: ∀[[x <: Σ] => x ∈ X <=> x ∈ Y] = Predicate.forallEquivConditions[[w <: Σ] => w ∈ X, F, [w <: Σ] => w ∈ Y](x, y)
     setEquals[X, Y](ev1)
+  }
+
+  def uniqueExistence[R[_ <: Σ, _ <: Σ]](exists: ∀[[x <: Σ] => ∃[[y <: Σ] => R[y, x]]],
+                                         unique: ∀[[x <: Σ] => Unique[[y <: Σ] => R[y, x]]]): ∀[[x <: Σ] => ∃![[y <: Σ] => R[y, x]]] = {
+    Predicate.forallConj[[x <: Σ] => ∃[[y <: Σ] => R[y, x]], [x <: Σ] => Unique[[y <: Σ] => R[y, x]]].implies(exists ∧ unique)
+  }
+
+  def uniqueExistence2[R[_ <: Σ, _ <: Σ, _ <: Σ]](exists: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => R[z, x, y]]]],
+                                                  unique: ∀[[x <: Σ] => ∀[[y <: Σ] => Unique[[z <: Σ] => R[z, x, y]]]])
+    : ∀[[x <: Σ] => ∀[[y <: Σ] => ∃![[z <: Σ] => R[z, x, y]]]] = {
+      byContradiction { assumption: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => ∃![[z <: Σ] => R[z, x, y]]]]] =>
+        type X = assumption.S
+        type RX[z <: Σ, y <: Σ] = R[z, X, y]
+        val ev1: ￢[∀[[y <: Σ] => ∃![[z <: Σ] => RX[z, y]]]] = assumption.value
+        val ev2: ∀[[y <: Σ] => ∃[[z <: Σ] => RX[z, y]]] = forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => R[z, x, y]]]](exists)
+        val ev3: ∀[[y <: Σ] => Unique[[z <: Σ] => RX[z, y]]] = forType[X].instantiate[[x <: Σ] => ∀[[y <: Σ] => Unique[[z <: Σ] => R[z, x, y]]]](unique)
+        uniqueExistence[RX](ev2, ev3) ∧ ev1
+      }
   }
 
   /**

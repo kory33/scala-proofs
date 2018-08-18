@@ -35,9 +35,14 @@ object SetDefinitions {
   type hasSome[A <: Σ, F[_ <: Σ]] = ∃[[x <: Σ] => (x ∈ A) ∧ F[x]]
 
   /**
+   * If there are two types satisfying F, they are equal.
+   */
+  type Unique[F[_ <: Σ]] = ∀[[x <: Σ] => ∀[[y <: Σ] => (F[x] ∧ F[y]) => x =::= y]]
+
+  /**
    * Unique existence
    */
-  type ∃![F[_ <: Σ]] = ∃[F] ∧ ∀[[x <: Σ] => ∀[[y <: Σ] => (F[x] ∧ F[y]) => x =::= y]]
+  type ∃![F[_ <: Σ]] = ∃[F] ∧ Unique[F]
 
   /**
    * x and y are disjoint
