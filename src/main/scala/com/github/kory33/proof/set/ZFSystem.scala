@@ -239,25 +239,23 @@ class PairSetConstruct(implicit axiom: ZFAxiom) {
     }
   }
 
-  val uniqueness: ∀[[z <: Σ] => ∀[[w <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (containsTwo[z, x, y] ∧ containsTwo[w, x, y]) => z =::= w]]]] = {
-    byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[w <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (containsTwo[z, x, y] ∧ containsTwo[w, x, y]) => z =::= w]]]]] =>
-      type Z = assumption.S
-      val ev1: ∃[[w <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (containsTwo[Z, x, y] ∧ containsTwo[w, x, y]) => Z =::= w]]]] = assumption.value
-      type W = ev1.S
-      val ev2: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (containsTwo[Z, x, y] ∧ containsTwo[W, x, y]) => Z =::= W]]] = ev1.value
-      type X = ev2.S
-      val ev3: ∃[[y <: Σ] => ￢[(containsTwo[Z, X, y] ∧ containsTwo[W, X, y]) => Z =::= W]] = ev2.value
-      type Y = ev3.S
+  val uniqueness: ∀[[x <: Σ] => ∀[[y <: Σ] => Unique[[z <: Σ] => containsTwo[z, x, y]]]] = {
+    byContradiction { assumption: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => Unique[[z <: Σ] => containsTwo[z, x, y]]]]] =>
+      type X = assumption.S
+      val ev1: ∃[[y <: Σ] => ￢[Unique[[z <: Σ] => containsTwo[z, X, y]]]] = assumption.value
+      type Y = ev1.S
+      val ev2: ∃[[z <: Σ] => ￢[∀[[w <: Σ] => (containsTwo[z, X, Y] ∧ containsTwo[w, X, Y]) => z =::= w]]] = ev1.value
+      type Z = ev2.S
+      val ev3: ∃[[w <: Σ] => ￢[(containsTwo[Z, X, Y] ∧ containsTwo[w, X, Y]) => Z =::= w]] = ev2.value
+      type W = ev3.S
       val ev4: ￢[(containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W] = ev3.value
       val ev5: (containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W = equivalence[Z, W, [z <: Σ] => (z =::= X) ∨ (z =::= Y)]
       ev5 ∧ ev4
     }
   }
 
-  val uniqueExistence: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃![[z <: Σ] => containsTwo[z, x, y]]]] = ???
-
   val pairFunctionExistence: ∃~~>[[++:[_ <: Σ, _ <: Σ] <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => containsTwo[x ++: y, x, y]]]] = {
-    createBinaryClassFunction[containsTwo](uniqueExistence)
+    createBinaryClassFunction[containsTwo](uniqueExistence2[containsTwo](existence, uniqueness))
   }
 
   type ++:[x <: Σ, y <: Σ] = pairFunctionExistence.F[x, y]
@@ -308,7 +306,7 @@ class UnionSetConstruct(implicit axiom: ZFAxiom) {
     }
   }
 
-  val uniqueness: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isUnionOf z) ∧ (y isUnionOf z) => x =::= y]]] = {
+  val uniqueness: ∀[[x <: Σ] => Unique[[y <: Σ] => y isUnionOf x]] = {
     byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isUnionOf z) ∧ (y isUnionOf z) => x =::= y]]]] =>
       type Z = assumption.S
       val ev1: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isUnionOf Z) ∧ (y isUnionOf Z) => x =::= y]]] = assumption.value
@@ -321,9 +319,9 @@ class UnionSetConstruct(implicit axiom: ZFAxiom) {
     }
   }
 
-  val uniqueExistence: ∀[[x <: Σ] => ∃![[y <: Σ] => y isUnionOf x]] = ???
-
-  val unionFunctionExistence: ∃~>[[Union[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Union[x] isUnionOf x]] = createUnaryClassFunction[isUnionOf](uniqueExistence)
+  val unionFunctionExistence: ∃~>[[Union[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Union[x] isUnionOf x]] = {
+    createUnaryClassFunction[isUnionOf](uniqueExistence[isUnionOf](existence, uniqueness))
+  }
 
   type Union[x <: Σ] = unionFunctionExistence.F[x]
   val constraint: ∀[[x <: Σ] => Union[x] isUnionOf x] = unionFunctionExistence.value
@@ -359,9 +357,9 @@ class PowerSetConstruct(implicit axiom: ZFAxiom) {
     }
   }
 
-  val uniqueExistence: ∀[[x <: Σ] => ∃![[y <: Σ] => y isPowerOf x]] = ???
-
-  val powerFunctionExistence: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = createUnaryClassFunction[isPowerOf](uniqueExistence)
+  val powerFunctionExistence: ∃~>[[Pow[_ <: Σ] <: Σ] => ∀[[x <: Σ] => Pow[x] isPowerOf x]] = {
+    createUnaryClassFunction[isPowerOf](uniqueExistence[isPowerOf](existence, uniqueness))
+  }
 
   type Pow[x <: Σ] = powerFunctionExistence.F[x]
   val constraint: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExistence.value
