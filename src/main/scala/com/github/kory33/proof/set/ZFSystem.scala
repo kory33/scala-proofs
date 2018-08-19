@@ -17,7 +17,22 @@ import com.github.kory33.proof.set.ZFAxiom._
 object Lemma {
 
   object Predicate {
-    def forallConj[F[_ <: Σ], G[_ <: Σ]]: (∀[F] ∧ ∀[G]) <=> ∀[[x <: Σ] => F[x] ∧ G[x]] = ???
+    def forallConj[F[_ <: Σ], G[_ <: Σ]]: (∀[F] ∧ ∀[G]) <=> ∀[[x <: Σ] => F[x] ∧ G[x]] = {
+      val implies: (∀[F] ∧ ∀[G]) => ∀[[x <: Σ] => F[x] ∧ G[x]] = { case (forallF, forallG) =>
+        byContradiction { assumption: ∃[[x <: Σ] => ￢[F[x] ∧ G[x]]] =>
+          type X = assumption.S
+          val ev1: ￢[F[X] ∧ G[X]] = assumption.value
+          val ev2: F[X] ∧ G[X] = forType[X].instantiate[F](forallF) ∧ forType[X].instantiate[G](forallG)
+          ev2 ∧ ev1
+        }
+      }
+      val impliedBy: ∀[[x <: Σ] => F[x] ∧ G[x]] => (∀[F] ∧ ∀[G]) = { forallFG =>
+        val ev1: ∀[F] = byContradiction { notF => forType[notF.S].instantiate[[x <: Σ] => F[x] ∧ G[x]](forallFG)._1 ∧ notF.value }
+        val ev2: ∀[G] = byContradiction { notF => forType[notF.S].instantiate[[x <: Σ] => F[x] ∧ G[x]](forallFG)._2 ∧ notF.value }
+        ev1 ∧ ev2
+      }
+      implies ∧ impliedBy
+    }
 
     def forallEquivCommute[F[_ <: Σ], G[_ <: Σ]]: ∀[[x <: Σ] => F[x] <=> G[x]] => ∀[[x <: Σ] => G[x] <=> F[x]] = { equiv =>
       byContradiction { assumption: ∃[[x <: Σ] => ￢[G[x] <=> F[x]]] =>
@@ -346,7 +361,7 @@ class PowerSetConstruct(implicit axiom: ZFAxiom) {
   val uniqueness: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]] = {
     byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] =>
       type Z = assumption.S
-      val ev1: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = ev1
+      val ev1: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = assumption.value
       type X = ev1.S
       val ev2: ∃[[y <: Σ] => ￢[(X isPowerOf Z) ∧ (y isPowerOf Z) => X =::= y]] = ev1.value
       type Y = ev2.S
