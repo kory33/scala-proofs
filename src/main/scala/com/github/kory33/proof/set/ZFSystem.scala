@@ -12,7 +12,8 @@ import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 import com.github.kory33.proof.set.SetDefinitions._
-import com.github.kory33.proof.set.ZFAxiom._
+import com.github.kory33.proof.set.axiom.ZFAxiom
+import com.github.kory33.proof.set.axiom.zf._
 
 object Lemma {
 
@@ -62,14 +63,14 @@ object Lemma {
   /**
    * shorthand for axiom schema of separation.
    */
-  def separate[X <: Σ, F[_ <: Σ]](implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u])]] = {
-    forType[X].instantiate[[x <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u])]]](separation[F])
+  def separate[X <: Σ, F[_ <: Σ]](implicit axiom: ZFSeparation): ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ X) ∧ F[u])]] = {
+    forType[X].instantiate[[x <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u])]]](axiom.separation[F])
   }
 
   /**
    * If there exists a set containing all set u such that F[u], then there exists a subset containing all u such that F[u] and nothing else.
    */
-  def comprehendsExactly[F[_ <: Σ]](existsSuperSet: ∃[[y <: Σ] => ∀[[z <: Σ] => F[z] => (z ∈ y)]])(implicit axiom: ZFAxiom): ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]] = {
+  def comprehendsExactly[F[_ <: Σ]](existsSuperSet: ∃[[y <: Σ] => ∀[[z <: Σ] => F[z] => (z ∈ y)]])(implicit axiom: ZFSeparation): ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> F[z]]] = {
     type Y = existsSuperSet.S
     val ev1: ∀[[u <: Σ] => F[u] => (u ∈ Y)] = existsSuperSet.value
     val ev2: ∃[[w <: Σ] => ∀[[u <: Σ] => (u ∈ w) <=> ((u ∈ Y) ∧ F[u])]] = separate[Y, F]
@@ -91,14 +92,14 @@ object Lemma {
   /**
    * shorthand for axiom of extensionality.
    */
-  def setEquals[X <: Σ, Y <: Σ](containsSameElement: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ Y)])(implicit axiom: ZFAxiom): X =::= Y = {
-    forType2[X, Y].instantiate[[x <: Σ, y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)](extensionality)(containsSameElement)
+  def setEquals[X <: Σ, Y <: Σ](containsSameElement: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ Y)])(implicit axiom: ZFExtensionality): X =::= Y = {
+    forType2[X, Y].instantiate[[x <: Σ, y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)](axiom.extensionality)(containsSameElement)
   }
 
   /**
    * Two sets having the same equivalence condition on their elements are equal.
    */
-  def equivalence[X <: Σ, Y <: Σ, F[_ <: Σ]](implicit axiom: ZFAxiom): (∀[[w <: Σ] => (w ∈ X) <=> F[w]] ∧ ∀[[w <: Σ] => (w ∈ Y) <=> F[w]]) => (X =::= Y) = { case (x, y) =>
+  def equivalence[X <: Σ, Y <: Σ, F[_ <: Σ]](implicit axiom: ZFExtensionality): (∀[[w <: Σ] => (w ∈ X) <=> F[w]] ∧ ∀[[w <: Σ] => (w ∈ Y) <=> F[w]]) => (X =::= Y) = { case (x, y) =>
     val ev1: ∀[[x <: Σ] => x ∈ X <=> x ∈ Y] = Predicate.forallEquivConditions[[w <: Σ] => w ∈ X, F, [w <: Σ] => w ∈ Y](x, y)
     setEquals[X, Y](ev1)
   }
@@ -179,7 +180,7 @@ class ComprehensionConstruct(implicit axiom: ZFAxiom) {
 
 }
 
-class EmptySetConstruct(implicit axiom: ZFAxiom) {
+class EmptySetConstruct(implicit axiom: ZFExistence & ZFExtensionality & ZFSeparation) {
   import Lemma._
 
   /**
@@ -214,7 +215,7 @@ class EmptySetConstruct(implicit axiom: ZFAxiom) {
       type X = assumption.S
       val ev1: ￢[isEmpty[X] => (X =::= ∅)] = assumption.value
       val ev2: ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] => (X =::= ∅) = {
-        forType2[X, ∅].instantiate[[x <: Σ, y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)](extensionality)
+        forType2[X, ∅].instantiate[[x <: Σ, y <: Σ] => ∀[[z <: Σ] => (z ∈ x) <=> (z ∈ y)] => (x =::= y)](axiom.extensionality)
       }
       val ev3: isEmpty[X] => ∀[[z <: Σ] => (z ∈ X) <=> (z ∈ ∅)] = { xIsEmpty: ∀[[y <: Σ] => y ∉ X] =>
         byContradiction { assumption3: ∃[[z <: Σ] => ￢[(z ∈ X) <=> (z ∈ ∅)]] =>
@@ -236,7 +237,7 @@ class EmptySetConstruct(implicit axiom: ZFAxiom) {
   }
 }
 
-class PairSetConstruct(implicit axiom: ZFAxiom) {
+class PairSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFParing) {
   import Lemma._
   import Lemma.Predicate._
 
@@ -247,7 +248,7 @@ class PairSetConstruct(implicit axiom: ZFAxiom) {
       type Y = ev1.S
       val ev2: ￢[∃[[z <: Σ] => containsTwo[z, X, Y]]] = ev1.value
       val ev3: ∃[[z <: Σ] => ∀[[w <: Σ] => ((w =::= X) ∨ (w =::= Y)) => (w ∈ z)]] = {
-        forType2[X, Y].instantiate[[a <: Σ, b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]](pairing)
+        forType2[X, Y].instantiate[[a <: Σ, b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]](axiom.pairing)
       }
       val ev4: ∃[[z <: Σ] => containsTwo[z, X, Y]] = comprehendsExactly[[w <: Σ] => ((w =::= X) ∨ (w =::= Y))](ev3)
       ev4 ∧ ev2
@@ -278,7 +279,7 @@ class PairSetConstruct(implicit axiom: ZFAxiom) {
 
 }
 
-class UnionSetConstruct(implicit axiom: ZFAxiom) {
+class UnionSetConstruct(implicit axiom: ZFSeparation & ZFExtensionality & ZFUnion) {
   import Lemma._
   import Lemma.Predicate._
 
@@ -287,7 +288,7 @@ class UnionSetConstruct(implicit axiom: ZFAxiom) {
       type F = assumption.S 
       val ev1: ￢[∃[[u <: Σ] => u isUnionOf F]] = assumption.value
       val ev2: ∃[[u <: Σ] => ∀[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]] = {
-        forType[F].instantiate[[F <: Σ] => ∃[[u <: Σ] => ∀[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]](union)
+        forType[F].instantiate[[F <: Σ] => ∃[[u <: Σ] => ∀[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ u]]]](axiom.union)
       }
       type U = ev2.S
       val ev3: ∀[[y <: Σ] => ∀[[x <: Σ] => ((x ∈ y) ∧ (y ∈ F)) => x ∈ U]] = ev2.value
@@ -343,7 +344,7 @@ class UnionSetConstruct(implicit axiom: ZFAxiom) {
 
 }
 
-class PowerSetConstruct(implicit axiom: ZFAxiom) {
+class PowerSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFPower) {
   import Lemma._
   import Lemma.Predicate._
 
@@ -351,7 +352,7 @@ class PowerSetConstruct(implicit axiom: ZFAxiom) {
     byContradiction { assumption: ∃[[x <: Σ] => ￢[∃[[y <: Σ] => y isPowerOf x]]] =>
       type X = assumption.S
       val ev1: ￢[∃[[y <: Σ] => y isPowerOf X]] = assumption.value
-      val ev2: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ⊂ X) => (z ∈ y)]] = forType[X].instantiate[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]](power)
+      val ev2: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ⊂ X) => (z ∈ y)]] = forType[X].instantiate[[x <: Σ] => ∃[[p <: Σ] => ∀[[z <: Σ] => (z ⊂ x) => (z ∈ p)]]](axiom.power)
       val ev3: ∃[[y <: Σ] => ∀[[z <: Σ] => (z ∈ y) <=> (z ⊂ X)]] = comprehendsExactly[[z <: Σ] => z ⊂ X](ev2)
       val ev4: ∃[[y <: Σ] => y isPowerOf X] = ev3
       ev4 ∧ ev1
