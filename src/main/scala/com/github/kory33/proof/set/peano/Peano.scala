@@ -1,4 +1,4 @@
-package com.github.kory33.proof.set
+package com.github.kory33.proof.set.peano
 
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
@@ -6,6 +6,7 @@ import com.github.kory33.proof.set.logic._
 import com.github.kory33.proof.set.logic.Equality._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.set.SetDefinitions._
+import com.github.kory33.proof.set._
 
 trait Peano[X <: Σ, x <: Σ, f[_ <: Σ] <: Σ] {
   
