@@ -28,15 +28,14 @@ class PowerSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFPowe
   }
 
   val uniqueness: ∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]] = {
-    byContradiction { assumption: ∃[[z <: Σ] => ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] =>
-      type Z = assumption.S
-      val ev1: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (x isPowerOf Z) ∧ (y isPowerOf Z) => x =::= y]]] = assumption.value
-      type X = ev1.S
-      val ev2: ∃[[y <: Σ] => ￢[(X isPowerOf Z) ∧ (y isPowerOf Z) => X =::= y]] = ev1.value
-      type Y = ev2.S
-      val ev3: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev2.value
-      val ev4: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = equivalence[X, Y, [z <: Σ] => z ⊂ Z]
-      ev4 ∧ ev3
+    byContradiction { assumption: ￢[∀[[z <: Σ] => ∀[[x <: Σ] => ∀[[y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] =>
+      val ev1: ∃[[z <: Σ] => ∃[[x <: Σ] => ∃[[y <: Σ] => ￢[(x isPowerOf z) ∧ (y isPowerOf z) => x =::= y]]]] = {
+        notForall3[[z <: Σ, x <: Σ, y <: Σ] => (x isPowerOf z) ∧ (y isPowerOf z) => x =::= y](assumption)
+      }
+      type Z = ev1.S; type X = ev1.value.S; type Y = ev1.value.value.S
+      val ev2: ￢[(X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y] = ev1.value.value.value
+      val ev3: (X isPowerOf Z) ∧ (Y isPowerOf Z) => X =::= Y = equivalence[X, Y, [z <: Σ] => z ⊂ Z]
+      ev3 ∧ ev2
     }
   }
 

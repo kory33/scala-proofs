@@ -17,11 +17,10 @@ import com.github.kory33.proof.set._
 class PairSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFParing) {
 
   val existence: ∀[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => containsTwo[z, x, y]]]] = {
-    byContradiction { assumption: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => ∃[[z <: Σ] => containsTwo[z, x, y]]]]] =>
-      type X = assumption.S
-      val ev1: ∃[[y <: Σ] => ￢[∃[[z <: Σ] => containsTwo[z, X, y]]]] = assumption.value
-      type Y = ev1.S
-      val ev2: ￢[∃[[z <: Σ] => containsTwo[z, X, Y]]] = ev1.value
+    byContradiction { assumption: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => ∃[[z <: Σ] => containsTwo[z, x, y]]]]] =>
+      val ev1: ∃[[x <: Σ] => ∃[[y <: Σ] => ￢[∃[[z <: Σ] => containsTwo[z, x, y]]]]] = notForall2[[x <: Σ, y <: Σ] => ∃[[z <: Σ] => containsTwo[z, x, y]]](assumption)
+      type X = ev1.S; type Y = ev1.value.S
+      val ev2: ￢[∃[[z <: Σ] => containsTwo[z, X, Y]]] = ev1.value.value
       val ev3: ∃[[z <: Σ] => ∀[[w <: Σ] => ((w =::= X) ∨ (w =::= Y)) => (w ∈ z)]] = {
         forType2[X, Y].instantiate[[a <: Σ, b <: Σ] => ∃[[x <: Σ] => ∀[[w <: Σ] => ((w =::= a) ∨ (w =::= b)) => (w ∈ x)]]](axiom.pairing)
       }
@@ -31,17 +30,14 @@ class PairSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFParin
   }
 
   val uniqueness: ∀[[x <: Σ] => ∀[[y <: Σ] => Unique[[z <: Σ] => containsTwo[z, x, y]]]] = {
-    byContradiction { assumption: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => Unique[[z <: Σ] => containsTwo[z, x, y]]]]] =>
-      type X = assumption.S
-      val ev1: ∃[[y <: Σ] => ￢[Unique[[z <: Σ] => containsTwo[z, X, y]]]] = assumption.value
-      type Y = ev1.S
-      val ev2: ∃[[z <: Σ] => ￢[∀[[w <: Σ] => (containsTwo[z, X, Y] ∧ containsTwo[w, X, Y]) => z =::= w]]] = ev1.value
-      type Z = ev2.S
-      val ev3: ∃[[w <: Σ] => ￢[(containsTwo[Z, X, Y] ∧ containsTwo[w, X, Y]) => Z =::= w]] = ev2.value
-      type W = ev3.S
-      val ev4: ￢[(containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W] = ev3.value
-      val ev5: (containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W = equivalence[Z, W, [z <: Σ] => (z =::= X) ∨ (z =::= Y)]
-      ev5 ∧ ev4
+    byContradiction { assumption: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => Unique[[z <: Σ] => containsTwo[z, x, y]]]]] =>
+      val ev1: ∃[[x <: Σ] => ∃[[y <: Σ] => ∃[[z <: Σ] => ∃[[w <: Σ] => ￢[(containsTwo[z, x, y] ∧ containsTwo[w, x, y]) => z =::= w]]]]] = {
+        notForall4[[x <: Σ, y <: Σ, z <: Σ, w <: Σ] => (containsTwo[z, x, y] ∧ containsTwo[w, x, y]) => z =::= w](assumption)
+      }
+      type X = ev1.S; type Y = ev1.value.S; type Z = ev1.value.value.S; type W = ev1.value.value.value.S
+      val ev2: ￢[(containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W] = ev1.value.value.value.value
+      val ev3: (containsTwo[Z, X, Y] ∧ containsTwo[W, X, Y]) => Z =::= W = equivalence[Z, W, [z <: Σ] => (z =::= X) ∨ (z =::= Y)]
+      ev3 ∧ ev2
     }
   }
 

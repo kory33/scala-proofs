@@ -8,6 +8,7 @@ import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
+import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
 import com.github.kory33.proof.set.logic.Equality._
 import com.github.kory33.proof.set.axiom.zf._
 import com.github.kory33.proof.set.zf.Lemma._
@@ -24,11 +25,10 @@ class ComprehensionConstruct(implicit axiom: ZFExtensionality & ZFSeparation) {
     type SF[y <: Σ] = isSeparationBy[y, X, F]
 
     val existence: ∃[SF] = separate[X, F]
-    val uniqueness: Unique[SF] = byContradiction { assumption: ∃[[x <: Σ] => ￢[∀[[y <: Σ] => (SF[x] ∧ SF[y]) => x =::= y]]] =>
-      type X1 = assumption.S
-      val ev1: ∃[[y <: Σ] => ￢[(SF[X1] ∧ SF[y]) => X1 =::= y]] = assumption.value
-      type Y1 = ev1.S
-      val ev2: ￢[(SF[X1] ∧ SF[Y1]) => X1 =::= Y1] = ev1.value
+    val uniqueness: Unique[SF] = byContradiction { assumption: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => (SF[x] ∧ SF[y]) => x =::= y]]] =>
+      val ev1: ∃[[x <: Σ] => ∃[[y <: Σ] => ￢[(SF[x] ∧ SF[y]) => x =::= y]]] = notForall2[[x <: Σ, y <: Σ] => (SF[x] ∧ SF[y]) => x =::= y](assumption)
+      type X1 = ev1.S; type Y1 = ev1.value.S
+      val ev2: ￢[(SF[X1] ∧ SF[Y1]) => X1 =::= Y1] = ev1.value.value
       val ev3: (SF[X1] ∧ SF[Y1]) => X1 =::= Y1 = equivalence[X1, Y1, [z <: Σ] => (z ∈ X) ∧ F[z]]
       ev3 ∧ ev2
     }
