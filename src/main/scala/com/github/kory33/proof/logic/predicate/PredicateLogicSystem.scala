@@ -65,6 +65,32 @@ object PredicateLogicSystem {
     eliminateDoubleNegation(notForall)
   }
 
+  def notForall2[D, φ[_ <: D, _ <: D]](notForall: ￢[∀[D, [x <: D] => ∀[D, [y <: D] => φ[x, y]]]])
+    : ∃[D, [x <: D] => ∃[D, [y <: D] => ￢[φ[x, y]]]] = {
+    val ev1: ∃[D, [x <: D] => ￢[∀[D, [y <: D] => φ[x, y]]]] = notForall
+    type X = ev1.S
+    val ev2: ∃[D, [y <: D] => ￢[φ[X, y]]] = ev1.value
+    forType[X, D].generalize[[x <: D] => ∃[D, [y <: D] => ￢[φ[x, y]]]](ev2)
+  }
+
+  def notForall3[D, φ[_ <: D, _ <: D, _ <: D]](notForall: ￢[∀[D, [x <: D] => ∀[D, [y <: D] => ∀[D, [z <: D] => φ[x, y, z]]]]])
+    : ∃[D, [x <: D] => ∃[D, [y <: D] => ∃[D, [z <: D] => ￢[φ[x, y, z]]]]] = {
+    val ev1: ∃[D, [x <: D] => ￢[∀[D, [y <: D] => ∀[D, [z <: D] => φ[x, y, z]]]]] = notForall
+    type X = ev1.S
+    val ev2: ￢[∀[D, [y <: D] => ∀[D, [z <: D] => φ[X, y, z]]]] = ev1.value
+    val ev3: ∃[D, [y <: D] => ∃[D, [z <: D] => ￢[φ[X, y, z]]]] = notForall2[D, [y <: D, z <: D] => φ[X, y, z]](ev2)
+    forType[X, D].generalize[[x <: D] => ∃[D, [y <: D] => ∃[D, [z <: D] => ￢[φ[x, y, z]]]]](ev3)
+  }
+
+  def notForall4[D, φ[_ <: D, _ <: D, _ <: D, _ <: D]](notForall: ￢[∀[D, [x <: D] => ∀[D, [y <: D] => ∀[D, [z <: D] => ∀[D, [w <: D] => φ[x, y, z, w]]]]]])
+    : ∃[D, [x <: D] => ∃[D, [y <: D] => ∃[D, [z <: D] => ∃[D, [w <: D] => ￢[φ[x, y, z, w]]]]]] = {
+    val ev1: ∃[D, [x <: D] => ￢[∀[D, [y <: D] => ∀[D, [z <: D] => ∀[D, [w <: D] => φ[x, y, z, w]]]]]] = notForall
+    type X = ev1.S
+    val ev2: ￢[∀[D, [y <: D] => ∀[D, [z <: D] => ∀[D, [w <: D] => φ[X, y, z, w]]]]] = ev1.value
+    val ev3: ∃[D, [y <: D] => ∃[D, [z <: D] => ∃[D, [w <: D] => ￢[φ[X, y, z, w]]]]] = notForall3[D, [y <: D, z <: D, w <: D] => φ[X, y, z, w]](ev2)
+    forType[X, D].generalize[[x <: D] => ∃[D, [y <: D] => ∃[D, [z <: D] => ∃[D, [w <: D] => ￢[φ[x, y, z, w]]]]]](ev3)
+  }
+
   /**
     * ∃x.∃y.F(x, y) ⇔ ∃y.∃x.F(x, y)
     */

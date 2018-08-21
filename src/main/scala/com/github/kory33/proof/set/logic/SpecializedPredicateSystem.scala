@@ -35,6 +35,17 @@ object SpecializedPredicateSystem {
   def forType2[T1 <: Σ, T2 <: Σ] = PredicateLogicSystem.forType2[T1, T2, Σ]
 
   def notForall[φ[_ <: Σ]](notForall: ￢[∀[[x <: Σ] => φ[x]]]): ∃[[x <: Σ] => ￢[φ[x]]] = PredicateLogicSystem.notForall[Σ, φ](notForall)
+  def notForall2[φ[_ <: Σ, _ <: Σ]](notForall: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => φ[x, y]]]]): ∃[[x <: Σ] => ∃[[y <: Σ] => ￢[φ[x, y]]]] = {
+    PredicateLogicSystem.notForall2[Σ, φ](notForall)
+  }
+  def notForall3[φ[_ <: Σ, _ <: Σ, _ <: Σ]](notForall: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => φ[x, y, z]]]]])
+    : ∃[[x <: Σ] => ∃[[y <: Σ] => ∃[[z <: Σ] => ￢[φ[x, y, z]]]]] = {
+    PredicateLogicSystem.notForall3[Σ, φ](notForall)
+  }
+  def notForall4[φ[_ <: Σ, _ <: Σ, _ <: Σ, _ <: Σ]](notForall: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => ∀[[z <: Σ] => ∀[[w <: Σ] => φ[x, y, z, w]]]]]])
+    : ∃[[x <: Σ] => ∃[[y <: Σ] => ∃[[z <: Σ] => ∃[[w <: Σ] => ￢[φ[x, y, z, w]]]]]] = {
+    PredicateLogicSystem.notForall4[Σ, φ](notForall)
+  }
 
   /**
     * ∃x.∃y.F(x, y) ⇔ ∃y.∃x.F(x, y)
