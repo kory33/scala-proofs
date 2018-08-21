@@ -441,14 +441,14 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct,
 
 }
 
-class IntersectionConstruct(val union: UnionSetConstruct) {
+class IntersectionConstruct(val comprehension: ComprehensionConstruct, val union: UnionSetConstruct) {
   
-  // TODO
-  type Intersection[F <: Σ] = union.Union[F]
-  val constraintVal: ∀[[F <: Σ] => ∀[[z <: Σ] => (z ∈ Intersection[F]) <=> (F hasAll ([x <: Σ] => z ∈ x))]] = ???
+  type Intersection[F <: Σ] = comprehension.Comprehension[union.Union[F], [z <: Σ] => F hasSome ([f <: Σ] => z ∈ f)]
+
+  val constraintValue: ∀[[F <: Σ] => ∀[[z <: Σ] => (z ∈ Intersection[F]) <=> (F hasAll ([x <: Σ] => z ∈ x))]] = ???
 
   def constraint[F <: Σ, z <: Σ]: (z ∈ Intersection[F]) <=> (F hasAll ([x <: Σ] => z ∈ x)) = {
-    forType2[F, z].instantiate[[F1 <: Σ, z1 <: Σ] => (z1 ∈ Intersection[F1]) <=> (F1 hasAll ([x <: Σ] => z1 ∈ x))](constraintVal)
+    forType2[F, z].instantiate[[F1 <: Σ, z1 <: Σ] => (z1 ∈ Intersection[F1]) <=> (F1 hasAll ([x <: Σ] => z1 ∈ x))](constraintValue)
   }
 
 }
@@ -486,8 +486,37 @@ class OrderedPairConstruct(val pairSet: PairSetConstruct, val singleton: Singlet
 
 }
 
+class DifferenceConstruct(val comprehension: ComprehensionConstruct) {
+
+  type \[x <: Σ, y <: Σ] = comprehension.Comprehension[x, [z <: Σ] => z ∉ y]
+
+}
+
+class SymmetricDifferenceConstruct(val difference: DifferenceConstruct, val binaryUnion: BinaryUnionConstruct) {
+
+  type \ = difference.\
+  type ∪ = binaryUnion.∪
+  type Δ[x <: Σ, y <: Σ] = (x \ y) ∪ (y \ x)
+
+}
+
+class CartesianProductConstruct(val comprehension: ComprehensionConstruct,
+                                val power: PowerSetConstruct,
+                                val binaryUnion: BinaryUnionConstruct,
+                                val orderedPair: OrderedPairConstruct) {
+
+  type Comprehension = comprehension.Comprehension
+  type Pow = power.Pow
+  type ::: = orderedPair.:::
+  type ∪ = binaryUnion.∪
+
+  type ×[X <: Σ, Y <: Σ] = Comprehension[Pow[Pow[X ∪ Y]], [z <: Σ] => X hasSome ([x <: Σ] => Y hasSome ([y <: Σ] => z =::= (x ::: y)))]
+
+}
+
 class BasicConstructs(implicit axiom: ZFAxiom) {
-  import Lemma._
+
+  val comprehension = new ComprehensionConstruct
 
   val emptySet = new EmptySetConstruct
   type ∅ = emptySet.∅
@@ -507,7 +536,7 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
   val binaryUnion = new BinaryUnionConstruct(pairSet, unionSet)
   type ∪[x <: Σ, y <: Σ] = binaryUnion.∪[x, y]
 
-  val intersection = new IntersectionConstruct(unionSet)
+  val intersection = new IntersectionConstruct(comprehension, unionSet)
   type Intersection[F <: Σ] = intersection.Intersection[F]
 
   val binaryIntersection = new BinaryIntersectionConstruct(pairSet, intersection)
@@ -515,6 +544,15 @@ class BasicConstructs(implicit axiom: ZFAxiom) {
 
   val orderedPair = new OrderedPairConstruct(pairSet, singleton)
   type :::[a <: Σ, b <: Σ] = orderedPair.:::[a, b]
+
+  val difference = new DifferenceConstruct(comprehension)
+  type \[a <: Σ, b <: Σ] = difference.\[a, b]
+
+  val symmetricDifference = new SymmetricDifferenceConstruct(difference, binaryUnion)
+  type Δ[a <: Σ, b <: Σ] = symmetricDifference.Δ
+
+  val cartesianProduct = new CartesianProductConstruct(comprehension, powerSet, binaryUnion, orderedPair)
+  type ×[a <: Σ, b <: Σ] = cartesianProduct.×
 
 }
 
