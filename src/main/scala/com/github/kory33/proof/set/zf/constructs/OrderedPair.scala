@@ -29,29 +29,22 @@ class OrderedPairConstruct(val singleton: SingletonConstruct)(implicit val axiom
         val implies: ((A ::: B) =::= (C ::: D)) => ((A =::= C) ∧ (B =::= D)) = { abEqcd =>
           val ev31: A =::= C = {
             val ev311: (Just[A] =::= Just[C]) ∨ (Just[A] =::= (C ++: D)) = {
-              val ev3111: containsTwo[A ::: B, Just[C], C ++: D] = abEqcd.commute.sub[[ab <: Σ] => containsTwo[ab, Just[C], C ++: D]](singleton.pairSet.constraint)
-              val ev3112: Just[A] ∈ (A ::: B) = singleton.pairSet.containsLeft
-              forType[Just[A]].instantiate[[w <: Σ] => (w ∈ (A ::: B)) <=> ((w =::= Just[C]) ∨ (w =::= (C ++: D)))](ev3111).implies(ev3112)
+              singleton.pairSet.constraint2[Just[A], Just[C], C ++: D].implies(abEqcd.sub[[cd <: Σ] => Just[A] ∈ cd](singleton.pairSet.containsLeft))
             }
             val ev312: (Just[A] =::= Just[C]) => (A =::= C) = singleton.equality
             val ev313: (Just[A] =::= (C ++: D)) => (A =::= C) = { assumption313 =>
-              val ev3131: containsTwo[Just[A], C, D] = assumption313.commute.sub[[a <: Σ] => containsTwo[a, C, D]](singleton.pairSet.constraint)
-              val ev3132: (C ∈ Just[A]) <=> ((C =::= C) ∨ (C =::= D)) = forType[C].instantiate[[w <: Σ] => (w ∈ Just[A]) <=> ((w =::= C) ∨ (w =::= D))](ev3131)
-              val ev3133: C ∈ Just[A] = ev3132.impliedBy(Left(implicitly[C =::= C]))
-              forType[C].instantiate[[z <: Σ] => (z ∈ Just[A]) <=> (z =::= A)](singleton.constraint).implies(ev3133).commute
+              singleton.equalIfContained[C, A](assumption313.commute.sub[[ja <: Σ] => C ∈ ja](singleton.pairSet.containsLeft)).commute
             }
             removeDisj(ev311)(ev312)(ev313)
           }
           val ev32: B =::= D = {
             val ev331: (A ::: B) =::= (A ::: D) = ev31.commute.sub[[a <: Σ] => (A ::: B) =::= (a ::: D)](abEqcd)
             val ev332: ((A ++: B) =::= Just[A]) ∨ ((A ++: B) =::= (A ++: D)) = {
-              val ev3322: (A ++: B) ∈ (A ::: D) = ev331.sub[[ad <: Σ] => (A ++: B) ∈ ad](singleton.pairSet.containsRight)
-              forType[A ++: B].instantiate[[w <: Σ] => (w ∈ (A ::: D)) <=> ((w =::= Just[A]) ∨ (w =::= (A ++: D)))](singleton.pairSet.constraint).implies(ev3322)
+              singleton.pairSet.constraint2[A ++: B, Just[A], A ++: D].implies(ev331.sub[[ad <: Σ] => (A ++: B) ∈ ad](singleton.pairSet.containsRight))
             }
             val ev333: ((A ++: B) =::= (A ++: D)) => (B =::= D) = { assumption333 =>
               val ev3331: (B =::= A) ∨ (B =::= D) = {
-                val ev33311: containsTwo[A ++: B, A, D] = assumption333.commute.sub[[ab <: Σ] => containsTwo[ab, A, D]](singleton.pairSet.constraint)
-                forType[B].instantiate[[w <: Σ] => (w ∈ (A ++: B)) <=> ((w =::= A) ∨ (w =::= D))](ev33311).implies(singleton.pairSet.containsRight)
+                singleton.pairSet.constraint2[B, A, D].implies(assumption333.sub[[ad <: Σ] => B ∈ ad](singleton.pairSet.containsRight))
               }
               val ev3332: (B =::= A) => (B =::= D) = { assumption3332 =>
                 val ev33321: Just[A] =::= (A ++: D) = assumption3332.sub[[a <: Σ] => (A ++: a) =::= (A ++: D)](assumption333)
@@ -61,10 +54,9 @@ class OrderedPairConstruct(val singleton: SingletonConstruct)(implicit val axiom
               removeDisj(ev3331)(ev3332)(identity)
             }
             val ev334: ((A ++: B) =::= Just[A]) => (B =::= D) = { assumption334 =>
-              val ev3341: B ∈ (A ++: B) = singleton.pairSet.containsRight[A, B]
-              val ev3342: B =::= A = singleton.equalIfContained(assumption334.sub[[ja <: Σ] => B ∈ ja](ev3341))
+              val ev3342: B =::= A = singleton.equalIfContained(assumption334.sub[[ja <: Σ] => B ∈ ja](singleton.pairSet.containsRight[A, B]))
               val ev3343: Just[Just[A]] =::= (A ::: D) = ev3342.sub[[a <: Σ] => (A ::: a) =::= (A ::: D)](ev331)
-              val ev3344: (A ++: D) ∈ Just[Just[A]] = ev3343.commute.sub[[jja <: Σ] => (A ++: D) ∈ jja](singleton.pairSet.containsRight[Just[A], A ++: D])
+              val ev3344: (A ++: D) ∈ Just[Just[A]] = ev3343.commute.sub[[jja <: Σ] => (A ++: D) ∈ jja](singleton.pairSet.containsRight)
               val ev3345: (A ++: D) =::= Just[A] = singleton.equalIfContained(ev3344)
               val ev3346: D ∈ Just[A] = ev3345.sub[[ja <: Σ] => D ∈ ja](singleton.pairSet.containsRight[A, D])
               ev3342.andThen(singleton.equalIfContained(ev3346).commute)

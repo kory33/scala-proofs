@@ -47,17 +47,18 @@ class PairSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFParin
 
   type ++:[x <: Σ, y <: Σ] = pairFunctionExistence.F[x, y]
   val constraintValue: ∀[[x <: Σ] => ∀[[y <: Σ] => containsTwo[x ++: y, x, y]]] = pairFunctionExistence.value
+
   def constraint[x <: Σ, y <: Σ]: containsTwo[x ++: y, x, y] = {
     forType2[x, y].instantiate[[x <: Σ, y <: Σ] => containsTwo[x ++: y, x, y]](constraintValue)
   }
 
-  def containsLeft[x <: Σ, y <: Σ]: x ∈ (x ++: y) = {
-    forType[x].instantiate[[w <: Σ] => (w ∈ (x ++: y) <=> ((w =::= x) ∨ (w =::= y)))](constraint).impliedBy(Left(implicitly[x =::= x]))
+  def constraint2[z <: Σ, x <: Σ, y <: Σ]: (z ∈ (x ++: y)) <=> ((z =::= x) ∨ (z =::= y)) = {
+    forType[z].instantiate[[w <: Σ] => (w ∈ (x ++: y)) <=> ((w =::= x) ∨ (w =::= y))](constraint)
   }
 
-  def containsRight[x <: Σ, y <: Σ]: y ∈ (x ++: y) = {
-    forType[y].instantiate[[w <: Σ] => (w ∈ (x ++: y) <=> ((w =::= x) ∨ (w =::= y)))](constraint).impliedBy(Right(implicitly[y =::= y]))
-  }
+  def containsLeft[x <: Σ, y <: Σ]: x ∈ (x ++: y) = constraint2[x, x, y].impliedBy(Left(implicitly[x =::= x]))
+
+  def containsRight[x <: Σ, y <: Σ]: y ∈ (x ++: y) = constraint2[y, x, y].impliedBy(Right(implicitly[y =::= y]))
 
 }
 
