@@ -48,10 +48,10 @@ class ElementaryConstructs(implicit axiom: ZFAxiom) {
   type \[a <: Σ, b <: Σ] = difference.\[a, b]
 
   val symmetricDifference = new SymmetricDifferenceConstruct(difference, binaryUnion)
-  type Δ[a <: Σ, b <: Σ] = symmetricDifference.Δ
+  type Δ[a <: Σ, b <: Σ] = symmetricDifference.Δ[a, b]
 
   val cartesianProduct = new CartesianProductConstruct(comprehension, powerSet, binaryUnion, orderedPair)
-  type ×[a <: Σ, b <: Σ] = cartesianProduct.×
+  type ×[a <: Σ, b <: Σ] = cartesianProduct.×[a, b]
 
 }
 
