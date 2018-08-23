@@ -11,6 +11,7 @@ object Equality {
   trait =::=[D, A <: D, B <: D] {
     def sub[F[_ <: D]]: F[A] => F[B]
     def commute: =::=[D, B, A] = this.sub[[b <: D] => =::=[D, b, A]](implicitly[=::=[D, A, A]])
+    def andThen[C <: D](next: =::=[D, B, C]): =::=[D, A, C] = next.sub[[c <: D] => =::=[D, A, c]](this)
   }
 
   object =::= {

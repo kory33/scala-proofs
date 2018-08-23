@@ -41,7 +41,7 @@ class ElementaryConstructs(implicit axiom: ZFAxiom) {
   val binaryIntersection = new BinaryIntersectionConstruct(pairSet, intersection)
   type ∩[x <: Σ, y <: Σ] = binaryIntersection.∩[x, y]
 
-  val orderedPair = new OrderedPairConstruct(pairSet, singleton)
+  val orderedPair = new OrderedPairConstruct(singleton)
   type :::[a <: Σ, b <: Σ] = orderedPair.:::[a, b]
 
   val difference = new DifferenceConstruct(comprehension)
