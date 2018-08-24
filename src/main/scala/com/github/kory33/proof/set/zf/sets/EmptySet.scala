@@ -1,4 +1,4 @@
-package com.github.kory33.proof.set.zf.constructs
+package com.github.kory33.proof.set.zf.sets
 
 import scala.language.implicitConversions
 
@@ -13,7 +13,7 @@ import com.github.kory33.proof.set.zf.Lemma._
 import com.github.kory33.proof.set.SetDefinitions._
 import com.github.kory33.proof.set._
 
-class EmptySetConstruct(implicit axiom: ZFExistence & ZFExtensionality & ZFSeparation) {
+class EmptySet(implicit axiom: ZFExistence & ZFExtensionality & ZFSeparation) {
 
   /**
     * There exists an empty set.

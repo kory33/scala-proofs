@@ -11,13 +11,14 @@ import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
 import com.github.kory33.proof.set.SetDefinitions._
 import com.github.kory33.proof.set._
 
-import com.github.kory33.proof.set.zf.constructs._
+import com.github.kory33.proof.set.zf.operators._
+import com.github.kory33.proof.set.zf.sets._
 
-class ElementaryConstructs(implicit axiom: ZFAxiom) {
+class ZFSystem(implicit axiom: ZFAxiom) {
 
   val comprehension = new ComprehensionConstruct
 
-  val emptySet = new EmptySetConstruct
+  val emptySet = new EmptySet
   type ∅ = emptySet.∅
 
   val pairSet = new PairSetConstruct

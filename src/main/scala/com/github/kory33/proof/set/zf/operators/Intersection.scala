@@ -1,4 +1,4 @@
-package com.github.kory33.proof.set.zf.constructs
+package com.github.kory33.proof.set.zf.operators
 
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._

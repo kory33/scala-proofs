@@ -1,4 +1,4 @@
-package com.github.kory33.proof.set.zf.constructs
+package com.github.kory33.proof.set.zf.operators
 
 import com.github.kory33.proof.set.logic.Equality._
 import com.github.kory33.proof.set.SetDefinitions._
