@@ -22,7 +22,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
   /**
    * R is a reflexive relation on X
    */
-  implicit class isReflexive[R <: Σ, X <: Σ]
+  class isReflexive[R <: Σ, X <: Σ]
     (val reflexivity: X hasAll ([x <: Σ] => (x ::: x) ∈ R))
     (implicit val isRelation: isRelation[R, X, X]) {
 
@@ -33,7 +33,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
   /**
    * R is a symmetric relation on X
    */
-  implicit class isSymmetric[R <: Σ, X <: Σ]
+  class isSymmetric[R <: Σ, X <: Σ]
     (val symmetry: X hasAll ([x <: Σ] => X hasAll ([y <: Σ] => (x ::: y) ∈ R => (y ::: x) ∈ R)))
     (implicit val isRelation: isRelation[R, X, X]) {
     
@@ -47,7 +47,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
   /**
    * R is a transitive relation on X
    */
-  implicit class isTransitive[R <: Σ, X <: Σ]
+  class isTransitive[R <: Σ, X <: Σ]
     (val transition: X hasAll ([x <: Σ] => X hasAll ([y <: Σ] => X hasAll ([z <: Σ] => ((x ::: y) ∈ R) ∧ ((y ::: z) ∈ R) => (x ::: z) ∈ R))))
     (implicit val isRelation: isRelation[R, X, X]) {
 
