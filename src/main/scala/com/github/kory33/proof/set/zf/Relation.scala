@@ -17,7 +17,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
   /**
     * R is a relation on X and Y
     */
-  implicit class isRelation[R <: Σ, X <: Σ, Y <: Σ](val isRelation: R ⊂ (X × Y))
+  type isRelation[R <: Σ, X <: Σ, Y <: Σ] = R ⊂ (X × Y)
 
   /**
    * R is a reflexive relation on X
