@@ -64,12 +64,59 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    */
   trait EquivalenceRelation[R <: Σ, X <: Σ] extends ReflexiveRelation[R, X] with SymmetricRelation[R, X] with TransitiveRelation[R, X]
 
+  /**
+   * Relation R on X and Y is left-unique.
+   * for all x1, x2 ∈ X and y ∈ Y, x1Ry ∧ x2Ry => x1 = x2
+   */
+  trait LeftUniqueRelation[R <: Σ, X <: Σ, Y <: Σ] extends Relation[R, X, Y] {
+    val injective: (X hasAll ([x1 <: Σ] => X hasAll ([x2 <: Σ] => Y hasAll ([y <: Σ] => ((x1 ::: y) ∈ R) ∧ ((x2 ::: y) ∈ R) => (x1 =::= x2)))))
+  }
+
+  /**
+   * Relation R on X and Y is right-unique. That is, R is a partial function on X and Y.
+   * for all x ∈ X and y1, y2 ∈ Y, xRy1 ∧ xRy2 => y1 = y2
+   */
   trait PartialFunction[R <: Σ, X <: Σ, Y <: Σ] extends Relation[R, X, Y] {
     val uniqueImage: (X hasAll ([x <: Σ] => Y hasAll ([y1 <: Σ] => Y hasAll ([y2 <: Σ] => ((x ::: y1) ∈ R) ∧ ((x ::: y2) ∈ R) => (y1 =::= y2)))))
   }
 
-  trait Function[F <: Σ, X <: Σ, Y <: Σ]{
-    def definitionEqDomain(partialFunction: PartialFunction[F, X, Y]): partialFunction.dom =::= X
+  /**
+   * Relation R on X and Y is one-to-one
+   */
+  trait OneToOneRelation[R <: Σ, X <: Σ, Y <: Σ] extends LeftUniqueRelation[R, X, Y] with PartialFunction[R, X, Y]
+
+  /**
+   * Relation R on X and Y is left-total. That is, dom(R) = X.
+   */
+  trait LeftTotalRelation[R <: Σ, X <: Σ, Y <: Σ] extends Relation[R, X, Y] {
+    val domEqDomain: dom =::= X
   }
+
+  /**
+   * Relation R on X and Y is right-total, or surjective. That is, range(R) = Y.
+   */
+  trait SurjectiveRelation[R <: Σ, X <: Σ, Y <: Σ] extends Relation[R, X, Y] {
+    val rangeEqCod: range =::= Y
+  }
+
+  /**
+   * Relation F on X and Y is a function.
+   */
+  trait Function[F <: Σ, X <: Σ, Y <: Σ] extends LeftTotalRelation[F, X, Y] with PartialFunction[F, X, Y]
+
+  /**
+   * Function F from X into Y is a surjective function.
+   */
+  trait SurjectiveFunction[F <: Σ, X <: Σ, Y <: Σ] extends Function[F, X, Y] with SurjectiveRelation[F, X, Y]
+
+  /**
+   * Function F from X into Y is an injective function.
+   */
+  trait InjectiveFunction[F <: Σ, X <: Σ, Y <: Σ] extends Function[F, X, Y] with LeftUniqueRelation[F, X, Y]
+
+  /**
+   * Function F from X into Y is a bijection.
+   */
+  trait BijectiveFunction[F <: Σ, X <: Σ, Y <: Σ] extends SurjectiveFunction[F, X, Y] with InjectiveFunction[F, X, Y]
 
 }
