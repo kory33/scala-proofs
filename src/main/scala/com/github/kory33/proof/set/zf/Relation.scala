@@ -26,10 +26,12 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
     type range = Comprehension[Y, [y <: Σ] => X hasSome ([x <: Σ] => (x ::: y) ∈ R)]
   }
 
+  type Endorelation[R <: Σ, X <: Σ] = Relation[R, X, X]
+
   /**
    * R is a reflexive relation on X
    */
-  trait ReflexiveRelation[R <: Σ, X <: Σ] extends Relation[R, X, X] {
+  trait ReflexiveRelation[R <: Σ, X <: Σ] extends Endorelation[R, X] {
     val reflexivity: X hasAll ([x <: Σ] => (x ::: x) ∈ R)
     def reflexive[x <: Σ](implicit domain: x ∈ X): (x ::: x) ∈ R = forType[x].instantiate[[x <: Σ] => (x ∈ X) => (x ::: x) ∈ R](reflexivity)(domain)
   }
@@ -37,7 +39,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
   /**
    * R is a symmetric relation on X
    */
-  trait SymmetricRelation[R <: Σ, X <: Σ] extends Relation[R, X, X] {
+  trait SymmetricRelation[R <: Σ, X <: Σ] extends Endorelation[R, X] {
     val symmetry: X hasAll ([x <: Σ] => X hasAll ([y <: Σ] => (x ::: y) ∈ R => (y ::: x) ∈ R))
     def symmetric[x <: Σ, y <: Σ](xRy: (x ::: y) ∈ R)(implicit domain1: x ∈ X, domain2: y ∈ X): (y ::: x) ∈ R = {
       val ev1 = forType[x].instantiate[[x1 <: Σ] => (x1 ∈ X) => (X hasAll ([y <: Σ] => (x1 ::: y) ∈ R => (y ::: x1) ∈ R))](symmetry)(domain1)
@@ -49,7 +51,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
   /**
    * R is a transitive relation on X
    */
-  trait TransitiveRelation[R <: Σ, X <: Σ] extends Relation[R, X, X] {
+  trait TransitiveRelation[R <: Σ, X <: Σ] extends Endorelation[R, X] {
     val transition: X hasAll ([x <: Σ] => X hasAll ([y <: Σ] => X hasAll ([z <: Σ] => ((x ::: y) ∈ R) ∧ ((y ::: z) ∈ R) => (x ::: z) ∈ R)))
     def transitive[x <: Σ, y <: Σ, z <: Σ](xRy: (x ::: y) ∈ R, yRz: (y ::: z) ∈ R)(implicit domain1: x ∈ X, domain2: y ∈ X, domain3: z ∈ X): (x ::: z) ∈ R = {
       val ev1 = forType[x].instantiate[[x1 <: Σ] => (x1 ∈ X) => X hasAll ([y <: Σ] => X hasAll ([z <: Σ] => ((x1 ::: y) ∈ R) ∧ ((y ::: z) ∈ R) => (x1 ::: z) ∈ R))](transition)(domain1)
