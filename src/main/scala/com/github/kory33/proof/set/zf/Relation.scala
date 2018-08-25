@@ -69,7 +69,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    * for all x1, x2 ∈ X and y ∈ Y, x1Ry ∧ x2Ry => x1 = x2
    */
   trait LeftUniqueRelation[R <: Σ, X <: Σ, Y <: Σ] extends Relation[R, X, Y] {
-    val injective: (X hasAll ([x1 <: Σ] => X hasAll ([x2 <: Σ] => Y hasAll ([y <: Σ] => ((x1 ::: y) ∈ R) ∧ ((x2 ::: y) ∈ R) => (x1 =::= x2)))))
+    val uniquePreimage: (X hasAll ([x1 <: Σ] => X hasAll ([x2 <: Σ] => Y hasAll ([y <: Σ] => ((x1 ::: y) ∈ R) ∧ ((x2 ::: y) ∈ R) => (x1 =::= x2)))))
   }
 
   /**
