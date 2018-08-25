@@ -106,6 +106,8 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    */
   trait Function[F <: Σ, X <: Σ, Y <: Σ] extends LeftTotalRelation[F, X, Y] with PartialFunction[F, X, Y]
 
+  type Endofunction[F <: Σ, X <: Σ] = Function[F, X, X]
+
   /**
    * Function F from X into Y is a surjective function.
    */
