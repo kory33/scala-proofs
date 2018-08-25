@@ -9,9 +9,8 @@ import com.github.kory33.proof.set.SetDefinitions._
 /**
   * Axiom schema of replacement.
   *
-  * For every formula φ, A and p, if φ(s, t, A, p) defines a function F on A by F(x) = y ⇔ φ(x, y, A, p)
-  * then there exists a set Y containing the range F[A] = {F(x): x ∈ A} of the function F.
+  * For every class function F, there exists a the range F[A] = {F(x): x ∈ A} of F.
   */
 trait ZFReplacement {
-  def replacement[φ[_ <: Σ, _ <: Σ, _ <: Σ, _ <: Σ]]: ∀[[A <: Σ] => ∀[[p <: Σ] => A hasAll ([x <: Σ] => ∃![[y <: Σ] => φ[x, y, A, p]]) => ∃[[Y <: Σ] => A hasAll ([x <: Σ] => Y hasSome ([y <: Σ] => φ[x, y, A, p]))]]]
+  def replacement[F[_ <: Σ] <: Σ]: ∀[[A <: Σ] => ∃[[FA <: Σ] => isRangeOfClassFn[FA, F, A]]]
 }
