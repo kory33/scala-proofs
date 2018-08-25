@@ -66,6 +66,29 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    */
   trait EquivalenceRelation[R <: Σ, X <: Σ] extends ReflexiveRelation[R, X] with SymmetricRelation[R, X] with TransitiveRelation[R, X]
 
+  trait AntisymmetricRelation[R <: Σ, X <: Σ] extends Endorelation[R, X] {
+    val antisymmetry: X hasAll ([x <: Σ] => X hasAll ([y <: Σ] => ((x ::: y) ∈ R) ∧ ((y ::: x) ∈ R) => x =::= y))
+    def antisymmetric[x <: Σ, y <: Σ](xRy: (x ::: y) ∈ R, yRx: (y ::: x) ∈ R)
+                                     (implicit domain1: x ∈ X, domain2: y ∈ X): ((x ::: y) ∈ R) ∧ ((y ::: x) ∈ R) => x =::= y = {
+      val ev1 = forType[x].instantiate[[x1 <: Σ] => (x1 ∈ X) => X hasAll ([y <: Σ] => ((x1 ::: y) ∈ R) ∧ ((y ::: x1) ∈ R) => x1 =::= y)](antisymmetry)(domain1)
+      val ev2 = forType[y].instantiate[[y1 <: Σ] => (y1 ∈ X) => ((x ::: y1) ∈ R) ∧ ((y1 ::: x) ∈ R) => x =::= y1](ev1)(domain2)
+      ev2
+    }
+  }
+
+  trait PartialOrder[R <: Σ, X <: Σ] extends ReflexiveRelation[R, X] with TransitiveRelation[R, X] with AntisymmetricRelation[R, X]
+
+  trait ConnectedRelation[R <: Σ, X <: Σ] extends Endorelation[R, X] {
+    val connection: X hasAll ([x <: Σ] => X hasAll ([y <: Σ] => ((x ::: y) ∈ R) ∨ ((y ::: x) ∈ R)))
+    def connected[x <: Σ, y <: Σ](implicit domain1: x ∈ X, domain2: y ∈ X): ((x ::: y) ∈ R) ∨ ((y ::: x) ∈ R) = {
+      val ev1 = forType[x].instantiate[[x1 <: Σ] => (x1 ∈ X) => X hasAll ([y <: Σ] => ((x1 ::: y) ∈ R) ∨ ((y ::: x1) ∈ R))](connection)(domain1)
+      val ev2 = forType[y].instantiate[[y1 <: Σ] => (y1 ∈ X) => ((x ::: y1) ∈ R) ∨ ((y1 ::: x) ∈ R)](ev1)(domain2)
+      ev2
+    }
+  }
+
+  trait LinearOrder[R <: Σ, X <: Σ] extends PartialOrder[R, X] with ConnectedRelation[X, R]
+
   /**
    * Relation R on X and Y is left-unique.
    * for all x1, x2 ∈ X and y ∈ Y, x1Ry ∧ x2Ry => x1 = x2
