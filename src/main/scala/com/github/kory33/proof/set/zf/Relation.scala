@@ -127,7 +127,47 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
   /**
    * Relation F on X and Y is a function.
    */
-  trait Function[F <: Σ, X <: Σ, Y <: Σ] extends LeftTotalRelation[F, X, Y] with PartialFunction[F, X, Y]
+  trait Function[F <: Σ, X <: Σ, Y <: Σ] extends LeftTotalRelation[F, X, Y] with PartialFunction[F, X, Y] {
+    trait valueAt[x <: Σ](val belongs: x ∈ X) {
+      type V = ∃[[y <: Σ] => (x ::: y) ∈ F]#S
+    }
+
+    /**
+     * image of a subset of domain
+     */
+    trait image[A <: Σ](val subset: A ⊂ X) {
+      type I = Comprehension[Y, [y <: Σ] => A hasSome ([x <: Σ] => y =::= valueAt[x])]
+    }
+
+    /**
+     * preimage of an elemnt in range
+     */
+    trait preimage[y <: Σ](val subset: y ∈ range) {
+      type P = Comprehension[X, [x <: Σ] => y =::= valueAt[x]]
+    }
+
+    /**
+     * for all x in X, xF(F(x))
+     */
+    val valueConstraint1: X hasAll ([x <: Σ] => (x ::: valueAt[x]) ∈ F) = {
+      ???
+    }
+
+    /**
+     * application of an elemnt in domain belongs to range
+     */
+    val valueConstraint2: X hasAll ([x <: Σ] => valueAt[x] ∈ range) = {
+      ???
+    }
+
+    /**
+     * preimage of an element in range is nonempty
+     */
+    val valueConstraint3: range hasAll ([y <: Σ] => isNonEmpty[preimage[y]]) = {
+      ???
+    }
+
+  }
 
   type Endofunction[F <: Σ, X <: Σ] = Function[F, X, X]
 
