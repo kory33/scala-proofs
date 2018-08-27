@@ -1,5 +1,7 @@
 package com.github.kory33.proof.set.zf
 
+import scala.language.implicitConversions
+
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
@@ -8,11 +10,14 @@ import com.github.kory33.proof.set.logic.SpecializedPredicateSystem._
 import com.github.kory33.proof.set.logic.Equality._
 import com.github.kory33.proof.set.zf.operators._
 import com.github.kory33.proof.set.SetDefinitions._
+import com.github.kory33.proof.set.Universal._
 import com.github.kory33.proof.set._
 
 class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
 
-  type Comprehension = cartesianProduct.Comprehension
+  val comprehension: cartesianProduct.comprehension.type = cartesianProduct.comprehension
+  type Comprehension = comprehension.Comprehension
+
   type ::: = cartesianProduct.:::
   type × = cartesianProduct.×
 
@@ -20,7 +25,7 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    * Typeclass on relation; R is a relation on X and Y
    */
   trait Relation[R <: Σ, X <: Σ, Y <: Σ] {
-    val subset: R ⊂ (X × Y)
+    val subsetOfProduct: R ⊂ (X × Y)
 
     type dom = Comprehension[X, [x <: Σ] => Y hasSome ([y <: Σ] => (x ::: y) ∈ R)]
     type range = Comprehension[Y, [y <: Σ] => X hasSome ([x <: Σ] => (x ::: y) ∈ R)]
@@ -128,42 +133,58 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    * Relation F on X and Y is a function.
    */
   trait Function[F <: Σ, X <: Σ, Y <: Σ] extends LeftTotalRelation[F, X, Y] with PartialFunction[F, X, Y] {
-    trait valueAt[x <: Σ](val belongs: x ∈ X) {
-      type V = ∃[[y <: Σ] => (x ::: y) ∈ F]#S
+    trait apply[x <: Σ](val xInX: x ∈ X) {
+      type v = ∃[[y <: Σ] => (x ::: y) ∈ F]#S
     }
 
     /**
      * image of a subset of domain
      */
-    trait image[A <: Σ](val subset: A ⊂ X) {
-      type I = Comprehension[Y, [y <: Σ] => A hasSome ([x <: Σ] => y =::= valueAt[x])]
+    trait image[A <: Σ](val aIncludedInX: A ⊂ X) {
+      type i = Comprehension[Y, [y <: Σ] => A hasSome ([x <: Σ] => y =::= apply[x]#v)]
     }
 
     /**
      * preimage of an elemnt in range
      */
-    trait preimage[y <: Σ](val subset: y ∈ range) {
-      type P = Comprehension[X, [x <: Σ] => y =::= valueAt[x]]
+    trait preimage[y <: Σ](val yInRange: y ∈ range) {
+      type p = Comprehension[X, [x <: Σ] => y =::= apply[x]#v]
     }
 
     /**
      * for all x in X, xF(F(x))
      */
-    val valueConstraint1: X hasAll ([x <: Σ] => (x ::: valueAt[x]) ∈ F) = {
+    val valueConstraint1: X hasAll ([x <: Σ] => (x ::: apply[x]#v) ∈ F) = {
       ???
     }
 
     /**
      * application of an elemnt in domain belongs to range
      */
-    val valueConstraint2: X hasAll ([x <: Σ] => valueAt[x] ∈ range) = {
-      ???
+    val valueConstraint2: X hasAll ([x <: Σ] => apply[x]#v ∈ range) = {
+      byContradiction { assumption: ∃[[x <: Σ] => ￢[(x ∈ X) => (apply[x]#v ∈ range)]] =>
+        type Z = assumption.S
+        val ev1: ￢[(Z ∈ X) => (apply[Z]#v ∈ range)] = assumption.value
+        val ev2: (Z ∈ X) => (apply[Z]#v ∈ range) = { zInX =>
+          val ev21: (Z ::: apply[Z]#v) ∈ F = forType[Z].instantiate[[x <: Σ] => (x ∈ X) => ((x ::: apply[x]#v) ∈ F)](valueConstraint1)(zInX)
+          val ev22: (Z ::: apply[Z]#v) ∈ (X × Y) = subsetOfProduct.containsElement(ev21)
+          val ev23: apply[Z]#v ∈ Y = ???
+          val ev24: X hasSome ([x <: Σ] => (x ::: apply[Z]#v) ∈ F) = forType[Z].generalize(zInX ∧ ev21)
+          val ev25: (apply[Z]#v ∈ range) <=> ((apply[Z]#v ∈ Y) ∧ (X hasSome ([x <: Σ] => (x ::: apply[Z]#v) ∈ F))) = {
+            forType[apply[Z]#v].instantiate[[y <: Σ] => (y ∈ range) <=> ((y ∈ Y) ∧ (X hasSome ([x1 <: Σ] => (x1 ::: y) ∈ F)))](
+              comprehension.constraint[Y, [y1 <: Σ] => X hasSome ([x1 <: Σ] => (x1 ::: y1) ∈ F)]
+            )
+          }
+          ev25.impliedBy(ev23 ∧ ev24)
+        }
+        ev2 ∧ ev1
+      }
     }
 
     /**
      * preimage of an element in range is nonempty
      */
-    val valueConstraint3: range hasAll ([y <: Σ] => isNonEmpty[preimage[y]]) = {
+    val valueConstraint3: range hasAll ([y <: Σ] => isNonEmpty[preimage[y]#p]) = {
       ???
     }
 

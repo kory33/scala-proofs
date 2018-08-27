@@ -34,7 +34,7 @@ object SetDefinitions {
   type hasAll[A <: Σ, F[_ <: Σ]] = ∀[[x <: Σ] => (x ∈ A) => F[x]]
   type hasSome[A <: Σ, F[_ <: Σ]] = ∃[[x <: Σ] => (x ∈ A) ∧ F[x]]
 
-  type isRangeOfClassFn[FA <: Σ, F[_ <: Σ] <: Σ, A <: Σ] = ∀[[z <: Σ] => (z ∈ FA) <=> A hasSome ([a <: Σ] => z =::= F[a])]
+  type isRangeOfClassFn[FA <: Σ, F[_ <: Σ] <: Σ, A <: Σ] = ∀[[z <: Σ] => (z ∈ FA) <=> (A hasSome ([a <: Σ] => z =::= F[a]))]
 
   /**
    * If there are two types satisfying F, they are equal.
