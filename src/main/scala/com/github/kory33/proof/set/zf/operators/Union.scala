@@ -86,4 +86,7 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct,
   val constraintValue: ∀[[x <: Σ] => ∀[[y <: Σ] => isSumOf[x ∪ y, x, y]]] = ???
   def constraint[x <: Σ, y <: Σ]: isSumOf[x ∪ y, x, y] = forType2[x, y].instantiate[[x1 <: Σ, y1 <: Σ] => isSumOf[x1 ∪ y1, x1, y1]](constraintValue)
 
+  def containsLeft[x <: Σ, X <: Σ, Y <: Σ]: (x ∈ X) => (x ∈ (X ∪ Y)) = ???
+  def containsRight[y <: Σ, X <: Σ, Y <: Σ]: (y ∈ Y) => (y ∈ (X ∪ Y)) = ???
+
 }

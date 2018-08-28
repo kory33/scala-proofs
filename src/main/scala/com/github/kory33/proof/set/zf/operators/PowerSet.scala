@@ -44,5 +44,11 @@ class PowerSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFPowe
   }
 
   type Pow[x <: Σ] = powerFunctionExistence.F[x]
-  val constraint: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExistence.value
+  val constraintValue: ∀[[x <: Σ] => Pow[x] isPowerOf x] = powerFunctionExistence.value
+  def constraint[x <: Σ, z <: Σ]: (z ∈ Pow[x]) <=> (z ⊂ x) = {
+    forType[z].instantiate[[z <: Σ] => (z ∈ Pow[x]) <=> (z ⊂ x)](
+      forType[x].instantiate[[x <: Σ] => Pow[x] isPowerOf x](constraintValue)
+    )
+  }
+
 }
