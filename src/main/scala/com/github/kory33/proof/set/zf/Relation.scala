@@ -168,12 +168,10 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
         val ev2: (Z ∈ X) => (apply[Z]#v ∈ range) = { zInX =>
           val ev21: (Z ::: apply[Z]#v) ∈ F = forType[Z].instantiate[[x <: Σ] => (x ∈ X) => ((x ::: apply[x]#v) ∈ F)](valueConstraint1)(zInX)
           val ev22: (Z ::: apply[Z]#v) ∈ (X × Y) = subsetOfProduct.containsElement(ev21)
-          val ev23: apply[Z]#v ∈ Y = ???
+          val ev23: apply[Z]#v ∈ Y = cartesianProduct.rightProjection(ev22)
           val ev24: X hasSome ([x <: Σ] => (x ::: apply[Z]#v) ∈ F) = forType[Z].generalize(zInX ∧ ev21)
           val ev25: (apply[Z]#v ∈ range) <=> ((apply[Z]#v ∈ Y) ∧ (X hasSome ([x <: Σ] => (x ::: apply[Z]#v) ∈ F))) = {
-            forType[apply[Z]#v].instantiate[[y <: Σ] => (y ∈ range) <=> ((y ∈ Y) ∧ (X hasSome ([x1 <: Σ] => (x1 ::: y) ∈ F)))](
-              comprehension.constraint[Y, [y1 <: Σ] => X hasSome ([x1 <: Σ] => (x1 ::: y1) ∈ F)]
-            )
+            comprehension.constraint2[Y, [y1 <: Σ] => X hasSome ([x1 <: Σ] => (x1 ::: y1) ∈ F), apply[Z]#v]
           }
           ev25.impliedBy(ev23 ∧ ev24)
         }
