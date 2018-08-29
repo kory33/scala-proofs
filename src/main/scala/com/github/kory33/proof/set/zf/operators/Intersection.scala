@@ -8,7 +8,7 @@ import com.github.kory33.proof.set._
 
 class IntersectionConstruct(val comprehension: ComprehensionConstruct, val union: UnionSetConstruct) {
   
-  type Intersection[F <: Σ] = comprehension.Comprehension[union.Union[F], [z <: Σ] => F hasSome ([f <: Σ] => z ∈ f)]
+  type Intersection[F <: Σ] = comprehension.Comprehension[union.Union[F], [z <: Σ] => F hasAll ([f <: Σ] => z ∈ f)]
 
   val constraintValue: ∀[[F <: Σ] => ∀[[z <: Σ] => (z ∈ Intersection[F]) <=> (F hasAll ([x <: Σ] => z ∈ x))]] = ???
 
