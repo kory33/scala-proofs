@@ -134,44 +134,45 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    */
   trait Function[F <: Σ, X <: Σ, Y <: Σ] extends LeftTotalRelation[F, X, Y] with PartialFunction[F, X, Y] {
     trait apply[x <: Σ](val xInX: x ∈ X) {
-      type v = ∃[[y <: Σ] => (x ::: y) ∈ F]#S
+      /** application result */
+      type a = ∃[[y <: Σ] => (x ::: y) ∈ F]#S
     }
 
     /**
      * image of a subset of domain
      */
     trait image[A <: Σ](val aIncludedInX: A ⊂ X) {
-      type i = Comprehension[Y, [y <: Σ] => A hasSome ([x <: Σ] => y =::= apply[x]#v)]
+      type i = Comprehension[Y, [y <: Σ] => A hasSome ([x <: Σ] => y =::= apply[x]#a)]
     }
 
     /**
      * preimage of an elemnt in range
      */
     trait preimage[y <: Σ](val yInRange: y ∈ range) {
-      type p = Comprehension[X, [x <: Σ] => y =::= apply[x]#v]
+      type p = Comprehension[X, [x <: Σ] => y =::= apply[x]#a]
     }
 
     /**
      * for all x in X, xF(F(x))
      */
-    val valueConstraint1: X hasAll ([x <: Σ] => (x ::: apply[x]#v) ∈ F) = {
+    val valueConstraint1: X hasAll ([x <: Σ] => (x ::: apply[x]#a) ∈ F) = {
       ???
     }
 
     /**
      * application of an elemnt in domain belongs to range
      */
-    val valueConstraint2: X hasAll ([x <: Σ] => apply[x]#v ∈ range) = {
-      byContradiction { assumption: ∃[[x <: Σ] => ￢[(x ∈ X) => (apply[x]#v ∈ range)]] =>
+    val valueConstraint2: X hasAll ([x <: Σ] => apply[x]#a ∈ range) = {
+      byContradiction { assumption: ∃[[x <: Σ] => ￢[(x ∈ X) => (apply[x]#a ∈ range)]] =>
         type Z = assumption.S
-        val ev1: ￢[(Z ∈ X) => (apply[Z]#v ∈ range)] = assumption.value
-        val ev2: (Z ∈ X) => (apply[Z]#v ∈ range) = { zInX =>
-          val ev21: (Z ::: apply[Z]#v) ∈ F = forType[Z].instantiate[[x <: Σ] => (x ∈ X) => ((x ::: apply[x]#v) ∈ F)](valueConstraint1)(zInX)
-          val ev22: (Z ::: apply[Z]#v) ∈ (X × Y) = subsetOfProduct.containsElement(ev21)
-          val ev23: apply[Z]#v ∈ Y = cartesianProduct.rightProjection(ev22)
-          val ev24: X hasSome ([x <: Σ] => (x ::: apply[Z]#v) ∈ F) = forType[Z].generalize(zInX ∧ ev21)
-          val ev25: (apply[Z]#v ∈ range) <=> ((apply[Z]#v ∈ Y) ∧ (X hasSome ([x <: Σ] => (x ::: apply[Z]#v) ∈ F))) = {
-            comprehension.constraint2[Y, [y1 <: Σ] => X hasSome ([x1 <: Σ] => (x1 ::: y1) ∈ F), apply[Z]#v]
+        val ev1: ￢[(Z ∈ X) => (apply[Z]#a ∈ range)] = assumption.value
+        val ev2: (Z ∈ X) => (apply[Z]#a ∈ range) = { zInX =>
+          val ev21: (Z ::: apply[Z]#a) ∈ F = forType[Z].instantiate[[x <: Σ] => (x ∈ X) => ((x ::: apply[x]#a) ∈ F)](valueConstraint1)(zInX)
+          val ev22: (Z ::: apply[Z]#a) ∈ (X × Y) = subsetOfProduct.containsElement(ev21)
+          val ev23: apply[Z]#a ∈ Y = cartesianProduct.rightProjection(ev22)
+          val ev24: X hasSome ([x <: Σ] => (x ::: apply[Z]#a) ∈ F) = forType[Z].generalize(zInX ∧ ev21)
+          val ev25: (apply[Z]#a ∈ range) <=> ((apply[Z]#a ∈ Y) ∧ (X hasSome ([x <: Σ] => (x ::: apply[Z]#a) ∈ F))) = {
+            comprehension.constraint2[Y, [y1 <: Σ] => X hasSome ([x1 <: Σ] => (x1 ::: y1) ∈ F), apply[Z]#a]
           }
           ev25.impliedBy(ev23 ∧ ev24)
         }
