@@ -51,4 +51,11 @@ class ComprehensionConstruct(implicit axiom: ZFExtensionality & ZFSeparation) {
     ev2 ∧ ev1
   }
 
+  def hasAll[X <: Σ, F[_ <: Σ]]: Comprehension[X, F] hasAll F = byContradiction { assumption: ∃[[x <: Σ] => ￢[(x ∈ Comprehension[X, F]) => F[x]]] =>
+    type Y = assumption.S
+    val ev1: ￢[(Y ∈ Comprehension[X, F]) => F[Y]] = assumption.value
+    val ev2: (Y ∈ Comprehension[X, F]) => F[Y] = { assumption2 => constraint2[X, F, Y].implies(assumption2)._2 }
+    ev2 ∧ ev1
+  }
+
 }
