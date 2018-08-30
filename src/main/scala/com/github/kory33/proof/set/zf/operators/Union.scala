@@ -101,14 +101,14 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct, val unionSet: UnionSet
           val ev323: Z ∈ (X ++: Y) = ev321.value._2
           val ev324: (Z =::= X) ∨ (Z =::= Y) = pairSet.constraint2[Z, X, Y].implies(ev323)
           ev324 match {
-            case zEqX: (Z =::= X) => Left(zEqX.sub(ev322))
-            case zEqY: (Z =::= Y) => Right(zEqY.sub(ev322))
+            case Left(zEqX) => Left(zEqX.sub(ev322))
+            case Right(zEqY) => Right(zEqY.sub(ev322))
           }
         }
         val ev33: ((W ∈ X) ∨ (W ∈ Y)) => (W ∈ (X ∪ Y)) = { assumption33 =>
           val ev331: ∃[[z <: Σ] => ((W ∈ z) ∧ (z ∈ (X ++: Y)))] = assumption33 match {
-            case wInX: (W ∈ X) => forType[X].generalize(wInX ∧ pairSet.containsLeft)
-            case wInY: (W ∈ Y) => forType[Y].generalize(wInY ∧ pairSet.containsRight)
+            case Left(wInX) => forType[X].generalize(wInX ∧ pairSet.containsLeft)
+            case Right(wInY) => forType[Y].generalize(wInY ∧ pairSet.containsRight)
           }
           unionSet.constraint2[X ++: Y, W].impliedBy(ev331)
         }
