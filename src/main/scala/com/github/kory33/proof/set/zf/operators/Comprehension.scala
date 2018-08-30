@@ -44,4 +44,11 @@ class ComprehensionConstruct(implicit axiom: ZFExtensionality & ZFSeparation) {
     forType[x].instantiate[[x <: Σ] => (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x])](constraint[X, F])
   }
 
+  def subset[X <: Σ, F[_ <: Σ]]: Comprehension[X, F] ⊂ X = byContradiction { assumption: ∃[[x <: Σ] => ￢[(x ∈ Comprehension[X, F]) => (x ∈ X)]] =>
+    type Y = assumption.S
+    val ev1: ￢[(Y ∈ Comprehension[X, F]) => (Y ∈ X)] = assumption.value
+    val ev2: (Y ∈ Comprehension[X, F]) => (Y ∈ X) = { assumption2 => constraint2[X, F, Y].implies(assumption2)._1 }
+    ev2 ∧ ev1
+  }
+
 }
