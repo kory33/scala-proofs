@@ -206,4 +206,8 @@ class RelationConstruct(val cartesianProduct: CartesianProductConstruct) {
    */
   trait BijectiveFunction[F <: Σ, X <: Σ, Y <: Σ] extends SurjectiveFunction[F, X, Y] with InjectiveFunction[F, X, Y]
 
+  /**
+   * * is a binary operation on S
+   */
+  trait BinaryOperation[* <: Σ, S <: Σ] extends Function[*, S × S, S]
 }
