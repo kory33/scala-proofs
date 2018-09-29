@@ -74,38 +74,27 @@ class PeanoConstruct(comprehension: ComprehensionConstruct) {
       ev4.sub[[a <: Σ] => a hasAll P](ev5)
     }
 
-    val natSuccThenNat: ∀[[n <: Σ] => Nat[S[n]] => Nat[n]] = byContradiction { assumption: ∃[[n <: Σ] => ￢[Nat[S[n]] => Nat[n]]] =>
-      type N = assumption.S
-      val ev1: ￢[Nat[S[N]] => Nat[N]] = assumption.value
-      val ev2: Nat[S[N]] => Nat[N] = { natSN =>
-        ???
-      }
-      ev2 ∧ ev1
-    }
-
-    def natSuccThenNatG[n <: Σ]: Nat[S[n]] => Nat[n] = forType[n].instantiate[[n <: Σ] => Nat[S[n]] => Nat[n]](natSuccThenNat)
-
     // any natural number is either zero or has a unique predecessor
-    val zeroOrHasPred: N hasAll ([n <: Σ] => (n =::= _0) ∨ ∃![[y <: Σ] => n =::= S[y]]) = {
-      type prop[n <: Σ] = (n =::= _0) ∨ ∃![[y <: Σ] => n =::= S[y]]
+    val zeroOrHasPred: N hasAll ([n <: Σ] => (n =::= _0) ∨ ∃![[y <: Σ] => Nat[y] ∧ (n =::= S[y])]) = {
+      type prop[n <: Σ] = (n =::= _0) ∨ ∃![[y <: Σ] => Nat[y] ∧ (n =::= S[y])]
       val ev1: prop[_0] = Left(implicitly[_0 =::= _0])
       val ev2: (N hasAll ([n <: Σ] => prop[n] => prop[S[n]])) = byContradiction { assumption2: ∃[[m <: Σ] => ￢[Nat[m] => prop[m] => prop[S[m]]]] =>
         type M = assumption2.S
         val ev21: ￢[Nat[M] => prop[M] => prop[S[M]]] = assumption2.value
         val ev22: Nat[M] => prop[M] => prop[S[M]] = implicit natM => propM => {
-          val ev221: ∃[[y <: Σ] => S[M] =::= S[y]] = forType[M].generalize(implicitly[S[M] =::= S[M]])
-          val ev222: ∀[[x <: Σ] => ∀[[y <: Σ] => ((S[M] =::= S[x]) ∧ (S[M] =::= S[y])) => x =::= y]] = {
-            byContradiction { assumption: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => ((S[M] =::= S[x]) ∧ (S[M] =::= S[y])) => x =::= y]]] =>
-              val ev2221: ∃[[x <: Σ] => ∃[[y <: Σ] => ￢[((S[M] =::= S[x]) ∧ (S[M] =::= S[y])) => x =::= y]]] = {
-                notForall2[[x <: Σ, y <: Σ] => ((S[M] =::= S[x]) ∧ (S[M] =::= S[y])) => x =::= y](assumption)
+          val ev221: ∃[[y <: Σ] => Nat[y] ∧ (S[M] =::= S[y])] = forType[M].generalize(natM ∧ implicitly[S[M] =::= S[M]])
+          val ev222: ∀[[x <: Σ] => ∀[[y <: Σ] => ((Nat[x] ∧ (S[M] =::= S[x])) ∧ (Nat[y] ∧ (S[M] =::= S[y]))) => x =::= y]] = {
+            byContradiction { assumption: ￢[∀[[x <: Σ] => ∀[[y <: Σ] => ((Nat[x] ∧ (S[M] =::= S[x])) ∧ (Nat[y] ∧ (S[M] =::= S[y]))) => x =::= y]]] =>
+              val ev2221: ∃[[x <: Σ] => ∃[[y <: Σ] => ￢[((Nat[x] ∧ (S[M] =::= S[x])) ∧ (Nat[y] ∧ (S[M] =::= S[y]))) => x =::= y]]] = {
+                notForall2[[x <: Σ, y <: Σ] => ((Nat[x] ∧ (S[M] =::= S[x])) ∧ (Nat[y] ∧ (S[M] =::= S[y]))) => x =::= y](assumption)
               }
               type X = ev2221.S; type Y = ev2221.value.S
-              val ev2222: ￢[((S[M] =::= S[X]) ∧ (S[M] =::= S[Y])) => X =::= Y] = ev2221.value.value
-              val ev2223: ((S[M] =::= S[X]) ∧ (S[M] =::= S[Y])) => X =::= Y = { case (smsx, smsy) =>
-                val ev22231: Nat[S[X]] = smsx.sub[[sx <: Σ] => Nat[sx]](functionG[M])
-                val ev22232: Nat[S[Y]] = smsy.sub[[sy <: Σ] => Nat[sy]](functionG[M])
-                implicit val natX: Nat[X] = natSuccThenNatG[X](ev22231)
-                implicit val natY: Nat[Y] = natSuccThenNatG[Y](ev22232)
+              val ev2222: ￢[((Nat[X] ∧ (S[M] =::= S[X])) ∧ (Nat[Y] ∧ (S[M] =::= S[Y]))) => X =::= Y] = ev2221.value.value
+              val ev2223: ((Nat[X] ∧ (S[M] =::= S[X])) ∧ (Nat[Y] ∧ (S[M] =::= S[Y]))) => X =::= Y = { case (nxsmsx, nysmsy) =>
+                implicit val natX = nxsmsx._1
+                implicit val natY = nysmsy._1
+                val smsx = nxsmsx._2
+                val smsy = nysmsy._2
                 injectiveG[X, Y](smsx.commute.andThen(smsy))
               }
               ev2223 ∧ ev2222
