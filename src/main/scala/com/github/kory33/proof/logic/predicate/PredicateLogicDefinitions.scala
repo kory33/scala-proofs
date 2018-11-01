@@ -9,7 +9,7 @@ object PredicateLogicDefinitions {
     val value: F[S]
   }
 
-  type ∀[-D, F[_ <: D]] = ￢[∃[D, [x <: D] => ￢[F[x]]]]
+  type ∀[D, F[_ <: D]] = ￢[∃[D, [x <: D] => ￢[F[x]]]]
 
   /**
    * There exists a type constructor such that F is fulfilled.
