@@ -1,18 +1,22 @@
 package com.github.kory33.proof.set.logic
 
 import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.{∃, ∀}
-import com.github.kory33.proof.set.Σ
 import com.github.kory33.proof.logic.propositional.LogicDefinitions.￢
 
+/**
+ * Domain of discourse of set theory.
+ */
+trait SetDomain[x] private ()
+
 object SpecializedPredicateDefinitions {
-  type ∃[F[_ <: Σ]] = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.∃[Σ, F]
-  type ∀[F[_ <: Σ]] = ￢[∃[[x <: Σ] => ￢[F[x]]]]
-  trait ∃~>[P[_[_ <: Σ] <: Σ]] {
-    type F[_ <: Σ] <: Σ
-    val value: P[F]
+  type ∃[F[_]] = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.∃[SetDomain, F]
+  type ∀[F[_]] = ￢[∃[[x] => ￢[F[x]]]]
+  trait ∃~>[P[_[_]]] {
+    type F[_]
+    val instance: P[F]
   }
-  trait ∃~~>[P[_[_ <: Σ, _ <: Σ] <: Σ]] {
-    type F[_ <: Σ, _ <: Σ] <: Σ
-    val value: P[F]
-  }  
+  trait ∃~~>[P[_[_, _]]] {
+    type F[_, _]
+    val instance: P[F]
+  }
 }

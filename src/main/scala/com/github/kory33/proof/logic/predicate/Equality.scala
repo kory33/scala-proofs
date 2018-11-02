@@ -1,28 +1,22 @@
 package com.github.kory33.proof.logic.predicate
 
 import scala.annotation.implicitNotFound
-import com.github.kory33.proof.set.Σ
 
 object Equality {
   /**
-  * Typeclass of bounded isomorphism
-  */
+   * Typeclass for equality predicate
+   */
   @implicitNotFound(msg = "Cannot prove that ${A} =::= ${B}.")
-  trait =::=[D, A <: D, B <: D] {
-    def sub[F[_ <: D]]: F[A] => F[B]
-    def commute: =::=[D, B, A] = this.sub[[b <: D] => =::=[D, b, A]](implicitly[=::=[D, A, A]])
-    def andThen[C <: D](next: =::=[D, B, C]): =::=[D, A, C] = next.sub[[c <: D] => =::=[D, A, c]](this)
+  trait =::=[A, B] {
+    def sub[F[_]]: F[A] => F[B]
+    def commute: =::=[B, A] = this.sub[[b] => =::=[b, A]](implicitly[=::=[A, A]])
+    def andThen[C](next: =::=[B, C]): =::=[A, C] = next.sub[[c] => =::=[A, c]](this)
   }
 
   object =::= {
-    implicit def constructEquality[D, A <: D]: =::=[D, A, A] = new =::=[D, A, A] {
-      def sub[F[_ <: D]]: F[A] => F[A] = identity
+    implicit def constructEquality[A]: =::=[A, A] = new =::=[A, A] {
+      def sub[F[_]]: F[A] => F[A] = identity
     }
   }
-
-  /**
-   * unbounded isomorphism
-   */
-  type =~=[A, B] = =::=[Any, A, B]
 
 }

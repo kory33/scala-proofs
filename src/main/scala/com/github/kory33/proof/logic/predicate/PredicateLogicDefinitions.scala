@@ -4,19 +4,34 @@ import com.github.kory33.proof.logic.propositional.LogicDefinitions.￢
 
 object PredicateLogicDefinitions {
 
-  trait ∃[+D, F[_ <: D]] {
-    type S <: D
-    val value: F[S]
-  }
-
-  type ∀[D, F[_ <: D]] = ￢[∃[D, [x <: D] => ￢[F[x]]]]
+  type Id[x] = x
 
   /**
-   * There exists a type constructor such that F is fulfilled.
+   * Existential quantification
+   * 
+   * typeclass [[D]] represents a domain of discourse, and [[typeclass]] ensures that type [[S]] is an element of [[D]].
+   * typeclass [[F]] represents a predicate for which application to type [[S]] becomes truth.
+   *
+   * overall, the instance of this trait represents ∃S∈D.F[S] (here the relation ∈ is not set-theoretic).
    */
-  trait ∃~>[D, P[_[_ <: D] <: D]] {
-    type F[_ <: D] <: D
-    val value: P[F]
+  trait ∃[D[_], F[_]] {
+    type S
+    val typeclass: D[S]
+    val instance: F[S]
+  }
+
+  /**
+   * Universal quantification
+   */
+  type ∀[D[_], F[_]] = ￢[∃[D, [x] => ￢[F[x]]]]
+
+  /**
+   * There exists a type constructor F such that [[P]] is fulfilled and the constructed type belongs to typeclass [[D]].
+   */
+  trait ∃~>[D[_], P[_[_]]] {
+    type F[_]
+    val typeclass: ∀[Id, [x] => D[F[x]]]
+    val instance: P[F]
   }
 
 }

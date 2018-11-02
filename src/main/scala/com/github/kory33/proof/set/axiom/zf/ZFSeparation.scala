@@ -2,7 +2,7 @@ package com.github.kory33.proof.set.axiom.zf
 
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
-import com.github.kory33.proof.set.logic.Equality._
+import com.github.kory33.proof.logic.predicate.Equality._
 import com.github.kory33.proof.set._
 import com.github.kory33.proof.set.SetDefinitions._
 
@@ -15,5 +15,5 @@ import com.github.kory33.proof.set.SetDefinitions._
   * @tparam F unary predicate
   */
 trait ZFSeparation {
-  def separation[F[_ <: Σ]]: ∀[[x <: Σ] => ∃[[y <: Σ] => ∀[[u <: Σ] => (u ∈ y) <=> ((u ∈ x) ∧ F[u])]]]
+  def separation[F[_]]: ∀[[x] => ∃[[y] => ∀[[u] => (u ∈ y) <=> ((u ∈ x) ∧ F[u])]]]
 }

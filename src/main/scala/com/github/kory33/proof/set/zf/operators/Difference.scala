@@ -5,7 +5,7 @@ import com.github.kory33.proof.set._
 
 class DifferenceConstruct(val comprehension: ComprehensionConstruct) {
 
-  type \[x <: Σ, y <: Σ] = comprehension.Comprehension[x, [z <: Σ] => z ∉ y]
+  type \[x, y] = comprehension.Comprehension[x, [z] => z ∉ y]
 
 }
 
@@ -13,6 +13,6 @@ class SymmetricDifferenceConstruct(val difference: DifferenceConstruct, val bina
 
   type \ = difference.\
   type ∪ = binaryUnion.∪
-  type Δ[x <: Σ, y <: Σ] = (x \ y) ∪ (y \ x)
+  type Δ[x, y] = (x \ y) ∪ (y \ x)
 
 }
