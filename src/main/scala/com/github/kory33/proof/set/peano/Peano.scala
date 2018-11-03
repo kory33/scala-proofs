@@ -14,11 +14,11 @@ import com.github.kory33.proof.set.Universal._
 import com.github.kory33.proof.set._
 import com.github.kory33.proof.set.zf.operators.ComprehensionConstruct
 
-/*
+
 class PeanoConstruct(comprehension: ComprehensionConstruct) {
   private type Comprehension = comprehension.Comprehension
 
-  trait PeanoSystem[N, _0, S[_]] {
+  trait PeanoSystem[N : SetDomain, _0, S[_]] {
 
     type Nat[n] = n ∈ N
 
@@ -52,6 +52,8 @@ class PeanoConstruct(comprehension: ComprehensionConstruct) {
 
     // principle of mathematical induction
     def induction[P[_]]: P[_0] => (N hasAll ([n] => P[n] => P[S[n]])) => (N hasAll P) = { p0 => inductive =>
+      import comprehension.comprehensionIsSet
+
       type A = Comprehension[N, P]
       val ev1: A ⊂ N = comprehension.subset
       val ev2: _0 ∈ A = comprehension.constraint2[N, P, _0].impliedBy(zero ∧ p0)
@@ -125,5 +127,3 @@ class PeanoConstruct(comprehension: ComprehensionConstruct) {
     }
   }
 }
-
-*/

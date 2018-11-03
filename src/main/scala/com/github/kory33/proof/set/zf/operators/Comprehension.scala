@@ -43,6 +43,8 @@ class ComprehensionConstruct(implicit axiom: ZFExtensionality & ZFSeparation) {
     ev2
   }
 
+  implicit def comprehensionIsSet[X, F[_]]: SetDomain[Comprehension[X, F]] = ???
+
   def constraint2[X : SetDomain, F[_], x : SetDomain]: (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x]) = {
     forType[x].instantiate[[x] => (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x])](constraint[X, F])
   }
