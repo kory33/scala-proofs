@@ -17,8 +17,8 @@ object Universal {
   /**
    * "isElementOf" relation is a meta-logical relation defined on sets
    */
-  implicit def elementRelationOnSetsLeft[x, y](ev: x ∈ y): SetDomain[x] = ev.xSetDomain
-  implicit def elementRelationOnSetsRight[x, y](ev: x ∈ y): SetDomain[y] = ev.ySetDomain
+  implicit def elementRelationOnSetsLeft[x, y](implicit ev: x ∈ y): SetDomain[x] = ev.xSetDomain
+  implicit def elementRelationOnSetsRight[x, y](implicit ev: x ∈ y): SetDomain[y] = ev.ySetDomain
 
   implicit def selfInclusion[A]: A ⊂ A = {
     byContradiction { implicit assumption: ∃[[z] => ￢[(z ∈ A) => (z ∈ A)]] =>
