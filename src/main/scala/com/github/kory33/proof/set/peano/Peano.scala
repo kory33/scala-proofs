@@ -106,24 +106,5 @@ class PeanoConstruct(comprehension: ComprehensionConstruct) {
       }
       induction(ev1)(ev2)
     }
-
-    sealed trait AdditiveNat[n : Nat] {
-      type +[m]
-    }
-
-    final object Additive0 extends AdditiveNat[_0] {
-      override type +[m] = m
-    }
-
-    final class AdditiveSuccNat[k : Nat] extends AdditiveNat[S[k]] {
-      override type +[m] = S[AdditiveNat[k]# +[m]]
-    }
-
-    type +[a, b] = AdditiveNat[a]# + [b]
-
-    def additionFunctional[n : Nat, m : Nat]: Nat[n + m] = {
-      val ev1: (AdditiveNat[n]# + [m]) ∈ N = ???
-      ev1
-    }
   }
 }
