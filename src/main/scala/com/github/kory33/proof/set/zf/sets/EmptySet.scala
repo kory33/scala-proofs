@@ -67,4 +67,18 @@ class EmptySet(implicit axiom: ZFExistence & ZFExtensionality & ZFSeparation) {
       ev4 ∧ ev1
     }
   }
+
+  /**
+   * The empty set is a subset of any set.
+   */
+  val subsetOfAllSet: ∀[[x] => ∅ ⊂ x] = byContradiction { assumption: ∃[[x] => ￢[∅ ⊂ x]] =>
+    type S = assumption.S
+    val ev1: ￢[∅ ⊂ S] = assumption.instance
+    implicit val ev2: ∃[[x] => ￢[x ∈ ∅ => x ∈ S]] = ev1
+    type Z = ev2.S
+    val ev3: ￢[Z ∈ ∅ => Z ∈ S] = ev2.instance
+    val ev4: ￢[Z ∈ ∅] = forType[Z].instantiate[[y] => ￢[y ∈ ∅]](constraint)
+    val ev5: Z ∈ ∅ => Z ∈ S = { ev51 => ev51 ∧ ev4 }
+    ev5 ∧ ev3
+  }
 }
