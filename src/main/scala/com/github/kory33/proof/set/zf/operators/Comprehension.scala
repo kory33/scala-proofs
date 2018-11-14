@@ -22,7 +22,7 @@ class ComprehensionConstruct(implicit axiom: ZFExtensionality & ZFSeparation) {
 
   type Comprehension[X, F[_]] = ∃[[y] => isSeparationBy[y, X, F]]#S
 
-  def constraint[X : SetDomain, F[_]]: ∀[[x] => (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x])] = {
+  def constraint[X : SetDomain, F[_]]: ∀[[x] => (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x])] ∧ SetDomain[Comprehension[X, F]] = {
     type SF[y] = isSeparationBy[y, X, F]
 
     implicit val existence: ∃[SF] = separate[X, F]
@@ -39,14 +39,19 @@ class ComprehensionConstruct(implicit axiom: ZFExtensionality & ZFSeparation) {
     
     type Y = existence.S
     val ev1: SF[Y] = existence.instance
-    val ev2: SF[Comprehension[X, F]] = Isomorphisms.uniqueness(uniqueExistence, ev1).sub[SF](ev1)
-    ev2
+    val ev2: Y =::= Comprehension[X, F] = Isomorphisms.uniqueness(uniqueExistence, ev1)
+    val ev3: SF[Comprehension[X, F]] = ev2.sub[SF](ev1)
+    val ev4: SetDomain[Y] = implicitly
+    val ev5: SetDomain[Comprehension[X, F]] = ev2.sub[SetDomain](ev4)
+    ev3 ∧ ev5
   }
 
-  implicit def comprehensionIsSet[X, F[_]]: SetDomain[Comprehension[X, F]] = ???
+  def constraint1[X : SetDomain, F[_]]: ∀[[x] => (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x])] = constraint._1
+
+  implicit def comprehensionIsSet[X : SetDomain, F[_]]: SetDomain[Comprehension[X, F]] = constraint._2
 
   def constraint2[X : SetDomain, F[_], x : SetDomain]: (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x]) = {
-    forType[x].instantiate[[x] => (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x])](constraint[X, F])
+    forType[x].instantiate[[x] => (x ∈ Comprehension[X, F]) <=> ((x ∈ X) ∧ F[x])](constraint1[X, F])
   }
 
   def subset[X : SetDomain, F[_]]: Comprehension[X, F] ⊂ X = byContradiction { implicit assumption: ∃[[x] => ￢[(x ∈ Comprehension[X, F]) => (x ∈ X)]] =>
