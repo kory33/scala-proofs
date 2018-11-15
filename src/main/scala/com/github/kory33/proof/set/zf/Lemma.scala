@@ -131,6 +131,7 @@ object Lemma {
     : ∃~>[[ClassFunction[_]] => ∀[[x] => ClassFunction[x] R x]] = {
     new ∃~>[[ClassFunction[_]] => ∀[[x] => ClassFunction[x] R x]] {
       type F[x] = ∃[[y] => y R x]#S
+
       val instance: ∀[[x] => F[x] R x] = {
         byContradiction { implicit assumption: ∃[[x] => ￢[F[x] R x]] =>
           type X = assumption.S
@@ -144,6 +145,17 @@ object Lemma {
           ev4 ∧ ev1
         }
       }
+
+      def typeclass[X : SetDomain]: SetDomain[F[X]] = {
+          type RX[y] = y R X
+          val ev1: ∃![RX] = forType[X].instantiate[[x] => ∃![[y] => y R x]](uniqueExists)
+          implicit val existsY = ev1._1
+          type Y = existsY.S
+          val ev2: RX[Y] = existsY.instance
+          val ev3: SetDomain[Y] = existsY.typeclass
+          val ev4: Y =::= F[X] = Isomorphisms.uniqueness(ev1, ev2)
+          ev4.sub[SetDomain](ev3)
+      }
     }
   }
 
@@ -154,6 +166,7 @@ object Lemma {
     : ∃~~>[[ClassFunction[_, _]] => ∀[[x] => ∀[[y] => R[ClassFunction[x, y], x, y]]]] = {
       new ∃~~>[[ClassFunction[_, _]] => ∀[[x] => ∀[[y] => R[ClassFunction[x, y], x, y]]]] {
         type F[x, y] = ∃[[z] => R[z, x, y]]#S
+
         val instance: ∀[[x] => ∀[[y] => R[F[x, y], x, y]]] = {
           byContradiction { implicit assumption: ∃[[x] => ￢[∀[[y] => R[F[x, y], x, y]]]] =>
             type X = assumption.S
@@ -170,7 +183,17 @@ object Lemma {
             ev5 ∧ ev2
           }
         }
+
+        def typeclass[X : SetDomain, Y : SetDomain]: SetDomain[F[X, Y]] = {
+          type RXY[z] = R[z, X, Y]
+          val ev1: ∃![RXY] = forType2[X, Y].instantiate[[x, y] => ∃![[z] => R[z, x, y]]](uniqueExists)
+          implicit val existsY = ev1._1
+          type Z = existsY.S
+          val ev2: RXY[Z] = existsY.instance
+          val ev3: SetDomain[Z] = existsY.typeclass
+          val ev4: Z =::= F[X, Y] = Isomorphisms.uniqueness(ev1, ev2)
+          ev4.sub[SetDomain](ev3)
+        }
       }
-  }
-  
+  }  
 }
