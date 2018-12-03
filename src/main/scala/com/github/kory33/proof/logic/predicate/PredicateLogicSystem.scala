@@ -2,7 +2,7 @@ package com.github.kory33.proof.logic.predicate
 
 import scala.language.implicitConversions
 
-import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.{∀, ∃}
+import com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions._
 import com.github.kory33.proof.logic.propositional.LogicDefinitions.{￢, _}
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
@@ -13,6 +13,17 @@ object PredicateLogicSystem {
     * Existential generalization
     */
   implicit def genExist[D[_], F[_], A : D](instance: F[A]): ∃[D, F] = new ∃ { type S = A; val instance = instance; val typeclass = implicitly }
+
+  /**
+    * Universal generalization
+    */
+  def genUniv[D[_], F[_]](deduction: (e: ArbitraryObject[D]) => F[e.T]): ∀[D, F] = byContradiction { assumption: ∃[D, [x] => ￢[F[x]]] =>
+    type X = assumption.S
+    val ev1: ￢[F[X]] = assumption.instance
+    // this should be a valid code
+    val ev2: F[X] = ??? // deduction(new ArbitraryObject { type T = X; val tyepclass = assumption.typeclass })
+    ev2 ∧ ev1
+  }
 
   def instUniv[D[_], φ[_], X : D](forall: ∀[D, φ]): φ[X] = {
     byContradiction { notPX: ￢[φ[X]] =>

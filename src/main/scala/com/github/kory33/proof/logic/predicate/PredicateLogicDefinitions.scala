@@ -21,6 +21,14 @@ object PredicateLogicDefinitions {
   }
 
   /**
+   * An "object" in the predicate logic which is arbitrary and belongs to the typeclass D.
+   */
+  trait ArbitraryObject[D[_]] {
+    type T
+    val typeclass: D[T]
+  }
+
+  /**
    * Universal quantification
    */
   type ∀[D[_], F[_]] = ￢[∃[D, [x] => ￢[F[x]]]]
