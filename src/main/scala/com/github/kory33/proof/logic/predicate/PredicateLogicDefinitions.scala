@@ -34,12 +34,20 @@ object PredicateLogicDefinitions {
   type ∀[D[_], F[_]] = ￢[∃[D, [x] => ￢[F[x]]]]
 
   /**
-   * There exists a type constructor F such that [[P]] is fulfilled and the constructed type belongs to typeclass [[D]].
+   * There exists a unary type constructor F such that [[P]] is fulfilled and the constructed type belongs to typeclass [[D]].
    */
   trait ∃~>[D[_], P[_[_]]] {
     type F[_]
-    val typeclass: ∀[Id, [x] => D[F[x]]]
     val instance: P[F]
+    def typeclass[x: D]: D[F[x]]
   }
 
+  /**
+   * There exists a binary type constructor F such that [[P]] is fulfilled and the constructed type belongs to typeclass [[D]].
+   */
+  trait ∃~~>[D[_], P[_[_, _]]] {
+    type F[_, _]
+    val instance: P[F]
+    def typeclass[x: D, y: D]: D[F[x, y]]
+  }
 }

@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 import com.github.kory33.proof.logic.predicate.PredicateLogicSystem
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
-import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions.{∃, ∀}
+import com.github.kory33.proof.set.logic.SpecializedPredicateDefinitions._
 import com.github.kory33.proof.set.logic.SetDomain
 
 object SpecializedPredicateSystem {
@@ -14,6 +14,11 @@ object SpecializedPredicateSystem {
     * Existential generalization
     */
   implicit def genExist[F[_], A : SetDomain](instance: F[A]): ∃[F] = PredicateLogicSystem.genExist[SetDomain, F, A](instance)
+
+  /**
+    * Universal generalization
+    */
+  def genUniv[F[_]](deduction: (e: ArbitraryObject) => F[e.T]): ∀[F] = ??? // PredicateLogicSystem.genUniv[SetDomain, F](deduction)
 
   def instUniv[φ[_], X : SetDomain](forall: ∀[φ]): φ[X] = PredicateLogicSystem.instUniv[SetDomain, φ, X](forall)
 

@@ -11,16 +11,9 @@ trait SetDomain[x] private ()
 object SpecializedPredicateDefinitions {
   type ∃[F[_]] = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.∃[SetDomain, F]
   type ∀[F[_]] = ￢[∃[[x] => ￢[F[x]]]]
-  trait ∃~>[P[_[_]]] {
-    type F[_]
 
-    val instance: P[F]
-    def typeclass[X : SetDomain]: SetDomain[F[X]]
-  }
-  trait ∃~~>[P[_[_, _]]] {
-    type F[_, _]
+  type ArbitraryObject = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.ArbitraryObject[SetDomain]
 
-    val instance: P[F]
-    def typeclass[X : SetDomain, Y : SetDomain]: SetDomain[F[X, Y]]
-  }
+  type ∃~>[P[_[_]]] = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.∃~>[SetDomain, P]
+  type ∃~~>[P[_[_, _]]] = com.github.kory33.proof.logic.predicate.PredicateLogicDefinitions.∃~~>[SetDomain, P]
 }
