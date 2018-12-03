@@ -77,7 +77,11 @@ class UnionSetConstruct(implicit axiom: ZFSeparation & ZFExtensionality & ZFUnio
   }
 
   type Union[x] = unionFunctionExistence.F[x]
+
   val constraintValue: ∀[[x] => Union[x] isUnionOf x] = unionFunctionExistence.instance
+
+  implicit def familyUnionIsSet[x : SetDomain]: SetDomain[Union[x]] = unionFunctionExistence.typeclass[x]
+
   def constraint[x : SetDomain]: Union[x] isUnionOf x = forType[x].instantiate[[x] => Union[x] isUnionOf x](constraintValue)
   def constraint2[F : SetDomain, x : SetDomain]: (x ∈ Union[F]) <=> ∃[[Y] => ((x ∈ Y) ∧ (Y ∈ F))] = {
     forType[x].instantiate[[z] => (z ∈ Union[F]) <=> ∃[[Y] => ((z ∈ Y) ∧ (Y ∈ F))]](constraint[F])
@@ -128,7 +132,7 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct, val unionSet: UnionSet
     }
   }
 
-  implicit def binaryUnionIsSet[X, Y]: SetDomain[X ∪ Y] = ???
+  implicit def binaryUnionIsSet[X: SetDomain, Y: SetDomain]: SetDomain[X ∪ Y] = unionSet.familyUnionIsSet(pairSet.pairIsSet)
 
   def constraint[x : SetDomain, y : SetDomain]: isSumOf[x ∪ y, x, y] = forType2[x, y].instantiate[[x1, y1] => isSumOf[x1 ∪ y1, x1, y1]](constraintValue)
 
@@ -150,8 +154,7 @@ class BinaryUnionConstruct(val pairSet: PairSetConstruct, val unionSet: UnionSet
       ev14 ∧ ev11
     }
 
-    //??
-    setEquals[X ∪ Y, Y ∪ X](ev1)(binaryUnionIsSet[X, Y], binaryUnionIsSet[Y, X], implicitly)
+    setEquals[X ∪ Y, Y ∪ X](ev1)
   }
 
   def includesLeft[X : SetDomain, Y : SetDomain]: X ⊂ (X ∪ Y) = byContradiction { implicit assumption: ∃[[x] => ￢[(x ∈ X) => (x ∈ (X ∪ Y))]] =>

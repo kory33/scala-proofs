@@ -56,6 +56,6 @@ class PowerSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFPowe
     )
   }
 
-  implicit def powerIsSet[x]: SetDomain[Pow[x]] = ???
+  implicit def powerIsSet[x: SetDomain]: SetDomain[Pow[x]] = powerFunctionExistence.typeclass[x]
 
 }

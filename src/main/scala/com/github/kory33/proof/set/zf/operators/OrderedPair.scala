@@ -17,6 +17,8 @@ class OrderedPairConstruct(val singleton: SingletonConstruct)(implicit val axiom
 
   val pairSet: singleton.pairSet.type = singleton.pairSet
 
+  import pairSet.pairIsSet
+
   type ++:[a, b] = pairSet.++:[a, b]
   type Just[a] = singleton.Just[a]
 
@@ -88,7 +90,7 @@ class OrderedPairConstruct(val singleton: SingletonConstruct)(implicit val axiom
     }
   }
 
-  implicit def setDomain[a : SetDomain, b : SetDomain]: SetDomain[a ::: b] = ???
+  implicit def setDomain[a : SetDomain, b : SetDomain]: SetDomain[a ::: b] = pairSet.pairIsSet
 
   def constraint[a : SetDomain, b : SetDomain, c : SetDomain, d : SetDomain]: ((a ::: b) =::= (c ::: d)) <=> ((a =::= c) ∧ (b =::= d)) = {
     forType2[c, d].instantiate[[c1, d1] => ((a ::: b) =::= (c1 ::: d1)) <=> ((a =::= c1) ∧ (b =::= d1))](

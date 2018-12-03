@@ -69,7 +69,7 @@ class PairSetConstruct(implicit axiom: ZFExtensionality & ZFSeparation & ZFParin
 
   def containsRight[x : SetDomain, y : SetDomain]: y ∈ (x ++: y) = constraint2[y, x, y].impliedBy(Right(implicitly[y =::= y]))
 
-  implicit def pairIsSet[x, y]: SetDomain[x ++: y] = ???
+  implicit def pairIsSet[x: SetDomain, y: SetDomain]: SetDomain[x ++: y] = pairFunctionExistence.typeclass[x, y]
 
 }
 
