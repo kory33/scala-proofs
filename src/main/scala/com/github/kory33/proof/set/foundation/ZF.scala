@@ -54,16 +54,16 @@ object ZF {
 
 trait ZFAxioms {
 
-    val systemLanguage: SetLanguage
+    val language: SetLanguage
 
-    val axiomExistence: ZF.Existence { val language: systemLanguage.type }
-    val axiomExtensionality: ZF.Extensionality { val language: systemLanguage.type }
-    val axiomSeparation: ZF.Separation { val language: systemLanguage.type }
-    val axiomPairing: ZF.Pairing { val language: systemLanguage.type }
-    val axiomUnion: ZF.Union { val language: systemLanguage.type }
-    val axiomPower: ZF.Power { val language: systemLanguage.type }
-    val axiomInfinity: ZF.Infinity { val language: systemLanguage.type }
-    val axiomReplacement: ZF.Replacement { val language: systemLanguage.type }
-    val axiomRegularity: ZF.Regularity { val language: systemLanguage.type }
+    val axiomExistence: ZF.Existence { val language: ZFAxioms.this.language.type }
+    val axiomExtensionality: ZF.Extensionality { val language: ZFAxioms.this.language.type }
+    val axiomSeparation: ZF.Separation { val language: ZFAxioms.this.language.type }
+    val axiomPairing: ZF.Pairing { val language: ZFAxioms.this.language.type }
+    val axiomUnion: ZF.Union { val language: ZFAxioms.this.language.type }
+    val axiomPower: ZF.Power { val language: ZFAxioms.this.language.type }
+    val axiomInfinity: ZF.Infinity { val language: ZFAxioms.this.language.type }
+    val axiomReplacement: ZF.Replacement { val language: ZFAxioms.this.language.type }
+    val axiomRegularity: ZF.Regularity { val language: ZFAxioms.this.language.type }
 
 }

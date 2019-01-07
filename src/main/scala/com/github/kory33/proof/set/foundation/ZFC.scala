@@ -16,6 +16,6 @@ object ZFC {
 
 trait ZFCAxioms extends ZFAxioms {
 
-    val axiomChoice: ZFC.Choice { val language: systemLanguage.type }
+    val axiomChoice: ZFC.Choice { val language: ZFCAxioms.this.language.type }
 
 }
