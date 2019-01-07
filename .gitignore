@@ -1,6 +1,8 @@
 .idea
 *.iml
 .ensime
+.ensime_cache/*
+*.log
 project/*/
 target/
 
