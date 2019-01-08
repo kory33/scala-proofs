@@ -40,14 +40,23 @@ object ZF {
 
     trait Infinity {
         val language: SetLanguage; import language._
+        val predicates: Predicates { val language: Infinity.this.language.type } = new Predicates { val language: Infinity.this.language.type = Infinity.this.language }; import predicates._
+
+        def infinity: ∃[λ[x => ∀[λ[z => isEmpty[z] => (z ∈ x)]] ∧ ∀∈[x, λ[y => ∀[λ[z => (z isSingletonOf y) => (z ∈ x)]]]]]]
     }
 
     trait Replacement {
         val language: SetLanguage; import language._
+        val predicates: Predicates { val language: Replacement.this.language.type } = new Predicates { val language: Replacement.this.language.type = Replacement.this.language }; import predicates._
+
+        def replacement[F[_, _]]: ∀[λ[A => ∀[λ[p => ∀∈[A, λ[x => ∃![λ[y => F[x, y]]]]] => ∃[λ[Y => ∀∈[A, λ[x => ∃∈[Y, λ[y => F[x, y]]]]]]]]]]]
     }
 
     trait Regularity {
         val language: SetLanguage; import language._
+        val predicates: Predicates { val language: Regularity.this.language.type } = new Predicates { val language: Regularity.this.language.type = Regularity.this.language }; import predicates._
+
+        def infinity: ∀[λ[x => ￢[isEmpty[x]] => ∃∈[x, λ[y => ￢[∃∈[x, λ[z => z ∈ y]]]]]]]
     }
 
 }

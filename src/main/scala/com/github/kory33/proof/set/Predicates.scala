@@ -9,6 +9,7 @@ trait Predicates {
 
     type ∃![F[_]] = ∃[F] ∧ ∀[λ[x => ∀[λ[y => (F[x] ∧ F[y]) => x =::= y]]]]
     type ∀∈[A, F[_]] = ∀[λ[x => (x ∈ A) => F[x]]]
+    type ∃∈[A, F[_]] = ∃[λ[x => (x ∈ A) ∧ F[x]]]
 
     type ⊂[x, X] = ∀[λ[z => (z ∈ x) => (z ∈ X)]]
 
@@ -16,5 +17,7 @@ trait Predicates {
     type isEmpty[x] = ￢[∃[λ[y => y ∈ x]]]
     type hasNonemptySets[F] = ∀∈[F, λ[x => ∃[λ[z => z ∈ x]]]]
     type hasDisjointSets[F] = ∀∈[F, λ[x => ∀∈[F, λ[y => (x =::= y) ∨ disjoint[x, y]]]]]
+    type isSingletonOf[s, x] = ∀∈[s, λ[y => y =::= x]]
+    type isSucc[s, x] = ∀∈[s, λ[y => (y =::= x) ∨ (y isSingletonOf x)]]
 
 }
