@@ -43,6 +43,9 @@ trait EqPredLanguage extends PredicateLanguage {
 
     type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
 
+    /**
+     * These two axioms are included to allow "definition" of new functional symbols.
+     */
     def nameExistenceCond[P[_]](uniqueExistence: ∃![P]): P[{ type E = P }]
     def nameExistenceTerm[P[_]](uniqueExistence: ∃![P]): Univ[{ type E = P }]
 
