@@ -42,7 +42,7 @@ object ZF {
         import language._
         val predicates = new BasicPredicates { val language: Infinity.this.language.type = Infinity.this.language }; import predicates._
 
-        def infinity: ∃[[x] => ∀[[z] => isEmpty[z] => (z ∈ x)] ∧ ∀∈[x, [y] => ∀[[z] => (z isSingletonOf y) => (z ∈ x)]]]
+        def infinity: ∃[[x] => ∀[[z] => isEmpty[z] => (z ∈ x)] ∧ ∀∈[x, [y] => ∀[[z] => (z isSucc y) => (z ∈ x)]]]
     }
 
     trait Replacement extends SetAxiom {

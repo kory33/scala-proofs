@@ -9,7 +9,7 @@ object ZFC {
   trait Choice extends SetAxiom {
       import language._
       val predicates = new BasicPredicates { val language: Choice.this.language.type = Choice.this.language }; import predicates._
-      def choice: ∀[[F] => (hasNonemptySets[F] ∧ hasDisjointSets[F]) => ∃[[S] => ∀∈[F, [X] => ∃![[z] => (z ∈ S) ∧ (z ∈ X)]]]]
+      def choice: ∀[[F] => (hasNonemptySets[F] ∧ hasDisjointSets[F]) => ∃[[S] => S isSelectorOn F]]
   }
 
 }

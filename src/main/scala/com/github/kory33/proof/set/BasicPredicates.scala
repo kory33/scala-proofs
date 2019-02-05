@@ -12,11 +12,22 @@ trait BasicPredicates {
 
   type ⊂[x, X] = ∀[[z] => (z ∈ x) => (z ∈ X)]
 
-  type disjoint[x, y] = ￢[∃[[z] => (z ∈ x) ∧ (z ∈ x)]]
   type isEmpty[x] = ￢[∃[[y] => y ∈ x]]
-  type hasNonemptySets[F] = ∀∈[F, [x] => ∃[[z] => z ∈ x]]
-  type hasDisjointSets[F] = ∀∈[F, [x] => ∀∈[F, [y] => (x =::= y) ∨ disjoint[x, y]]]
+  type containsTwo[z, x, y] = ∀[[w] => (w ∈ z) <=> ((w =::= x) ∨ (w =::= y))]
+  type isUnionOf[U, F] = ∀[[x] => (x ∈ U) <=> ∃[[Y] => ((x ∈ Y) ∧ (Y ∈ F))]]
+  type isPowerOf[y, x] = ∀[[z] => (z ∈ y) <=> (z ⊂ x)]
+  type isSelectorOn[S, F] = ∀∈[F, [x] => ∃![[z] => (z ∈ S) ∧ (z ∈ x)]]
+
   type isSingletonOf[s, x] = ∀∈[s, [y] => y =::= x]
   type isSucc[s, x] = ∀∈[s, [y] => (y =::= x) ∨ (y isSingletonOf x)]
+
+  type disjoint[x, y] = ￢[∃[[z] => (z ∈ x) ∧ (z ∈ x)]]
+  type hasNonemptySets[F] = ∀∈[F, [x] => ∃[[z] => z ∈ x]]
+  type hasDisjointSets[F] = ∀∈[F, [x] => ∀∈[F, [y] => (x =::= y) ∨ disjoint[x, y]]]
+
+  type isSumOf[z, x, y] = ∀[[w] => (w ∈ z) <=> (w ∈ x) ∨ (w ∈ y)]
+  type isIntersectionOf[z, x, y] = ∀[[w] => (w ∈ z) <=> (w ∈ x) ∧ (w ∈ y)]
+
+  type isInjective[f[_]] = ∀[[x] => ∀[[y] => (f[x] =::= f[y]) => (x =::= y)]]
   
 }
