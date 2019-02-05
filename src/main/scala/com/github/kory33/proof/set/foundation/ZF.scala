@@ -56,24 +56,28 @@ object ZF {
         import language._
         val predicates = new BasicPredicates { val language: Regularity.this.language.type = Regularity.this.language }; import predicates._
 
-        def infinity: ∀[[x] => ￢[isEmpty[x]] => ∃∈[x, [y] => ￢[∃∈[x, [z] => z ∈ y]]]]
+        def regularity: ∀[[x] => ￢[isEmpty[x]] => ∃∈[x, [y] => ￢[∃∈[x, [z] => z ∈ y]]]]
     }
 
-}
+    type Axioms =
+        Existence &
+        Extensionality &
+        Separation &
+        Pairing &
+        Union &
+        Power &
+        Infinity &
+        Replacement &
+        Regularity
 
-
-trait ZFAxioms {
-
-    val language: SetTheoryLanguage
-
-    val axiomExistence: ZF.Existence { val language: ZFAxioms.this.language.type }
-    val axiomExtensionality: ZF.Extensionality { val language: ZFAxioms.this.language.type }
-    val axiomSeparation: ZF.Separation { val language: ZFAxioms.this.language.type }
-    val axiomPairing: ZF.Pairing { val language: ZFAxioms.this.language.type }
-    val axiomUnion: ZF.Union { val language: ZFAxioms.this.language.type }
-    val axiomPower: ZF.Power { val language: ZFAxioms.this.language.type }
-    val axiomInfinity: ZF.Infinity { val language: ZFAxioms.this.language.type }
-    val axiomReplacement: ZF.Replacement { val language: ZFAxioms.this.language.type }
-    val axiomRegularity: ZF.Regularity { val language: ZFAxioms.this.language.type }
+    def existence(implicit e: Existence) = e.existence
+    def extensionality(implicit e: Extensionality) = e.extensionality
+    def separation[F[_]](implicit s: Separation) = s.separation[F]
+    def pairing(implicit p: Pairing) = p.pairing
+    def union(implicit u: Union) = u.union
+    def power(implicit p: Power) = p.power
+    def infinity(implicit i: Infinity) = i.infinity
+    def replacement[F[_, _]](implicit r: Replacement) = r.replacement[F]
+    def regularity(implicit r: Regularity) = r.regularity
 
 }

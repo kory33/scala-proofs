@@ -12,8 +12,8 @@ object ZFC {
       def choice: ∀[[F] => (hasNonemptySets[F] ∧ hasDisjointSets[F]) => ∃[[S] => S isSelectorOn F]]
   }
 
-}
+  type Axioms = ZF.Axioms & Choice
 
-trait ZFCAxioms extends ZFAxioms {
-  val axiomChoice: ZFC.Choice { val language: ZFCAxioms.this.language.type }
+  def choice(implicit c: Choice) = c.choice
+
 }
