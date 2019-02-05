@@ -9,6 +9,8 @@ trait PredicateLogicLemma {
 
   import language._
 
+  implicit def existenceUniv[F[_]](implicit ex: ∃[F]): Univ[ex.witness.type] = ex.term
+
   def predicateDeMorgan1[F[_]]: ∀[F] <=> ￢[∃[[x] => ￢[F[x]]]] = ???
   def predicateDeMorgan2[F[_]]: ∃[F] <=> ￢[∀[[x] => ￢[F[x]]]] = ???
   def predicateDeMorgan3[F[_]]: ∀[[x] => ￢[F[x]]] <=> ￢[∃[F]] = predicateDeMorgan2[F].negSides.andThen(doubleNegationEquivalence.commute).commute

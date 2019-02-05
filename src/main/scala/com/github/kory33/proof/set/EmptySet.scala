@@ -1,5 +1,7 @@
 package com.github.kory33.proof.set
 
+import scala.reflect.Selectable.reflectiveSelectable
+
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.IntuitionisticLogicSystem._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
@@ -18,16 +20,16 @@ class EmptySet(implicit val axiom: ZF.Existence & ZF.Extensionality & ZF.Separat
   import axiom.language._
 
   val emptyExistence: ∃[isEmpty] = {
-    val ev1: axiom.language.∃[[x] => x =::= x] = existence
+    implicit val ev1: axiom.language.∃[[x] => x =::= x] = existence
     type S = ev1.witness.type
     val s: S = ev1.witness
     val ev2: ∀[[x] => ∃[[y] => ∀[[u] => (u ∈ y) <=> ((u ∈ x) ∧ Nothing)]]] = separation[[x] => Nothing]
-    val ev3: ∃[[y] => ∀[[u] => (u ∈ y) <=> ((u ∈ S) ∧ Nothing)]] = ???
+    val ev3: ∃[[y] => ∀[[u] => (u ∈ y) <=> ((u ∈ S) ∧ Nothing)]] = ev2(s)
     type Y = ev3.witness.type
     val y: Y = ev3.witness
     val ev4: ∀[[u] => (u ∈ Y) <=> ((u ∈ S) ∧ Nothing)] = ev3.proof
     val ev5: ∀[[u] => ￢[u ∈ Y]] = { u: Any => implicit uT: Univ[u.type] =>
-      val ev51: (u.type ∈ Y) <=> ((u.type ∈ S) ∧ Nothing) = ???
+      val ev51: (u.type ∈ Y) <=> ((u.type ∈ S) ∧ Nothing) = ev4(u)
       val ev52: ￢[u.type ∈ Y] = { uInY: u.type ∈ Y => ev51.implies(uInY)._2 }
       ev52
     }
