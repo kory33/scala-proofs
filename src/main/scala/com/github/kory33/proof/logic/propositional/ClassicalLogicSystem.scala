@@ -72,4 +72,11 @@ object ClassicalLogicSystem {
 
   def doubleNegationEquivalence[A]: A <=> ￢[￢[A]] = introduceDoubleNeg[A] ∧ { doubleNeg: ￢[￢[A]] => eliminateDoubleNegation[A](doubleNeg) }
 
+  def contrapositionEquivalence[A, B]: (A => B) <=> (￢[B] => ￢[A]) = {
+    val ev1: (￢[B] => ￢[A]) => (A => B) = { notBThenNotA: (￢[B] => ￢[A]) =>
+      eliminateDoubleNegation[B] compose contraposition(notBThenNotA) compose introduceDoubleNeg
+    }
+    contraposition ∧ ev1
+  }
+
 }
