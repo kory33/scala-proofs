@@ -70,4 +70,6 @@ object ClassicalLogicSystem {
     implies ∧ impliedBy
   }
 
+  def doubleNegationEquivalence[A]: A <=> ￢[￢[A]] = introduceDoubleNeg[A] ∧ { doubleNeg: ￢[￢[A]] => eliminateDoubleNegation[A](doubleNeg) }
+
 }

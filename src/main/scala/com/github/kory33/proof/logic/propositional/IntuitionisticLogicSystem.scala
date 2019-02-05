@@ -41,11 +41,6 @@ object IntuitionisticLogicSystem {
     def mapLeft[C] : (A => C) => C ∧ B = { ded => conj.commute.mapRight(ded).commute }
   }
 
-  implicit class RichEquivalence[A, B](eq: A <=> B) {
-    def andThen[C]: (B <=> C) => (A <=> C) = { bEqC => eq.implies.andThen(bEqC.implies) ∧ bEqC.impliedBy.andThen(eq.impliedBy) }
-    def commute: B <=> A = eq.impliedBy ∧ eq.implies
-  }
-
   /**
     * removal of disjunction
     */
@@ -135,5 +130,11 @@ object IntuitionisticLogicSystem {
   }
 
   final def alwaysImplied[A, B]: B => (A => B) = { b: B => _ => b }
+
+  implicit class RichEquivalence[A, B](eq: A <=> B) {
+    def andThen[C]: (B <=> C) => (A <=> C) = { bEqC => eq.implies.andThen(bEqC.implies) ∧ bEqC.impliedBy.andThen(eq.impliedBy) }
+    def commute: B <=> A = eq.impliedBy ∧ eq.implies
+    def negSides: ￢[A] <=> ￢[B] = { contraposition(eq.impliedBy) ∧ contraposition(eq.implies) }
+  }
 
 }
