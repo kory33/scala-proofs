@@ -79,4 +79,6 @@ object ClassicalLogicSystem {
     contraposition ∧ ev1
   }
 
+  def nonEquivalence[A, B]: ￢[A <=> B] <=> (￢[A => B] ∨ ￢[B => A]) = deMorgan3.commute
+
 }
