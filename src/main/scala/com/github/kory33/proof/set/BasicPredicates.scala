@@ -6,13 +6,14 @@ import com.github.kory33.proof.set.foundation.SetTheoryLanguage
 trait BasicPredicates {
   val language: SetTheoryLanguage; import language._
 
-  type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
+  type Unique[F[_]] = ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
+  type ∃![F[_]] = ∃[F] ∧ Unique[F]
   type ∀∈[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
   type ∃∈[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
 
   type ⊂[x, X] = ∀[[z] => (z ∈ x) => (z ∈ X)]
 
-  type isEmpty[x] = ￢[∃[[y] => y ∈ x]]
+  type isEmpty[x] = ∀[[y] => ￢[y ∈ x]]
   type containsTwo[z, x, y] = ∀[[w] => (w ∈ z) <=> ((w =::= x) ∨ (w =::= y))]
   type isUnionOf[U, F] = ∀[[x] => (x ∈ U) <=> ∃[[Y] => ((x ∈ Y) ∧ (Y ∈ F))]]
   type isPowerOf[y, x] = ∀[[z] => (z ∈ y) <=> (z ⊂ x)]

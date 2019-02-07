@@ -1,5 +1,8 @@
 package com.github.kory33.proof.logic.predicate
 
+import scala.language.implicitConversions
+import scala.reflect.Selectable.reflectiveSelectable
+
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 
 /**
@@ -10,6 +13,7 @@ trait PredicateLanguage {
 
   trait ∃[F[_]] {
     val witness: Any
+    type W = witness.type
     val term: Univ[witness.type]
     val proof: F[witness.type]
   }
@@ -43,29 +47,31 @@ trait EqPredLanguage extends PredicateLanguage {
 
   type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
 
-  /**
-   * These two axioms are included to allow "definition" of new functional symbols.
-   */
-  def nameExistenceCond[P[_]](uniqueExistence: ∃![P]): P[{ type E = P }]
-  def nameExistenceTerm[P[_]](uniqueExistence: ∃![P]): Univ[{ type E = P }]
+  def isomorphism[P[_]](ex: ∃![P]): ex._1.witness.type =::= ∃[P]#W
+  implicit def isomorphismTerm[P[_]](ex: ∃![P]): Univ[∃[P]#W]
 
   // Identity functional symbol
-  type Id[z] = { type E[x] = z =::= x }
+  type Id[z] = ∃[[x] => z =::= x]#W
+
   object Id {
-    val identity: ∀[[x] => x =::= Id[x]] = { x: Any => implicit xTerm: Univ[x.type] =>
-      type F[y] = x.type =::= y
-      val ev1: ∃[F] = genExist(x)
-      val ev2: ∀[[y] => ∀[[z] => (F[y] ∧ F[z]) => y =::= z]] = {
-        y: Any => implicit yTerm: Univ[y.type] => {
-          z: Any => implicit zTerm: Univ[z.type] => {
-            xEqyAndXEqZ: F[y.type] ∧ F[z.type] => {
-              xEqyAndXEqZ._1.commute.andThen(xEqyAndXEqZ._2)
-            }
+    val uniqueness: ∀[[z] => ∃![[x] => z =::= x]] = {
+      z: Any => implicit zTerm: Univ[z.type] =>
+      type F[x] = z.type =::= x
+      val existence: ∃[[x] => z.type =::= x] = genExist(z)
+      val uniquenss: ∀[[x] => ∀[[y] => ((z.type =::= x) ∧ (z.type =::= y)) => x =::= y]] = {
+        x: Any => implicit xTerm: Univ[x.type] => y: Any => implicit yTerm: Univ[y.type] => {
+          xEqyAndXEqZ: F[x.type] ∧ F[y.type] => {
+            xEqyAndXEqZ._1.commute.andThen(xEqyAndXEqZ._2)
           }
         }
       }
-      val ev3: ∃![F] = ev1 ∧ ev2
-      nameExistenceCond(ev3)
+      existence ∧ uniquenss
+    }
+    val identity: ∀[[x] => x =::= Id[x]] = { z: Any => implicit zTerm: Univ[z.type] =>
+      type F[x] = z.type =::= x
+      val ev1: ∃![[x] => z.type =::= x] = uniqueness(z)
+      val ev2: z.type =::= ev1._1.witness.type = ev1._1.proof
+      isomorphism(ev1).sub[[idx] => z.type =::= idx](ev2)
     }
   }
 }

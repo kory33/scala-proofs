@@ -1,5 +1,6 @@
 package com.github.kory33.proof.set
 
+import scala.language.implicitConversions
 import scala.reflect.Selectable.reflectiveSelectable
 
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
@@ -33,7 +34,26 @@ class EmptySet(implicit val axiom: ZF.Existence & ZF.Extensionality & ZF.Separat
       val ev52: ￢[u.type ∈ Y] = { uInY: u.type ∈ Y => ev51.implies(uInY)._2 }
       ev52
     }
-    val ev7: isEmpty[Y] = predicateDeMorgan3[[u] => u ∈ Y].implies(ev5)
-    genExist(y)(ev3.term, ev7)
+    genExist(y)(ev3.term, ev5)
   }
+
+  val emptyUniqueness: Unique[isEmpty] = { x: Any => implicit xU: Univ[x.type] => y: Any => implicit yU: Univ[y.type] =>
+    { assumption: (isEmpty[x.type] ∧ isEmpty[y.type]) =>
+      type F = [z] => (z ∈ x.type) <=> (z ∈ y.type)
+      val ev1: ∀[[z] => (z ∈ x.type) <=> (z ∈ y.type)] => (x.type =::= y.type) = extensionality(axiom)(x)(xU)(y)(yU)
+      val ev2: ∀[[z] => (z ∈ x.type) <=> (z ∈ y.type)] = predicateDeMorgan1[F].impliedBy { implicit assumption2: ∃[[z] => ￢[F[z]]] =>
+        val z: assumption2.witness.type = assumption2.witness
+        val notFz: ￢[F[z.type]] = assumption2.proof
+        val ev21: ￢[(z.type ∈ x.type) => (z.type ∈ y.type)] ∨ ￢[(z.type ∈ x.type) <= (z.type ∈ y.type)] = nonEquivalence.implies(notFz)
+        val ev22: ￢[￢[(z.type ∈ x.type) => (z.type ∈ y.type)]] = introduceDoubleNeg { _ ∧ assumption._1(z) }
+        val ev23: ￢[￢[(z.type ∈ x.type) <= (z.type ∈ y.type)]] = introduceDoubleNeg { _ ∧ assumption._2(z) }
+        removeDisj(ev21)(ev22)(ev23)
+      }
+      ev1(ev2)
+    }
+  }
+
+  val emptySet: emptyExistence.witness.type = emptyExistence.witness
+  implicit val emptySetUniv: Univ[emptySet.type] = emptyExistence.term
+
 }
