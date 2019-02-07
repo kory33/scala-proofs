@@ -35,9 +35,9 @@ trait PredicateLanguage {
 trait EqPredLanguage extends PredicateLanguage {
   trait =::=[A, B] {
     def sub[F[_]]: F[A] => F[B]
+    def commute: B =::= A
     def andThen[C](bEqC: B =::= C): A =::= C = bEqC.sub[[b] => A =::= b](this)
     def cast(a: A): B = sub[[a] => a](a)
-    def commute: B =::= A = sub[[a] => a =::= A](implicitly[A =::= A])
   }
 
   implicit def typeEq[A]: A =::= A = new =::=[A, A] {
