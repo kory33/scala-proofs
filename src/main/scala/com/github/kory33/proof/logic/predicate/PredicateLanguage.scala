@@ -35,19 +35,21 @@ trait PredicateLanguage {
 trait EqPredLanguage extends PredicateLanguage {
   trait =::=[A, B] {
     def sub[F[_]]: F[A] => F[B]
-    def commute: B =::= A = sub[[a] => a =::= A](implicitly[A =::= A])
     def andThen[C](bEqC: B =::= C): A =::= C = bEqC.sub[[b] => A =::= b](this)
+    def cast(a: A): B = sub[[a] => a](a)
+    def commute: B =::= A = sub[[a] => a =::= A](implicitly[A =::= A])
   }
 
   implicit def typeEq[A]: A =::= A = new =::=[A, A] {
     override def sub[F[_]] = identity
     override def commute = this
     override def andThen[C](aEqC: A =::= C) = aEqC
+    override def cast(a: A): A = a
   }
 
   type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
 
-  def isomorphism[P[_]](ex: ∃![P]): ex._1.witness.type =::= ∃[P]#W
+  def isomorphism[P[_]: ∃!](ex: ∃[P]): ex.witness.type =::= ∃[P]#W
   implicit def isomorphismTerm[P[_]](ex: ∃![P]): Univ[∃[P]#W]
 
   // Identity functional symbol
@@ -69,9 +71,14 @@ trait EqPredLanguage extends PredicateLanguage {
     }
     val identity: ∀[[x] => x =::= Id[x]] = { z: Any => implicit zTerm: Univ[z.type] =>
       type F[x] = z.type =::= x
-      val ev1: ∃![[x] => z.type =::= x] = uniqueness(z)
+      implicit val ev1: ∃![[x] => z.type =::= x] = uniqueness(z)
       val ev2: z.type =::= ev1._1.witness.type = ev1._1.proof
-      isomorphism(ev1).sub[[idx] => z.type =::= idx](ev2)
+      isomorphism(ev1._1).sub[[idx] => z.type =::= idx](ev2)
+    }
+
+    def id(x: Any)(implicit xu: Univ[x.type]): Id[x.type] = {
+      implicit val ev1: ∃![[y] => x.type =::= y] = uniqueness(x)
+      isomorphism(ev1._1).cast(ev1._1.witness)
     }
   }
 }
