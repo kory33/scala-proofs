@@ -29,7 +29,7 @@ trait PredicateLogicLanguage {
 
   trait ∀[P[_]] { def apply[X](implicit ev: Univ[X]): P[X] }
 
-  implicit def negExistenceImpliesUniversality[P[_]](proof: ￢[∃[[x] => ￢[P[x]]]]): ∀[P] = new {
+  implicit def noCounterexample[P[_]](proof: ￢[∃[[x] => ￢[P[x]]]]): ∀[P] = new {
     def apply[X: Univ]: P[X] = { assumption: ￢[P[X]] => proof(assumption) }
   }
 
@@ -37,7 +37,7 @@ trait PredicateLogicLanguage {
   type OWrap = { type T; val obj: Univ[T] }
   type WrappedProof[P[_]] = (OWrap => Any) { def apply(ow: OWrap): P[ow.T] }
 
-  implicit def arbitraryTypeProofToUniversality[P[_]](proof: WrappedProof[P]): ∀[P] = new {
+  implicit def genUniv[P[_]](proof: WrappedProof[P]): ∀[P] = new {
     def apply[X: Univ]: P[X] = {
       val ow: OWrap { type T = X } = new { type T = X; val obj: Univ[T] = implicitly }
       proof(ow)
@@ -99,20 +99,16 @@ trait ProjectiveCalculusLanguage extends EqualityPredicateLanguage {
    */
   type Id = [x] => Proj[[y] => x =::= y]
   object Id {
-    val uniqueExistence: ∀[[x] => ∃![[y] => x =::= y]] = arbitraryTypeProofToUniversality { x: OWrap => type X = x.T
+    val uniqueExistence: ∀[[x] => ∃![[y] => x =::= y]] = genUniv { x: OWrap => type X = x.T
       implicit val objX: Univ[X] = x.obj
       val ev1: ∃[[y] => X =::= y] = genExist(implicitly[X =::= X])
       val ev2: ∀[[z] => ∀[[w] => ((X =::= z) ∧ (X =::= w)) => z =::= w]] = {
-        arbitraryTypeProofToUniversality { z: OWrap =>
-          arbitraryTypeProofToUniversality { w: OWrap =>
-            { case (xEqZ, xEqW) => xEqZ.commute.andThen(xEqW) }
-          }
-        }
+        genUniv { z: OWrap => genUniv { w: OWrap => { case (xEqZ, xEqW) => xEqZ.commute.andThen(xEqW) } } }
       }
-      (ev1 ∧ ev2): ∃![[y] => X =::= y]
+      ev1 ∧ ev2
     }
 
-    val identity: ∀[[x] => x =::= Id[x]] = arbitraryTypeProofToUniversality { x: OWrap => projectionSubstitution(uniqueExistence[x.T](x.obj)) }
+    val identity: ∀[[x] => x =::= Id[x]] = genUniv { x: OWrap => projectionSubstitution(uniqueExistence[x.T](x.obj)) }
     implicit def identityObj[X: Univ]: Univ[Id[X]] = projectionObject(uniqueExistence[X])
   }
 }
