@@ -6,7 +6,7 @@ import scala.reflect.Selectable.reflectiveSelectable
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 
-trait PredicateLogicLanguage {
+trait PredicateLogicContext {
   // typeclass of universe of language
   // We will sometimes say "object" to refer to a type within this particular universe.
   type Univ[_]
@@ -45,7 +45,7 @@ trait PredicateLogicLanguage {
   }
 }
 
-trait EqualityPredicateLanguage extends PredicateLogicLanguage {
+trait EqualityPredicateContext extends PredicateLogicContext {
   trait =::=[A, B] {
     def sub[P[_]](proof: P[A]): P[B]
     def commute: B =::= A
@@ -70,7 +70,7 @@ trait EqualityPredicateLanguage extends PredicateLogicLanguage {
  *
  * This language imposes another constraint on type equality, which is named as projectionEquality
  */
-trait ProjectiveCalculusLanguage extends EqualityPredicateLanguage {
+trait ProjectiveCalculusContext extends EqualityPredicateContext {
   type Proj[P[_]] = ∃[P]#W
 
   // axiom of projection equality

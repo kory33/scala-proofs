@@ -8,8 +8,8 @@ import com.github.kory33.proof.set.BasicPredicates
 trait ZFC {
 
   trait Choice extends SetAxiom {
-      import language._
-      val predicates = new BasicPredicates { val language: Choice.this.language.type = Choice.this.language }; import predicates._
+      import context._
+      val predicates = new BasicPredicates { val context: Choice.this.context.type = Choice.this.context }; import predicates._
       def choice: ∀[[F] => (hasNonemptySets[F] ∧ hasDisjointSets[F]) => ∃[[S] => S isSelectorOn F]]
   }
 

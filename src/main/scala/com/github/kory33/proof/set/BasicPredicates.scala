@@ -1,13 +1,11 @@
 package com.github.kory33.proof.set
 
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
-import com.github.kory33.proof.set.foundation.SetTheoryLanguage
+import com.github.kory33.proof.set.foundation.SetTheoryContext
 
 trait BasicPredicates {
-  val language: SetTheoryLanguage; import language._
+  val context: SetTheoryContext; import context._
 
-  type Unique[F[_]] = ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
-  type ∃![F[_]] = ∃[F] ∧ Unique[F]
   type ∀∈[A, F[_]] = ∀[[x] => (x ∈ A) => F[x]]
   type ∃∈[A, F[_]] = ∃[[x] => (x ∈ A) ∧ F[x]]
 
