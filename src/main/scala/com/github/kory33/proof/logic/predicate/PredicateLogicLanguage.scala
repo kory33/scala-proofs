@@ -6,6 +6,25 @@ import scala.reflect.Selectable.reflectiveSelectable
 import com.github.kory33.proof.logic.propositional.LogicDefinitions._
 import com.github.kory33.proof.logic.propositional.ClassicalLogicSystem._
 
+trait Equality[Universe[_], A, B] {
+  type Univ_=::=[A, B] = Equality[Universe, A, B]
+
+  def sub[P[_]](proof: P[A]): P[B]
+  def commute: B Univ_=::= A
+  def leftObject: Universe[A]
+
+  def andThen[C](bEqC: B Univ_=::= C): A Univ_=::= C = bEqC.sub(this)
+  def rightObject: Universe[B] = sub[Universe](leftObject)
+}
+
+object Equality {
+  implicit def universeEquality[Univ[_], A: Univ]: Equality[Univ, A, A] = new {
+    def sub[P[_]](proof: P[A]): P[A] = proof
+    def commute: Equality[Univ, A, A] = this
+    def leftObject: Univ[A] = implicitly[Univ[A]]
+  }
+}
+
 trait PredicateLogicContext {
   // typeclass of universe of language
   // We will sometimes say "object" to refer to a type within this particular universe.
@@ -43,23 +62,9 @@ trait PredicateLogicContext {
       proof(ow)
     }
   }
-}
 
-trait EqualityPredicateContext extends PredicateLogicContext {
-  trait =::=[A, B] {
-    def sub[P[_]](proof: P[A]): P[B]
-    def commute: B =::= A
-    def leftObject: Univ[A]
-
-    def andThen[C](bEqC: B =::= C): A =::= C = bEqC.sub(this)
-    def rightObject: Univ[B] = sub[Univ](leftObject)
-  }
-
-  implicit def identityEquality[A: Univ]: A =::= A = new {
-    def sub[P[_]](proof: P[A]): P[A] = proof
-    def commute: A =::= A = this
-    def leftObject: Univ[A] = implicitly[Univ[A]]
-  }
+  type =::=[A, B] = Equality[Univ, A, B]
+  implicit def identityEquality[A: Univ]: A =::= A = implicitly
 
   type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
 }
@@ -70,7 +75,7 @@ trait EqualityPredicateContext extends PredicateLogicContext {
  *
  * This language imposes another constraint on type equality, which is named as projectionEquality
  */
-trait ProjectiveCalculusContext extends EqualityPredicateContext {
+trait ProjectiveCalculusContext extends PredicateLogicContext {
   type Proj[P[_]] = ∃[P]#W
 
   // axiom of projection equality
