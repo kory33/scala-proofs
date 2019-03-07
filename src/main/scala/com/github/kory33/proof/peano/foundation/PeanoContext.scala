@@ -5,8 +5,10 @@ import com.github.kory33.proof.logic.predicate._
 import com.github.kory33.proof.function.foundation._
 
 trait PeanoContext extends PredicateLogicContext {
+  type Nat = Univ
+
   // "some" context on function whose domain and codomains are both naturals
-  val natFuncCtx: EndoFunctionContext & MultiarityFunctionContext { type InCod = Univ }
+  val natFuncCtx: EndoFunctionContext & MultiarityFunctionContext { type InCod = Nat; type InDom = Nat }
 
   // shorthand for natural function
   val nfn: natFuncCtx.type = natFuncCtx
@@ -18,7 +20,7 @@ trait PeanoContext extends PredicateLogicContext {
 trait ArithmeticContext extends PeanoContext {
   type Rec[_, _]
 
-  val nfn1: nfn.type = nfn
+  val nfn1: natFuncCtx.type = natFuncCtx
   val nfn2 = nfn1.nextArity
   val nfn3 = nfn2.nextArity
 
@@ -30,23 +32,13 @@ trait ArithmeticContext extends PeanoContext {
   type λ2 = nfn2.Lambda
   type λ3 = nfn3.Lambda
 
-  implicit def primitiveRecursive[init: Univ, f: nfn2.Univ]
+  implicit def primitiveRecursion[init: Nat, f: nfn2.Univ]
     : nfn1.Univ[Rec[init, f]]
 
-  implicit def primitiveRecursiveEqZero[init: Univ, f: nfn2.Univ]
+  implicit def primitiveRecursionEqZero[init: Nat, f: nfn2.Univ]
     : (Rec[init, f] @: Zero) =::= init
 
-  implicit def primitiveRecursiveEqSucc[init: Univ, f: nfn2.Univ, x: Univ]
-    : (Rec[init, f] @: (S @: x)) =::= (f :@@ x @: (Rec[init, f] @: x))
+  implicit def primitiveRecursionEqSucc[init: Nat, f: nfn2.Univ, x: Nat]
+    : (Rec[init, f] @: (S @: x)) =::= ((f :@@ x) @: (Rec[init, f] @: x))
 
-  type Itr[init, f] = Rec[init, λ2[[x] => λ1[[m] => f @: m]]]
-
-  type plus = λ2[[n] => λ1[[m] => Itr[n, S] @: m]]
-  type +[n, m] = plus :@@ n @: m
-
-  type mult = λ2[[n] => λ1[[m] => Itr[Zero, λ1[[x] => x + n]] @: m]]
-  type *[n, m] = mult :@@ n @: m
-
-  type expn = λ2[[n] => λ1[[m] => Itr[S @: Zero, λ1[[x] => x * n]] @: m]]
-  type ^[n, m] = expn :@@ n @: m
 }
