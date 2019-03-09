@@ -39,10 +39,4 @@ object Peano {
     SuccInj &
     Induction
 
-  def zeroExistence(implicit z: ZeroExistence) = z.zero
-  def succ(implicit s: Succ) = s.succFn
-  def zeroFirst(implicit z: ZeroFirst) = z.zeroFirst
-  def succInj(implicit s: SuccInj) = s.succInj
-  def induction[P[_]](implicit s: Induction) = s.induction[P]
-
 }
