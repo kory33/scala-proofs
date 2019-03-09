@@ -73,7 +73,7 @@ trait EndoFunctionContext extends FunctionContext {
  */
 trait MultiarityFunctionContext extends FunctionContext {
   type NextArityContext = MultiarityFunctionContext {
-    type InDom = MultiarityFunctionContext.this.InDom
+    val domCtx: PredicateLogicContext { type Univ = MultiarityFunctionContext.this.InDom }
     type InCod = MultiarityFunctionContext.this.Univ
   }
 
@@ -86,7 +86,7 @@ trait MultiarityFunctionContext extends FunctionContext {
  */
 trait ExponentiableFunctionContext extends MultiarityFunctionContext {
   type NextArityContextOnDom[Dom[_]] = ExponentiableFunctionContext {
-    type InDom = Dom
+    val domCtx: PredicateLogicContext { type Univ = ExponentiableFunctionContext.this.InDom }
     type InCod = ExponentiableFunctionContext.this.Univ
   }
 
