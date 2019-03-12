@@ -111,12 +111,48 @@ trait Arithmetic {
     induction(zeroCaseN, inductionPartN)
   }
 
+  val sumIdentThenZero: ∀[[x] => ∀[[n] => ((n + x) =::= n) => (x =::= _0)]] = {
+    ???
+  }
+
+  val sumZeroThenBothZero: ∀[[a] => ∀[[b] => ((a + b) =::= _0) => (a =::= _0) ∧ (b =::= _0)]] = {
+    ???
+  }
+
   type ≦[n, m] = ∃[[x] => (n + x) =::= m]
   type ≧[n, m] = m ≦ n
 
-  def leqRefl[a: Nat]: a ≦ a = genExist(addRightUnit[a])
-  // def leqTrans[a: Nat, b: Nat, c: Nat]: ((a ≦ b) ∧ (b ≦ c)) => (a ≦ c)  = ???
-  // def leqAntisym[a: Nat, b: Nat]: ((a ≦ b) ∧ (a ≧ b)) => (a =::= b)  = ???
+  val leqRefl: ∀[[a] => a ≦ a] = new { def apply[a: Nat] = genExist(addRightUnit[a]) }
+
+  val leqTrans: ∀[[a] => ∀[[b] => ∀[[c] => ((a ≦ b) ∧ (b ≦ c)) => (a ≦ c)]]] = new { def apply[a: Nat] = new { def apply[b: Nat] = new { def apply[c: Nat] = {
+    hypothesis: ((a ≦ b) ∧ (b ≦ c)) => {
+      implicit val ev1: ∃[[x] => (a + x) =::= b] = hypothesis._1
+      implicit val ev2: ∃[[y] => (b + y) =::= c] = hypothesis._2
+      type x = ev1.W; type y = ev2.W
+      val ev3: (a + x) =::= b = ev1.proof
+      val ev4: (b + y) =::= c = ev2.proof
+      val ev5: ((a + x) + y) =::= c = ev3.commute.sub[[ax] => (ax + y) =::= c](ev4)
+      val ev6: (a + (x + y)) =::= c = (addAssoc[a][x][y]).sub[[axy] => axy =::= c](ev5)
+      genExist[[xy] => (a + xy) =::= c, x + y](ev6)
+    }
+  } } } }
+
+  val leqAntisym: ∀[[a] => ∀[[b] => ((a ≦ b) ∧ (a ≧ b)) => (a =::= b)]] = new { def apply[a: Nat] = new { def apply[b: Nat] = {
+    hypothesis: ((a ≦ b) ∧ (a ≧ b)) => {
+      implicit val ev1: ∃[[t1] => (a + t1) =::= b] = hypothesis._1
+      implicit val ev2: ∃[[t2] => (b + t2) =::= a] = hypothesis._2
+      type t1 = ev1.W; type t2 = ev2.W
+      val ev3: (a + t1) =::= b = ev1.proof
+      val ev4: (b + t2) =::= a = ev2.proof
+      val ev5: ((a + t1) + t2) =::= a = ev3.commute.sub[[at1] => (at1 + t2) =::= a](ev4)
+      val ev6: (a + (t1 + t2)) =::= a = addAssoc[a][t1][t2].sub[[a12] => a12 =::= a](ev5)
+      val ev7: (t1 + t2) =::= _0 = sumIdentThenZero[t1 + t2][a].apply(ev6)
+      val ev8: (t1 =::= _0) ∧ (t2 =::= _0) = sumZeroThenBothZero[t1][t2].apply(ev7)
+      val ev9: (a + _0) =::= b = ev8._1.sub[[z] => (a + z) =::= b](ev3)
+
+      addRightUnit[a].sub[[a0] => a0 =::= b](ev9)
+    }
+  } } }
 
   type mult = λ2[[n] => λ1[[m] => Itr[_0, λ1[[x] => x + n]] @: m]]
   type *[n, m] = mult :@@ n @: m

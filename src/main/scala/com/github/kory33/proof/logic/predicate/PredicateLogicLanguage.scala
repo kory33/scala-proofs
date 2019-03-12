@@ -40,6 +40,8 @@ trait PredicateLogicContext {
     val obj: Univ[W]
   }
 
+  implicit def existenceObj[P[_]](implicit ev: ∃[P]): Univ[ev.W] = ev.obj
+
   implicit def genExist[P[_], X: Univ](proofX: P[X]): ∃[P] = new {
     type W = X
     val proof = proofX
