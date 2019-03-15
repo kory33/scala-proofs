@@ -111,12 +111,27 @@ trait Arithmetic {
     induction(zeroCaseN, inductionPartN)
   }
 
-  val sumIdentThenZero: ∀[[x] => ∀[[n] => ((n + x) =::= n) => (x =::= _0)]] = {
-    ???
-  }
+  val sumIdentThenZero: ∀[[x] => ∀[[n] => ((n + x) =::= n) => (x =::= _0)]] = new { def apply[x: Nat] = {
+    val zeroCase: ((_0 + x) =::= _0) => (x =::= _0) = { hypothesis => addLeftUnit[x].sub[[x0] => x0 =::= _0](hypothesis) }
+    val inductionPart: ∀[[n] => (((n + x) =::= n) => (x =::= _0)) => (((Succ[n] + x) =::= Succ[n]) => (x =::= _0))] = new { def apply[n: Nat] = {
+      indHypothesis: (((n + x) =::= n) => (x =::= _0)) => hypothesis: ((Succ[n] + x) =::= Succ[n]) => {
+        val ev1: Succ[n + x] =::= Succ[n] = addSuccLeft[n][x].sub[[snx] => snx =::= Succ[n]](hypothesis)
+        val ev2: (n + x) =::= n = succInj[n + x][n].apply(ev1)
+        indHypothesis(ev2)
+      }
+    } }
+    induction(zeroCase, inductionPart)
+  } }
 
-  val sumZeroThenBothZero: ∀[[a] => ∀[[b] => ((a + b) =::= _0) => (a =::= _0) ∧ (b =::= _0)]] = {
-    ???
+  val sumZeroThenLeftZero: ∀[[a] => ∀[[b] => ((a + b) =::= _0) => (a =::= _0)]] = {
+    val zeroCaseA: ∀[[b] => ((_0 + b) =::= _0) => (_0 =::= _0)] = new { def apply[b: Nat] = { _ => identityEquality } }
+    val inductionPartA: ∀[[a] => ∀[[b] => ((a + b) =::= _0) => (a =::= _0)] => ∀[[b] => ((Succ[a] + b) =::= _0) => (Succ[a] =::= _0)]] = new { def apply[a: Nat] = {
+      indHypothesis: ∀[[b] => ((a + b) =::= _0) => (a =::= _0)] => new { def apply[b: Nat] = { hypothesis: (Succ[a] + b) =::= _0 =>
+        val ev1: Succ[a + b] =::= _0 = addSuccLeft[a][b].sub[[sab] => sab =::= _0](hypothesis)
+        zeroFirst(genExist(ev1))
+      } }
+    } }
+    induction(zeroCaseA, inductionPartA)
   }
 
   type ≦[n, m] = ∃[[x] => (n + x) =::= m]
@@ -147,8 +162,8 @@ trait Arithmetic {
       val ev5: ((a + t1) + t2) =::= a = ev3.commute.sub[[at1] => (at1 + t2) =::= a](ev4)
       val ev6: (a + (t1 + t2)) =::= a = addAssoc[a][t1][t2].sub[[a12] => a12 =::= a](ev5)
       val ev7: (t1 + t2) =::= _0 = sumIdentThenZero[t1 + t2][a].apply(ev6)
-      val ev8: (t1 =::= _0) ∧ (t2 =::= _0) = sumZeroThenBothZero[t1][t2].apply(ev7)
-      val ev9: (a + _0) =::= b = ev8._1.sub[[z] => (a + z) =::= b](ev3)
+      val ev8: t1 =::= _0 = sumZeroThenLeftZero[t1][t2].apply(ev7)
+      val ev9: (a + _0) =::= b = ev8.sub[[z] => (a + z) =::= b](ev3)
 
       addRightUnit[a].sub[[a0] => a0 =::= b](ev9)
     }
