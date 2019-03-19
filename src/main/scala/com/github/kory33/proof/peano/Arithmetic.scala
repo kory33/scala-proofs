@@ -169,6 +169,8 @@ trait Arithmetic {
     }
   } } }
 
+  val zeroSmallest: ∀[[n] => _0 ≦ n] = new { def apply[n: Nat] = genExist(addLeftUnit[n]) }
+
   type mult = λ2[[n] => λ1[[m] => Itr[_0, λ1[[x] => x + n]] @: m]]
   type *[n, m] = mult :@@ n @: m
 
