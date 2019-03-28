@@ -68,7 +68,8 @@ trait PredicateLogicContext {
   type =::=[A, B] = Equality[Univ, A, B]
   implicit def identityEquality[A: Univ]: A =::= A = implicitly
 
-  type ∃![F[_]] = ∃[F] ∧ ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
+  type ExistsAtMostOne[F[_]] = ∀[[x] => ∀[[y] => (F[x] ∧ F[y]) => x =::= y]]
+  type ∃![F[_]] = ∃[F] ∧ ExistsAtMostOne[F]
 }
 
 /**
@@ -78,7 +79,7 @@ trait PredicateLogicContext {
  * This language imposes another constraint on type equality, which is named as projectionEquality
  */
 trait ProjectiveCalculusContext extends PredicateLogicContext {
-  type Proj[P[_]] = ∃[P]#W
+  type Proj[P[_]]
 
   // axiom of projection equality
   def projectionEquality[P[_]: ∃!, W: Univ](proof: P[W]): W =::= Proj[P]
