@@ -15,45 +15,39 @@ trait Arithmetic {
   import axioms._
   import Peano._
 
-  type NWrap = nfn1.domCtx.OWrap
-  type Succ[n] = S @: n
+  type NWrap = OWrap
 
   type _0 = Zero
-  type _1 = Succ[_0]
-  type _2 = Succ[_1]
+  type _1 = S[_0]
+  type _2 = S[_1]
 
-  val nfn1Const: ConstantFunction { val context: nfn1.type } = new ConstantFunction { val context: nfn1.type = nfn1 }
-  import nfn1Const.{ Constant => Constant1, _ }
+  implicit def succNat[n: Nat]: Nat[S[n]] = succFn[n]
 
-  val nfn2Const: ConstantFunction { val context: nfn2.type } = new ConstantFunction { val context: nfn2.type = nfn2 }
-  import nfn2Const.{ Constant => Constant2, _ }
+  type Itr[init, f[_]] = Rec[init, [n, m] => f[m]]
+  implicit def constFunction[f[_]: Fn1]: Fn2[[n, m] => f[m]] = genUniv { nOWrap: OWrap => implicitly }
+  implicit def itrFunction[init: Nat, f[_]: Fn1]: Fn1[Itr[init, f]] = primitiveRecursion
+  implicit def itrEqZero[init: Nat, f[_]: Fn1]: Itr[init, f][_0] =::= init = primitiveRecursionEqZero
+  implicit def itrEqS[init: Nat, f[_]: Fn1, x: Nat]: Itr[init, f][S[x]] =::= f[Itr[init, f][x]] = primitiveRecursionEqSucc
 
-  implicit def succNat[n: Nat]: Nat[Succ[n]] = nfn1.application
+  type +[n, m] = Itr[n, S][m]
+  type *[n, m] = Itr[_0, [x] => x + n][m]
+  type ^[n, m] = Itr[_1, [x] => x * n][m]
 
-  type Itr[init, f] = Rec[init, Constant2[f]]
-  implicit def itrFunction[init: Nat, f: nfn1.Univ]: nfn1.Univ[Itr[init, f]] = primitiveRecursion
-  implicit def itrEqZero[init: Nat, f: nfn1.Univ]: (Itr[init, f] @: _0) =::= init = implicitly
-  implicit def itrEqSucc[init: Nat, f: nfn1.Univ, x: Nat]: (Itr[init, f] @: Succ[x]) =::= (f @: (Itr[init, f] @: x)) = {
-    val ev1: nfn1.=::=[Constant2[f] :@@ x, f] = nfn2Const.constantApply[f, x]
-    ev1.sub[[fn] => (Itr[init, f] @: Succ[x]) =::= (fn @: (Itr[init, f] @: x))](primitiveRecursionEqSucc)
-  }
-
-  type +[n, m] = Itr[n, S] @: m
-  implicit def plusNat[n: Nat, m: Nat]: Nat[n + m] = nfn1.application
+  implicit def plusNat[n: Nat, m: Nat]: Nat[n + m] = itrFunction[n, S][m]
 
   val addRightUnit: ∀[[n] => (n + _0) =::= n] = new { def apply[n: Nat] = itrEqZero }
-  val addSuccRight: ∀[[n] => ∀[[m] => (n + Succ[m]) =::= Succ[n + m]]] = new { def apply[n: Nat] = new { def apply[m: Nat] = itrEqSucc[n, S, m] } }
+  val addSRight: ∀[[n] => ∀[[m] => (n + S[m]) =::= S[n + m]]] = new { def apply[n: Nat] = new { def apply[m: Nat] = itrEqS[n, S, m] } }
 
   val addLeftUnit: ∀[[n] => (_0 + n) =::= n] = {
-    val inductionPart: ∀[[n] => ((_0 + n) =::= n) => ((_0 + Succ[n]) =::= Succ[n])] = new { def apply[n: Nat] = indHyp: ((_0 + n) =::= n) =>
-      indHyp.sub[[zn] => (_0 + Succ[n]) =::= Succ[zn]](addSuccRight[_0][n])
+    val inductionPart: ∀[[n] => ((_0 + n) =::= n) => ((_0 + S[n]) =::= S[n])] = new { def apply[n: Nat] = indHyp: ((_0 + n) =::= n) =>
+      indHyp.sub[[zn] => (_0 + S[n]) =::= S[zn]](addSRight[_0][n])
     }
     induction(addRightUnit[_0], inductionPart)
   }
 
-  val plusOneIsSucc: ∀[[n] => (n + _1) =::= Succ[n]] = new { def apply[n: Nat] = {
-    val ev1: (n + _1) =::= Succ[n + _0] = addSuccRight[n][_0]
-    val ev2: Succ[n + _0] =::= Succ[n] = addRightUnit[n].sub[[snz] => Succ[n + _0] =::= Succ[snz]](identityEquality)
+  val plusOneIsS: ∀[[n] => (n + _1) =::= S[n]] = new { def apply[n: Nat] = {
+    val ev1: (n + _1) =::= S[n + _0] = addSRight[n][_0]
+    val ev2: S[n + _0] =::= S[n] = addRightUnit[n].sub[[snz] => S[n + _0] =::= S[snz]](identityEquality)
     ev1.andThen(ev2)
   } }
 
@@ -63,48 +57,48 @@ trait Arithmetic {
       val ev2: (a + b) =::= (a + (b + _0)) = addRightUnit[b].sub[[b0] => (a + b0) =::= (a + (b + _0))](identityEquality)
       ev1.andThen(ev2)
     }
-    val inductionPartC: ∀[[c] => (((a + b) + c) =::= (a + (b + c))) => (((a + b) + Succ[c]) =::= (a + (b + Succ[c])))] = new { def apply[c: Nat] = {
+    val inductionPartC: ∀[[c] => (((a + b) + c) =::= (a + (b + c))) => (((a + b) + S[c]) =::= (a + (b + S[c])))] = new { def apply[c: Nat] = {
       hypothesis: ((a + b) + c) =::= (a + (b + c)) => {
-        val ev1: ((a + b) + Succ[c]) =::= Succ[(a + b) + c] = addSuccRight[a + b][c]
-        val ev2: Succ[(a + b) + c] =::= Succ[a + (b + c)] = hypothesis.sub[[abc] => Succ[(a + b) + c] =::= Succ[abc]](identityEquality)
-        val ev3: Succ[a + (b + c)] =::= (a + Succ[b + c]) = addSuccRight[a][b + c].commute
-        val ev4: (a + Succ[b + c]) =::= (a + (b + Succ[c])) = addSuccRight[b][c].commute.sub[[bsc] => (a + Succ[b + c]) =::= (a + bsc)](identityEquality)
+        val ev1: ((a + b) + S[c]) =::= S[(a + b) + c] = addSRight[a + b][c]
+        val ev2: S[(a + b) + c] =::= S[a + (b + c)] = hypothesis.sub[[abc] => S[(a + b) + c] =::= S[abc]](identityEquality)
+        val ev3: S[a + (b + c)] =::= (a + S[b + c]) = addSRight[a][b + c].commute
+        val ev4: (a + S[b + c]) =::= (a + (b + S[c])) = addSRight[b][c].commute.sub[[bsc] => (a + S[b + c]) =::= (a + bsc)](identityEquality)
         ev1.andThen(ev2).andThen(ev3).andThen(ev4)
       }
     } }
     induction(zeroCaseC, inductionPartC)
   } } }
 
-  val addSuccLeft: ∀[[n] => ∀[[m] => (Succ[n] + m) =::= Succ[n + m]]] = new { def apply[n: Nat] = new { def apply[m: Nat] = {
+  val addSLeft: ∀[[n] => ∀[[m] => (S[n] + m) =::= S[n + m]]] = new { def apply[n: Nat] = new { def apply[m: Nat] = {
     val plusOneComm: ∀[[n] => (_1 + n) =::= (n + _1)] = {
       val zeroCase: (_1 + _0) =::= (_0 + _1) = addRightUnit[_1].andThen(addLeftUnit[_1].commute)
-      val inductionPart: ∀[[n] => ((_1 + n) =::= (n + _1)) => ((_1 + Succ[n]) =::= (Succ[n] + _1))] = new { def apply[n: Nat] = hypothesis: ((_1 + n) =::= (n + _1)) => {
-        val ev1: (_1 + Succ[n]) =::= (_1 + (n + _1)) = plusOneIsSucc[n].sub[[sn] => (_1 + sn) =::= (_1 + (n + _1))](identityEquality)
+      val inductionPart: ∀[[n] => ((_1 + n) =::= (n + _1)) => ((_1 + S[n]) =::= (S[n] + _1))] = new { def apply[n: Nat] = hypothesis: ((_1 + n) =::= (n + _1)) => {
+        val ev1: (_1 + S[n]) =::= (_1 + (n + _1)) = plusOneIsS[n].sub[[sn] => (_1 + sn) =::= (_1 + (n + _1))](identityEquality)
         val ev2: (_1 + (n + _1)) =::= ((_1 + n) + _1) = addAssoc[_1][n][_1].commute
         val ev3: ((_1 + n) + _1) =::= ((n + _1) + _1) = hypothesis.sub[[n1] => ((_1 + n) + _1) =::= (n1 + _1)](identityEquality)
-        val ev4: ((n + _1) + _1) =::= (Succ[n] + _1) = plusOneIsSucc[n].sub[[sn] => ((n + _1) + _1) =::= (sn + _1)](identityEquality)
+        val ev4: ((n + _1) + _1) =::= (S[n] + _1) = plusOneIsS[n].sub[[sn] => ((n + _1) + _1) =::= (sn + _1)](identityEquality)
 
         ev1.andThen(ev2).andThen(ev3).andThen(ev4)
       } }
       induction(zeroCase, inductionPart)
     }
 
-    val ev1: (Succ[n] + m) =::= ((n + _1) + m) = plusOneIsSucc[n].commute.sub[[sn] => (Succ[n] + m) =::= (sn + m)](identityEquality)
+    val ev1: (S[n] + m) =::= ((n + _1) + m) = plusOneIsS[n].commute.sub[[sn] => (S[n] + m) =::= (sn + m)](identityEquality)
     val ev2: ((n + _1) + m) =::= ((_1 + n) + m) = plusOneComm[n].commute.sub[[op] => ((n + _1) + m) =::= (op + m)](identityEquality)
     val ev3: ((_1 + n) + m) =::= (_1 + (n + m)) = addAssoc[_1][n][m]
     val ev4: (_1 + (n + m)) =::= ((n + m) + _1) = plusOneComm[n + m]
-    val ev5: ((n + m) + _1) =::= Succ[n + m] = plusOneIsSucc[n + m]
+    val ev5: ((n + m) + _1) =::= S[n + m] = plusOneIsS[n + m]
 
     ev1.andThen(ev2).andThen(ev3).andThen(ev4).andThen(ev5)
   } } }
 
   val addComm: ∀[[n] => ∀[[m] => (n + m) =::= (m + n)]] = {
     val zeroCaseN: ∀[[m] => (_0 + m) =::= (m + _0)] = new { def apply[m: Nat] = addLeftUnit[m].andThen(addRightUnit[m].commute) }
-    val inductionPartN: ∀[[n] => ∀[[m] => (n + m) =::= (m + n)] => ∀[[m] => (Succ[n] + m) =::= (m + Succ[n])]] = new { def apply[n: Nat] = {
+    val inductionPartN: ∀[[n] => ∀[[m] => (n + m) =::= (m + n)] => ∀[[m] => (S[n] + m) =::= (m + S[n])]] = new { def apply[n: Nat] = {
       indHypN: ∀[[m] => (n + m) =::= (m + n)] => new { def apply[m: Nat] = {
-        val ev1: (Succ[n] + m) =::= Succ[n + m] = addSuccLeft[n][m]
-        val ev2: Succ[n + m] =::= Succ[m + n] = indHypN[m].sub[[mn] => Succ[n + m] =::= Succ[mn]](identityEquality[Succ[n + m]])
-        val ev3: Succ[m + n] =::= (m + Succ[n]) = addSuccRight[m][n].commute
+        val ev1: (S[n] + m) =::= S[n + m] = addSLeft[n][m]
+        val ev2: S[n + m] =::= S[m + n] = indHypN[m].sub[[mn] => S[n + m] =::= S[mn]](identityEquality[S[n + m]])
+        val ev3: S[m + n] =::= (m + S[n]) = addSRight[m][n].commute
         ev1.andThen(ev2).andThen(ev3)
       } }
     } }
@@ -113,9 +107,9 @@ trait Arithmetic {
 
   val sumIdentThenZero: ∀[[x] => ∀[[n] => ((n + x) =::= n) => (x =::= _0)]] = new { def apply[x: Nat] = {
     val zeroCase: ((_0 + x) =::= _0) => (x =::= _0) = { hypothesis => addLeftUnit[x].sub[[x0] => x0 =::= _0](hypothesis) }
-    val inductionPart: ∀[[n] => (((n + x) =::= n) => (x =::= _0)) => (((Succ[n] + x) =::= Succ[n]) => (x =::= _0))] = new { def apply[n: Nat] = {
-      indHypothesis: (((n + x) =::= n) => (x =::= _0)) => hypothesis: ((Succ[n] + x) =::= Succ[n]) => {
-        val ev1: Succ[n + x] =::= Succ[n] = addSuccLeft[n][x].sub[[snx] => snx =::= Succ[n]](hypothesis)
+    val inductionPart: ∀[[n] => (((n + x) =::= n) => (x =::= _0)) => (((S[n] + x) =::= S[n]) => (x =::= _0))] = new { def apply[n: Nat] = {
+      indHypothesis: (((n + x) =::= n) => (x =::= _0)) => hypothesis: ((S[n] + x) =::= S[n]) => {
+        val ev1: S[n + x] =::= S[n] = addSLeft[n][x].sub[[snx] => snx =::= S[n]](hypothesis)
         val ev2: (n + x) =::= n = succInj[n + x][n].apply(ev1)
         indHypothesis(ev2)
       }
@@ -125,9 +119,9 @@ trait Arithmetic {
 
   val sumZeroThenLeftZero: ∀[[a] => ∀[[b] => ((a + b) =::= _0) => (a =::= _0)]] = {
     val zeroCaseA: ∀[[b] => ((_0 + b) =::= _0) => (_0 =::= _0)] = new { def apply[b: Nat] = { _ => identityEquality } }
-    val inductionPartA: ∀[[a] => ∀[[b] => ((a + b) =::= _0) => (a =::= _0)] => ∀[[b] => ((Succ[a] + b) =::= _0) => (Succ[a] =::= _0)]] = new { def apply[a: Nat] = {
-      indHypothesis: ∀[[b] => ((a + b) =::= _0) => (a =::= _0)] => new { def apply[b: Nat] = { hypothesis: (Succ[a] + b) =::= _0 =>
-        val ev1: Succ[a + b] =::= _0 = addSuccLeft[a][b].sub[[sab] => sab =::= _0](hypothesis)
+    val inductionPartA: ∀[[a] => ∀[[b] => ((a + b) =::= _0) => (a =::= _0)] => ∀[[b] => ((S[a] + b) =::= _0) => (S[a] =::= _0)]] = new { def apply[a: Nat] = {
+      indHypothesis: ∀[[b] => ((a + b) =::= _0) => (a =::= _0)] => new { def apply[b: Nat] = { hypothesis: (S[a] + b) =::= _0 =>
+        val ev1: S[a + b] =::= _0 = addSLeft[a][b].sub[[sab] => sab =::= _0](hypothesis)
         zeroFirst(genExist(ev1))
       } }
     } }
@@ -170,11 +164,5 @@ trait Arithmetic {
   } } }
 
   val zeroSmallest: ∀[[n] => _0 ≦ n] = new { def apply[n: Nat] = genExist(addLeftUnit[n]) }
-
-  type mult = λ2[[n] => λ1[[m] => Itr[_0, λ1[[x] => x + n]] @: m]]
-  type *[n, m] = mult :@@ n @: m
-
-  type expn = λ2[[n] => λ1[[m] => Itr[S @: _0, λ1[[x] => x * n]] @: m]]
-  type ^[n, m] = expn :@@ n @: m
 
 }

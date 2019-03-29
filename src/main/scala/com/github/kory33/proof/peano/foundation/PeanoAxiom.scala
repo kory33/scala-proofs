@@ -14,22 +14,22 @@ object Peano {
 
   trait Succ extends PeanoAxiom {
     import context._
-    implicit val succFn: nfn.Univ[S]
+    implicit val succFn: Fn1[S]
   }
 
   trait ZeroFirst extends PeanoAxiom {
-    import context._; import nfn.$_:
-    val zeroFirst: ￢[∃[[x] => (S $_: x) =::= Zero]]
+    import context._
+    val zeroFirst: ￢[∃[[x] => (S[x]) =::= Zero]]
   }
 
   trait SuccInj extends PeanoAxiom {
-    import context._; import nfn.$_:
-    val succInj: ∀[[x] => ∀[[y] => ((S $_: x) =::= (S $_: y)) => (x =::= y)]]
+    import context._
+    val succInj: ∀[[x] => ∀[[y] => (S[x] =::= S[y]) => (x =::= y)]]
   }
 
   trait Induction extends PeanoAxiom {
-    import context._; import nfn.$_:
-    def induction[P[_]]: (P[Zero] ∧ ∀[[n] => P[n] => P[S $_: n]]) => ∀[P]
+    import context._
+    def induction[P[_]]: (P[Zero] ∧ ∀[[n] => P[n] => P[S[n]]]) => ∀[P]
   }
 
   type Axioms =
